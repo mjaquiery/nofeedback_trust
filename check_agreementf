@@ -1,0 +1,12 @@
+for c=1:1000
+    % generate confidence judgement
+    conf(c)=25+5*randn;
+    agree1(c) = agreementf(1,conf,'sigmoid');
+    agree2(c) = agreementf(2,conf,'sigmoid');
+end
+
+mean([agree1(conf>40); agree2(conf>40)],2)
+
+figure(1),hold on
+X1 = normpdf([-2:.01:2],0,1);
+plot([-2:.01:2],X1)
