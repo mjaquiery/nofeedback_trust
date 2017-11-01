@@ -1,0 +1,77 @@
+ShowCursor('Arrow');
+%% randomly place cursor and initialize variables
+gs = round(gap_size/2);
+resp = 0; buttons=[]; haschanged=false; hasconfirmed=false;int=0;
+% while ((resp< gs && resp>-gs) || resp<-maxScale || resp>maxScale), resp = randi(nScale) - maxScale+1;end
+% if resp<0,int=-1;elseif resp>0, int=1;end
+
+display_response
+
+%% collect response
+while ~any(buttons) % wait for click
+    [x,y,buttons] = GetMouse;
+end
+while ~hasconfirmed
+    while any(buttons) || ~haschanged   % wait for release and change of cj and confirmation
+        [resp_x, resp_y, buttons] = GetMouse();
+        
+        % record response (and bound it to the scale length)
+        if resp_x>=barrect(1) && resp_x<gap(1) % if mouse's in the left rect
+            resp = ceil((resp_x-gap(1))/cursorwidth);
+            haschanged = true;
+            int = -1;
+        elseif resp_x>gap(3) && resp_x<=barrect(3) % if mouse's in the right rect
+            resp = floor((resp_x-gap(3))/cursorwidth);
+            haschanged = true;
+            int = 1;
+        end
+        
+        %--- display response
+        display_response;
+    end
+    
+    % check for confirmation
+    if ~hasconfirmed
+        switch 'mouse'
+            case 'mouse'
+                [x,y,buttons] = GetMouse;
+                if buttons(3)==1, hasconfirmed = true;end
+                resp_t = GetSecs;
+            case 'keyboard'
+                        [isdown resp_t keycode] = KbCheck;                 % get timing and key
+                        % translate key code into key name
+                        name = KbName(keycode);
+                        % only take first response if multiple responses
+                        if ~iscell(name), name = {name}; end
+                        name = name{1};
+                        if strcmp('space',name),hasconfirmed = true;end
+                
+                %until release
+                if cfg.until_release
+                    [resp_release x name] = KbCheck;          % get cfg.timing and resp1 from keyboard
+                    if sum(resp_release) == 1
+                        if strcmp('',KbName(name))
+                            resp_release = 0;
+                        end
+                    end
+                end
+        end
+    end
+    
+end
+
+
+% assign values to variables
+if ~show_cj1 % first decision
+    trials(t).resp1_time = resp_t;
+    trials(t).cj1 = resp + int;
+    trials(t).int1 = int;
+    trials(t).responded1 = hasconfirmed;
+else 
+    trials(t).resp2_time = resp_t;
+    trials(t).cj2 = resp + int;
+    trials(t).int2 = int;
+    trials(t).responded2 = hasconfirmed;
+end
+
+HideCursor;
