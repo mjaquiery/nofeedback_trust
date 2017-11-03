@@ -2,7 +2,7 @@
 Screen('DrawTexture', Sc.window, obs_tex, [], CenterRectOnPoint([0 0 258 325],Sc.center(1),Sc.center(2)));
 
 % draw static elements
-draw_static
+draw_static(Sc, cfg)
 
 % start voice play
 trials(t).onsetobsspeech = PsychPortAudio('Start', trials(t).whichspeech, 1,GetSecs,1); %startTime = PsychPortAudio('Start', pahandle [, repetitions=1] [, when=0] [, waitForStart=0] [, stopTime=inf] [, resume=0]);
@@ -15,7 +15,7 @@ trials(t).onsetobsspeech = PsychPortAudio('Start', trials(t).whichspeech, 1,GetS
 [startTime trials(t).offset_speech xruns ~] = PsychPortAudio('Stop', trials(t).whichspeech,1); %[startTime endPositionSecs xruns estStopTime] = PsychPortAudio('Stop', pahandle [, waitForEndOfPlayback=0] [, blockUntilStopped=1] [, repetitions] [, stopTime]);
 
 % draw static elements
-draw_static
+draw_static(Sc, cfg)
 
 % offset image
 [VBLts trials(t).offsetobs FTS trials(t).tmissed_offset2] = Screen('Flip',Sc.window,trials(t).onsetobs + cfg.observer.duration - cfg.frame);

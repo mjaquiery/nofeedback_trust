@@ -23,10 +23,10 @@ gs = round(cfg.bar.gap_size/2);
 %% display response
 % draw static elements
 add_fixation
-% draw_static
+draw_static(Sc, cfg)
 
 % display previous confidence
-if show_cj1,
+if show_cj1
     switch int1
         case -1 % 1
             positions = linspace(cfg.bar.gaprect(1)-cfg.bar.cursorwidth.*.5,...
@@ -38,7 +38,7 @@ if show_cj1,
     cj1rect = CenterRectOnPoint([0,0,cfg.bar.cursorwidth,cfg.bar.cursorheight],...
     positions(abs(cj1)), ...
     Sc.rect(4).*cfg.bar.positiony);
-    Screen('FillRect', Sc.window, cfg.partner.color,cj1rect );
+    Screen('FillRect', Sc.window, cfg.bar.cj1color, cj1rect );
 end
 
 % define response cursor position

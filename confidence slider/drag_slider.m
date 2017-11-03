@@ -1,4 +1,4 @@
-function [cj,resp_t,interval,hasconfirmed] = drag_slider(Sc,cfg,varargin)
+function [cj,resp_t,interval,hasconfirmed] = drag_slider_matt(Sc,cfg,varargin)
 % Usage:
 % [cj resp_t interval hasconfirmed] = drag_slider(Sc,cfg [,cj1])
 % Inputs:

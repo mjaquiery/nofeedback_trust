@@ -12,13 +12,8 @@ function [] = add_responseinstr(Sc,cfg)
 % Niccolo Pescetelli
 
 %% check required fields
-if ~isfield(cfg,'instr')
-    cfg.instr.instr = {'Left click with the mouse' ...
-        'Press spacebar to confirm response'};
-end
-if ~isfield(cfg.instr,'instr')
-    cfg.instr.instr = {'Left click with the mouse' ...
-        'Press spacebar to confirm response'};
+if ~isfield(cfg,'instr') || ~isfield(cfg.instr,'instr')
+    set_cfg_text
 end
 
 %% add response istructions

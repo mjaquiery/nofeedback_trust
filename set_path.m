@@ -1,5 +1,5 @@
 %% set path 
-switch 'dropbox'
+switch 'MattHome'
     case 'C141'
         cd('C:/Users/acclab/Desktop/Niccolo/study3');
         addpath(genpath('C:/Users/acclab/Desktop/Niccolo/myfunctions'));
@@ -64,4 +64,16 @@ switch 'dropbox'
         stims_path    = '/home/niccolo/Dropbox/Oxford/stims';
         addpath(genpath(my_path));
         im_path = '/home/niccolo/VBox_shared/internalExternal/';
+    case 'MattHome'
+        %cd('G:\Documents\University\Oxford\Work\matlabResults');
+        %addpath(genpath('G:\Documents\University\Programming\nofeedback_trust\myfunctions'));
+        my_path = 'G:\Documents\University\Programming\nofeedback_trust'; % working directory
+        if ~feedbackEnabled
+            results_path = 'G:\Documents\University\Oxford\Work\matlabResults\';
+        else
+            results_path = 'G:\Documents\University\Oxford\Work\matlabResults\Feedback\';
+        end
+        stims_path    = 'G:\Documents\University\Programming\nofeedback_trust\stims';
+        addpath(genpath(my_path));
+        im_path = 'G:\Documents\University\Programming\nofeedback_trust\internalExternal';
 end

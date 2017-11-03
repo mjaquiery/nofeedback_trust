@@ -3,7 +3,7 @@ function [] = draw_scale(Sc,cfg)
 % [] = draw_scale(Sc,cfg)
 %
 % cfg must have .bar fields in order to work. 
-% cfg.bar must have gap_rect and barrect fields
+% cfg.bar must have gaprect and barrect fields
 % Default values are assigned otherwise.
 %
 % Niccolo Pescetelli
@@ -25,7 +25,7 @@ if ~isfield(cfg,'bar')
         cfg.bar.cursorwidth) + (cfg.bar.maxScale * cfg.bar.cursorwidth  + ...
         cfg.bar.cursorwidth/2), Sc.size(2)*cfg.bar.positiony);
 end
-if ~isfield(cfg.bar,'gap_rect'),
+if ~isfield(cfg.bar,'gaprect'),
     cfg.bar.gaprect            = CenterRectOnPoint([0,0,cfg.bar.cursorwidth * cfg.bar.gap_size,cfg.bar.cursorheight],...
         Sc.center(1) -((cfg.bar.nScale*cfg.bar.cursorwidth/2)+cfg.bar.cursorwidth) + ...
         (cfg.bar.maxScale * cfg.bar.cursorwidth  + cfg.bar.cursorwidth/2), ...
