@@ -34,7 +34,7 @@ end
 for b = b+1 : cfg.nblocks+cfg.nblocksprac
     block_trials1 = [];
     for o = 1:cfg.nobs
-        for t = 1:((cfg.ntrials - cfg.nullt) ./ 3) % 10 presentations of observers/block
+        for t = 1:((cfg.ntrials - cfg.nullt) ./ cfg.nobs) % 10 presentations of observers/block
             trialid                                 = trialid+1;
             block_trials1(end+1).trialid            = trialid;
             block_trials1(end).estim_obsacc         = [];
@@ -66,6 +66,8 @@ for b = b+1 : cfg.nblocks+cfg.nblocksprac
 end
 clear  block_trial*;
 
+% this fills an appropriately sized list with 1, 2, 1, 2, 1, 2, ...
+% It gets shuffled with randperm later.
 wl0 = repmat([1 2],1,(cfg.ntrialsprac/2) * cfg.nblocksprac);
 
 % this method for where larger computation has been implemented only for
@@ -93,15 +95,14 @@ for t = 1:length(trials)
         trials(t).break         = false;
         trials(t).instr         = true;
         trials(t).questionnaire = false;
-    elseif ...
-            trials(t-1).block ~= trials(t).block 
+    elseif trials(t-1).block ~= trials(t).block 
         trials(t).break = true;
         trials(t).feedback = true;
         if trials(t).block <= cfg.nblocksprac+1
             trials(t).instr = true;
         else trials(t).instr = false;
         end
-        if ismember(trials(t).block,[3:2:cfg.nblocks+cfg.nblocksprac]), % questionnaires every 2 blocks
+        if ismember(trials(t).block,[3:cfg.questionnaire_frequency:cfg.nblocks+cfg.nblocksprac]) % questionnaires every few blocks
             trials(t).questionnaire = true; 
         else trials(t).questionnaire = false; 
         end
@@ -120,11 +121,10 @@ for f= 1:length(fields)
     end
 end
 clear f
-if 0
-    % check the design manually
-    % after randomization
-    img_dsg(trials,{'block', 'feedback', 'obstype', 'instr' 'wherelarger'})
-    figure(gcf+1);
-    [z index] = sort([trials.trialid]);clear z;
-    img_dsg(trials(index),{'block', 'feedback', 'obstype','instr' 'wherelarger'})
-end
+
+%     % check the design manually
+%     % after randomization
+%     img_dsg(trials,{'block', 'feedback', 'obstype', 'instr' 'wherelarger'})
+%     figure(gcf+1);
+%     [z index] = sort([trials.trialid]);clear z;
+%     img_dsg(trials(index),{'block', 'feedback', 'obstype','instr' 'wherelarger'})

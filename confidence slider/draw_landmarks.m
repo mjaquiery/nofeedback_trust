@@ -16,45 +16,24 @@ Screen('TextSize', Sc.window, 13);
 Screen('TextFont', Sc.window, 'Myriad Pro');
 
 %% check for required fields
-if ~isfield(cfg,'instr')
-    cfg.instr.cjtext = {'Certainly' 'Maybe'};
-    cfg.instr.interval = {'LEFT' 'RIGHT'};
+if ~isfield(cfg,'instr') || ~isfield(cfg.instr,'cjtext') || ~isfield(cfg.instr,'instr')
+    set_cfg_text
 end
-if ~isfield(cfg.instr,'cjtext')
-    cfg.instr.cjtext = {'Certainly' 'Maybe'};
+if ~isfield(cfg.instr,'xshift')
+    define_scale
 end
-if ~isfield(cfg.instr,'instr')
-    cfg.instr.interval = {'LEFT' 'RIGHT'};
-end
-if ~isfield(cfg.instr, 'xshift')
-    cfg.instr.xshift = [linspace(cfg.bar.gaprect(1)-cfg.bar.cursorwidth.*.5,...
-            cfg.bar.barrect(1)+cfg.bar.cursorwidth.*.5,length(cfg.instr.cjtext)) ...
-        linspace(cfg.bar.gaprect(3)+cfg.bar.cursorwidth.*.5, ...
-            cfg.bar.barrect(3)-cfg.bar.cursorwidth.*.5,length(cfg.instr.cjtext))];
-end
-
-%% define instructions for confidence judgement
-for i=1:length(cfg.instr.cjtext)
-    bounds(i,:) = Screen('TextBounds',Sc.window,cfg.instr.cjtext{i});
-end
-LintBounds              = Screen('TextBounds',Sc.window,cfg.instr.interval{1});
-RintBounds              = Screen('TextBounds',Sc.window,cfg.instr.interval{2});
 
 %% draw confidence landmarks
+ypos = Sc.rect(4).*cfg.bar.positiony - 40;
 for i=1:length(cfg.instr.xshift)
-    Screen('DrawText', Sc.window, ...
-        cfg.instr.cjtext{mod(i-1,length(cfg.instr.cjtext))+1}, ...
-        cfg.instr.xshift(i) - bounds(mod(i-1,length(cfg.instr.cjtext))+1,3)/2, ...
-        Sc.rect(4).*cfg.bar.positiony-40, 0);
+    % on even words we want to back up to align nicely on the scale
+    xbump = 0;
+    if mod(i,2)==0
+        xbump = Screen('TextBounds', Sc.window, cfg.instr.cjtext{i});
+        xbump = xbump(3);
+    end
+    Screen('DrawText', Sc.window, cfg.instr.cjtext{i}, ...
+        cfg.instr.xshift(i) - xbump, ypos);
 end
-
-%% draw interval landmarks
-Screen('DrawText', Sc.window, cfg.instr.interval{1}, ...
-    Sc.center(1)- (cfg.bar.barlength*.25 + cfg.bar.gaplength*.5) - LintBounds(3)*.5, ...
-    (Sc.rect(4).*cfg.bar.positiony +40), 0);
-
-Screen('DrawText', Sc.window, cfg.instr.interval{2}, ...
-    Sc.center(1)+ (cfg.bar.barlength*.25 + cfg.bar.gaplength*.5) - RintBounds(3)*.5, ...
-    (Sc.rect(4).*cfg.bar.positiony +40), 0);
 
 return

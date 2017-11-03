@@ -22,12 +22,12 @@ for o = 1:cfg.nobs
     Screen('DrawTexture', Sc.window, obs_tex, [], CenterRectOnPoint([0 0 258 325],Sc.center(1),Sc.center(2)));
     
     % Draw instructions
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.size(2) .* .1)
+    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.rect(4) .* .1)
     Screen('TextSize', Sc.window, 20);
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{2},'center', Sc.size(2) .* .15)
+    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{2},'center', Sc.rect(4) .* .15)
     Screen('TextSize', Sc.window, 13);
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{3},'center', Sc.size(2) .* cfg.bar.positiony)
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{4},'center', Sc.size(2) .* cfg.bar.positiony + 50)
+    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{3},'center', Sc.rect(4) .* cfg.bar.positiony)
+    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{4},'center', Sc.rect(4) .* cfg.bar.positiony + 50)
     
     % flip screen
     ft = Screen('Flip',Sc.window);

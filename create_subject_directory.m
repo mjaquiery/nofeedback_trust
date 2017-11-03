@@ -1,5 +1,5 @@
-% prompt dubject info
-prompt = {'Subject ID:','Gender(m/f):','Age:',...
+% prompt subject info
+prompt = {'Subject ID:','Gender(m/f/o):','Age:',...
     'Experiment restarted? Yes=1 or No=0: '};
 answer = inputdlg(prompt);
 

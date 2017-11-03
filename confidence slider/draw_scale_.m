@@ -9,28 +9,8 @@ function [] = draw_scale_(Sc,cfg)
 % Niccolo Pescetelli
 
 %% check for fields existence
-if ~isfield(cfg,'bar')
-    cfg.bar.maxScale            = 55;
-    cfg.bar.minScale            = -55;
-    cfg.bar.nScale              = length([cfg.bar.minScale:cfg.bar.maxScale]);
-    cfg.bar.cursorwidth         = Sc.rect(3)/200;
-    cfg.bar.cursorheight        = 20;
-    cfg.bar.positiony           = .7;
-    cfg.bar.barrect             = CenterRectOnPoint([0 0 (cfg.bar.nScale*cfg.bar.cursorwidth) (cfg.bar.cursorheight)], ...
-        Sc.center(1),Sc.rect(4)*cfg.bar.positiony);
-    cfg.bar.barlength           = cfg.bar.barrect(3)- cfg.bar.barrect(1);
-    cfg.bar.gap_size            = 11;
-    cfg.bar.gaprect            = CenterRectOnPoint([0,0,cfg.bar.cursorwidth * cfg.bar.gap_size,cfg.bar.cursorheight],...
-        Sc.center(1), Sc.size(2)*cfg.bar.positiony);
-end
-if ~isfield(cfg.bar,'gaprect'),
-    cfg.bar.gaprect            = CenterRectOnPoint([0,0,cfg.bar.cursorwidth * cfg.bar.gap_size,cfg.bar.cursorheight],...
-        Sc.center(1), ...
-        Sc.rect(4)*cfg.bar.positiony);
-end
-if ~isfield(cfg.bar,'barrect'),
-    cfg.bar.barrect             = CenterRectOnPoint([0 0 (cfg.bar.nScale*cfg.bar.cursorwidth) (cfg.bar.cursorheight)], ...
-        Sc.center(1),Sc.size(2)*cfg.bar.positiony);
+if ~isfield(cfg,'bar') || ~isfield(cfg.bar,'gaprect') || ~isfield(cfg.bar,'barrect')
+    define_scale
 end
 
 %% draw barrect and gap
