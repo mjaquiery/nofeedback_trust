@@ -1,7 +1,7 @@
 clear all
 close all 
 
-addpath(genpath('C:\Users\npescetelli\Documents\Paris\toolboxes'));
+% addpath(genpath('C:\Users\npescetelli\Documents\Paris\toolboxes'));
 
 %% plot confidence distribution
 clf

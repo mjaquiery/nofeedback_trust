@@ -4,7 +4,7 @@
 %% Extensions by Matt Jaquiery
 % matt.jaquiery@psy.ox.ac.uk
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-cd('G:\Documents\University\Programming\nofeedback_trust/')
+cd('G:\Documents\University\Programming\nofeedback_trust_matt\')
 
 %% clear workspace and create directories
 clear all;

@@ -1,6 +1,6 @@
 %%
-addpath(genpath('/home/niccolo/Dropbox/Oxford/myfunctions'));
-addpath(genpath('/media/niccolo/Yupi/Paris/toolboxes/JR_toolbox'));
+% addpath(genpath('/home/niccolo/Dropbox/Oxford/myfunctions'));
+% addpath(genpath('/media/niccolo/Yupi/Paris/toolboxes/JR_toolbox'));
 
 
 %%
