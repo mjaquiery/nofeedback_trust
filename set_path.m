@@ -66,7 +66,6 @@ switch 'MattHome'
 %         im_path = '/home/niccolo/VBox_shared/internalExternal/';
     case 'MattHome'
         %cd('G:\Documents\University\Oxford\Work\matlabResults');
-        %addpath(genpath('G:\Documents\University\Programming\nofeedback_trust\myfunctions'));
         my_path = 'G:\Documents\University\Programming\nofeedback_trust_matt'; % working directory
         if ~feedbackEnabled
             results_path = 'G:\Documents\University\Oxford\Work\matlabResults\';
@@ -75,5 +74,6 @@ switch 'MattHome'
         end
         stims_path    = 'G:\Documents\University\Programming\nofeedback_trust_matt\stims';
         addpath(genpath(my_path));
+        addpath(genpath([my_path '\confidence_slider']));
         im_path = 'G:\Documents\University\Programming\nofeedback_trust_matt\internalExternal';
 end

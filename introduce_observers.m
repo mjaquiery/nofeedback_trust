@@ -4,7 +4,7 @@ observers = randperm(3);
 pressKey = 'Press any key';
 bounds = Screen('TextBounds',Sc.window,pressKey);
 for obs = observers
-    imagedata = imread([stims_path '/observer',int2str(cfg.observer.pic(obs)),'.jpg']);
+    imagedata = imread([cfg.path.stims '/observer',int2str(cfg.observer.pic(obs)),'.jpg']);
     Screen('DrawText', Sc.window, 'Press any key', Sc.center(1)-bounds(3)/2,Sc.center(2)+Sc.size(2)/3, 0);
     % make texture image out of image matrix 'imdata'
     texture = Screen('MakeTexture', Sc.window, imagedata);

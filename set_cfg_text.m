@@ -9,6 +9,7 @@ cfg.instr.interval          = {'LEFT' 'RIGHT'};
 cfg.instr.tooslow           = {'Too slow.' 'Please press any key to continue.'};
 cfg.instr.wrongbutton       = {'Wrong button' 'Please press any key to continue.'};
 cfg.instr.cjtext(:,:)       = {'certainly' 'maybe' 'maybe' 'certainly'};
+cfg.instr.chooseAdvisor     = {'Click on one of the advisors to hear their advice'};
 cfg.instr.instr             = {'Left click with your mouse to make a decision.' ...
     'Press spacebar to confirm response.'};
 cfg.instr.estimated_obsacc  = {'Your baseline accuracy (before any advice) was 71%' ...

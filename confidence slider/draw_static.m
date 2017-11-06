@@ -1,4 +1,8 @@
-function [] = draw_static(Sc,cfg)
+function [] = draw_static(Sc,cfg,suppressFixation,suppressResponseInstr)
+
+if nargin < 4,    suppressResponseInstr = 0; end
+if nargin < 3,    suppressFixation = 0;      end
+
 % set font size
 Screen('TextSize', Sc.window, 13);
 
@@ -6,7 +10,9 @@ Screen('TextSize', Sc.window, 13);
 draw_progression_bar(Sc, cfg);
 
 % add fixation
-add_fixation;
+if ~suppressFixation
+    add_fixation;
+end
 
 % draw scale
 %if(cfg.debug)   disp('Drawing scale_'); end
@@ -17,7 +23,9 @@ draw_scale_(Sc,cfg);
 draw_landmarks(Sc,cfg);
 
 % add response instructions
-%if(cfg.debug)   disp('Adding responseinstr'); end
-add_responseinstr(Sc, cfg);
+if ~suppressResponseInstr
+    %if(cfg.debug)   disp('Adding responseinstr'); end
+    add_responseinstr(Sc, cfg);
+end
 
 return

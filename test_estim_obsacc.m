@@ -6,7 +6,7 @@ clc
 set_path
 
 cfg=[];
-cfg.stims_path = stims_path;
+cfg.path.stims = stims_path;
 cfg.observer.pic = randperm(4);
 cfg.nobs =3;
 cfg.positiony = .80;

@@ -42,7 +42,8 @@ if (subject.restarted)
     load([pathname filename]);
     starttrial = t;
     cfg.restarted = 1;
-else starttrial=1;
+else
+    starttrial=1;
 end
 %%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -93,7 +94,7 @@ for t = starttrial:length(trials)
     %% save and break
     if trials(t).break
         %% Save dataon break trials
-        save([results_path subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
+        save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
         %% break
         Screen('TextSize',Sc.window,18);
         DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
@@ -150,14 +151,14 @@ for t = starttrial:length(trials)
     
     % Show stimulus on screen at next possible display refresh cycle,
     % and record stimulus onset time in 'onsetstim':
-    [VBLTimestamp trials(t).onsetstim Fts trials(t).tmissed_onset1] = Screen('Flip', Sc.window, time + cfg.stim.RSI2 - cfg.frame);
+    [VBLTimestamp, trials(t).onsetstim, Fts, trials(t).tmissed_onset1] = Screen('Flip', Sc.window, time + cfg.stim.RSI2 - cfg.frame);
     
     % draw confidence scale
     draw_static(Sc, cfg)
     
     % stimulus is shown for 160 ms and then disappears
     % no response collection before 160 ms
-    [VBLts trials(t).offsetstim Fts trials(t).tmissed_offset1] = Screen('Flip',Sc.window,trials(t).onsetstim + cfg.stim.durstim - cfg.frame);
+    [VBLts, trials(t).offsetstim, Fts, trials(t).tmissed_offset1] = Screen('Flip',Sc.window,trials(t).onsetstim + cfg.stim.durstim - cfg.frame);
     
     % collect 1st response
     [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(Sc, cfg); % responded is 1 or 0; cj1 is the first confidence judgement
@@ -170,6 +171,26 @@ for t = starttrial:length(trials)
     
     % define RT1
     trials(t).rt1 = trials(t).resp1_time - trials(t).offsetstim;
+        
+    %% Advisor stuff
+    if trials(t).block>1
+        PsychPortAudio('Close');
+    end
+    
+    %% Choice of advisor
+    if ~isempty(trials(t).choice)
+        obsL = buildAdvisor(trials(t).choice(1), cfg);
+        obsR = buildAdvisor(trials(t).choice(2), cfg);
+        % get the judge's choice
+        [choice, trials(t).choiceTime] = getAdvisorChoice(Sc, cfg, obsL, obsR);
+        trials(t).choiceDecision = trials(t).choice(choice);
+        % fill in the remaining trial details from the choice
+        trials(t).obstype = trials(t).choiceDecision-1;
+        if ~isnan(trials(t).obstype)
+            trials(t).pic = cfg.observer.pic(trials(t).choiceDecision);
+            trials(t).voice = cfg.observer.voice(trials(t).choiceDecision);
+        end
+    end
     
     %% define observer behaviour
     if ~isnan(trials(t).obstype)
@@ -197,22 +218,19 @@ for t = starttrial:length(trials)
         trials(t).step   = NaN;
     end
     
-    %% read in observer picture and voice
-    if trials(t).block>1,
-        % load textures for images
-        images_texture
-        PsychPortAudio('Close');
-        load_observer,
+    %% load the observer
+    if trials(t).block > 1
+        load_observer;
     end
-    
+        
     %% Advice and final decision
     if trials(t).block > 1 
-        if ~isnan(trials(t).obstype),
+        if ~isnan(trials(t).obstype)
             present_advice;
             
             % prompt new confidence judgment
             [trials(t).cj2, trials(t).resp2_time, trials(t).int2] = ...
-                drag_slider(Sc, cfg, trials(t).cj1)
+                drag_slider(Sc, cfg, trials(t).cj1);
             
             % define new timestamp
             time = trials(t).resp2_time;
@@ -264,13 +282,13 @@ end
 questionnaire
 
 % save temporary final file
-save([results_path subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
+save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
 
 % collect estimated observers accuracy
 trials(t).estim_obsacc = estimated_obsacc(Sc,cfg);
 
 %% save final file
-save([results_path subject.dir '/behaviour/' subject.fileName '_final'],'subject','cfg','trials');
+save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_final'],'subject','cfg','trials');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks
@@ -288,7 +306,7 @@ KbWait;
 Screen('CloseAll');
 ListenChar(0);
 DisableKeysForKbCheck([]);
-ShowCursor()
+ShowCursor();
 Priority(0);
 toc
     

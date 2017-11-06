@@ -13,7 +13,7 @@ for o = 1:cfg.nobs
     valid = false;
     
     % load observer picture
-    obs_data = imread([cfg.stims_path '/observer' num2str(cfg.observer.pic(o)) '.jpg']);
+    obs_data = imread([cfg.path.stims '/observer' num2str(cfg.observer.pic(o)) '.jpg']);
     
     % make texture image out of image matrix 'observer data'
     obs_tex  = Screen('MakeTexture', Sc.window, obs_data);    

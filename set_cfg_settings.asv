@@ -58,18 +58,18 @@ if cfg.debug==1
     cfg.block.questionnaire_frequency = 4;
 
     cfg.practice.block_count = 2;
-    cfg.practice.trial_count = 2;    
+    cfg.practice.trial_count = 3;    
 end
 
 %% Set display variables
 cfg.display.portrait.width = 258;
 cfg.display.portrait.height = 325;
 cfg.display.choice.offset = 500;
-cfg.display.choice.frame.width = 10;
-cfg.display.choice.frame.gap = cfg.display.choice.frame.width + 5; % gap between the portrait and the frame
+cfg.display.choice.frame.width = 2;
+cfg.display.choice.frame.gap = 1;
 cfg.display.choice.frame.color = [.8 .8 .8];
 cfg.display.choice.instructionTextOffset = cfg.display.portrait.height/2 + 50;
-cfg.display.choice.nameTextOffset = 20;
+cfg.display.choice.nameTextOffset = cfg.display.portrait.height/2 + 10;
 
 % Reseed the random-number generator for each expt.
 cfg.resetrn = sum(100*clock);
@@ -78,6 +78,6 @@ rand('state',cfg.resetrn);
 set_cfg_text
 
 % save paths in cfg
-cfg.path.base               = my_path;
-cfg.path.results            = results_path;
-cfg.path.stims              = stims_path;
+cfg.my_path                 = my_path;
+cfg.results_path            = results_path;
+cfg.stims_path              = stims_path;

@@ -64,7 +64,7 @@ for ii = 1: length(question)
     inst{2}    = 'Press spacebar to provide response.';
     Ibounds{1}  = Screen('TextBounds',Sc.window,inst{1});
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
-    imdata      = imread([stims_path '/observer',int2str(cfg.observer.pic(obs)),'.jpg']);
+    imdata      = imread([cfg.path.stims '/observer',int2str(cfg.observer.pic(obs)),'.jpg']);
     % make texture image out of image matrix 'imdata'
     tex = Screen('MakeTexture', Sc.window, imdata);
     while true

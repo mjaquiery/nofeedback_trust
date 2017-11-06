@@ -1,0 +1,16 @@
+function [advisor] = buildAdvisor(advisorID)
+%% Build an advisor object by ID
+% usage:
+% [advisorLeft] = buildAdvisor[trials(t).advisor];
+% 
+% Inputs:
+% advisorID - the ID of the desired advisor
+%
+% Output:
+% advisor:
+%   .id - id (same as advisorID)
+%   .
+
+obsL.id = getObserver(trials(t).choice(1));
+    obsL.data = imread([stims_path '/observer' num2str(cfg.observer.pic(obsL.id)) '.jpg']);
+    obsL.voice = cfg.observer.voice(obsL.id);
