@@ -12,6 +12,7 @@ cw=Sc.size(1)/100;
 ch=5;
 brct=CenterRectOnPoint([0 0 (ns *cw) (ch)],Sc.center(1),Sc.center(2)+Sc.size(2)/5);
 bl = brct(3)- brct(1);
+advisorCenter = [Sc.center(1) Sc.rect(4)*.4];
 add_fixation;
 Screen('Flip', Sc.window);
 id=0;
@@ -64,9 +65,6 @@ for ii = 1: length(question)
     inst{2}    = 'Press spacebar to provide response.';
     Ibounds{1}  = Screen('TextBounds',Sc.window,inst{1});
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
-    imdata      = imread([cfg.path.stims '/observer',int2str(cfg.observer.pic(obs)),'.jpg']);
-    % make texture image out of image matrix 'imdata'
-    tex = Screen('MakeTexture', Sc.window, imdata);
     while true
         %add response istructions
         Screen('TextSize', Sc.window, 13);Screen('TextFont', Sc.window, 'Myriad Pro');
@@ -85,7 +83,7 @@ for ii = 1: length(question)
             Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
             Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
             Screen('DrawText', Sc.window, leftText, Sc.center(1)- bl/2 - LTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawTexture', Sc.window, tex, [], CenterRectOnPoint([0 0 258 325],(Sc.rect(3)/2),(Sc.rect(4)/3.5)));
+            drawAdvisor(Sc, cfg, obs, advisorCenter);
 
             Screen('Flip', Sc.window, question(ii).response_t + .100); % add lag to avoid too fast moving of the cursor
         end
@@ -101,7 +99,7 @@ for ii = 1: length(question)
             Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
             Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
             Screen('DrawText', Sc.window, leftText, Sc.center(1)- bl/2 - LTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawTexture', Sc.window, tex, [], CenterRectOnPoint([0 0 258 325],(Sc.rect(3)/2),(Sc.rect(4)/3.5)));
+            drawAdvisor(Sc, cfg, obs, advisorCenter);
 
             Screen('Flip', Sc.window, question(ii).response_t + .025); % add lag to avoid too fast moving of the cursor
         end

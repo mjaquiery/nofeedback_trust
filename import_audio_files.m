@@ -31,7 +31,7 @@ for obs= 1:4 % one is going to be used for practice, the others for the experime
     for h=1:2 % 1=normal / 2=reverse order
         for i=1:2 %1=left / 2=right
             %observers' speeches
-            [speechFile, cfg.speechFreq{obs,h,i}] = audioread([cfg.path.stims stim_folder num2str(cfg.observer.voice(obs)) slash num2str(h) num2str(i) '2.wav']);
+            [speechFile, cfg.speechFreq{obs,h,i}] = audioread([cfg.path.stims stim_folder num2str(cfg.advisor(obs).voice) slash num2str(h) num2str(i) '2.wav']);
             % The following lines of code are necessary for PsychPortAudio's handling of the wav file.
             cfg.speechData{obs,h,i} = speechFile';
             cfg.speechChannels{obs,h,i} = size(cfg.speechData{obs,h,i},1); % Number of rows == number of channels.

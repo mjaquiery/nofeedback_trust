@@ -1,4 +1,4 @@
-drawAdvisor(Sc, cfg, trials(t).obstype+1);
+drawAdvisor(Sc, cfg, trials(t).advisorID);
 
 % draw static elements
 draw_static(Sc, cfg, [1 0 1 1 0]);
@@ -17,5 +17,5 @@ trials(t).onsetobsspeech = PsychPortAudio('Start', trials(t).whichspeech, 1,GetS
 draw_static(Sc, cfg, [1 0 1 1 0]);
 
 % offset image
-[VBLts, trials(t).offsetobs, FTS, trials(t).tmissed_offset2] = Screen('Flip',Sc.window,trials(t).onsetobs + cfg.observer.duration - cfg.frame);
+[VBLts, trials(t).offsetobs, FTS, trials(t).tmissed_offset2] = Screen('Flip',Sc.window,trials(t).onsetobs + cfg.advisors.duration - cfg.frame);
 time = trials(t).offsetobs;

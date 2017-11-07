@@ -18,18 +18,16 @@ if nargin <4,   centerOn = Sc.center; end
 
 %% get advisor variables
 if ~isnan(advisorID)
-    imageData = imread([cfg.path.stims '/observer',int2str(cfg.observer.pic(advisorID)),'.jpg']);
-    nameText = getAdvisorName(cfg.observer.voice(advisorID));
+    advisor = cfg.advisor(advisorID);
 else
-    imageData = imread([cfg.path.stims '/silouette.jpg']);
-    nameText = getAdvisorName(NaN);
+    advisor = cfg.nullAdvisor;
 end
 
 oldTextSize = Screen('TextSize', Sc.window);
 
 %% draw texture
 % make texture image out of image matrix 'imdata'
-texture = Screen('MakeTexture', Sc.window, imageData);
+texture = Screen('MakeTexture', Sc.window, advisor.imdata);
 Screen('DrawTexture', Sc.window, texture, [],...
     CenterRectOnPoint([0 0 cfg.display.portrait.width cfg.display.portrait.height],...
     centerOn(1),centerOn(2)));
@@ -37,8 +35,8 @@ Screen('DrawTexture', Sc.window, texture, [],...
 %% write observer name
 if ~hideName
     Screen('TextSize', Sc.window, cfg.display.portrait.nameTextSize);
-    textLength = Screen('TextBounds', Sc.window, nameText);
-    Screen('DrawText', Sc.window, nameText,...
+    textLength = Screen('TextBounds', Sc.window, advisor.name);
+    Screen('DrawText', Sc.window, advisor.name,...
         floor(centerOn(1) - textLength(3)/2),...
         floor(centerOn(2) + cfg.display.portrait.height/2 + cfg.display.portrait.nameTextOffset));
 end

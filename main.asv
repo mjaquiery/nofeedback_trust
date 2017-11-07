@@ -90,10 +90,7 @@ for t = starttrial:length(trials)
         disp(['accuracy: ' num2str(trials(t-1).cor)])
         disp(['1st confidence: ' num2str(trials(t-1).cj1)])
         disp(['2nd confidence: ' num2str(trials(t-1).cj2)])
-        disp(['Advisor: ' num2str(trials(t-1).advisorID)]);
-        if ~isnan(trials(t-1).advisorID)
-            disp(['advice type: ' num2str(cfg.advisor(trials(t-1).advisorID).adviceType)]);
-        end
+        disp(['advice type: ' num2str(trials(t-1).obstype)]);
         disp(['agree?: ' num2str(trials(t-1).agree)]);
         disp('------------------------------------------');
     end
@@ -246,9 +243,27 @@ for t = starttrial:length(trials)
             
         else % null
             present_delay;
+            
+            % assign variables on 2 judgement
+            trials(t).resp2_time        = NaN;
+            trials(t).cj2               = NaN;
+            trials(t).cor2              = NaN;
+            trials(t).int2              = NaN;
+            trials(t).responded2        = NaN;
+            trials(t).rt2               = NaN;
+            trials(t).resp_advice_rt    = NaN;
+            trials(t).offset_speech     = NaN;
             time                        = GetSecs;
         end
     else % 1st practice block
+        trials(t).resp2_time        = NaN;
+        trials(t).cj2               = NaN;
+        trials(t).cor2              = NaN;
+        trials(t).int2              = NaN;
+        trials(t).responded2        = NaN;
+        trials(t).rt2               = NaN;
+        trials(t).resp_advice_rt    = NaN;
+        trials(t).offset_speech     = NaN;
         time                        = GetSecs;
     end
     

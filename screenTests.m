@@ -1,4 +1,4 @@
- %% STUDY 3 - agreement in confidence and uncertainty  #####################
+  %% STUDY 3 - agreement in confidence and uncertainty  #####################
 %% script by Niccolo Pescetelli %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % niccolo.pescetelli@psy.ox.ac.uk   
 %% Extensions by Matt Jaquiery
@@ -62,6 +62,9 @@ cfg.bar.xshift = [linspace(cfg.bar.barrect(1)+cfg.bar.cursorwidth.*.5,...
     linspace(cfg.bar.gaprect(3)+cfg.bar.cursorwidth.*.5, ...
         cfg.bar.barrect(3)-cfg.bar.cursorwidth.*.5,cfg.bar.maxScale)];
 
+% load advisor portraits
+load_advisor_portraits
+ 
 % Get timestamp for experiment start
 cfg.startexp = GetSecs;
 
@@ -70,13 +73,16 @@ trials(1).dotdifference = cfg.stim.initialDotDifference;
 trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %% Begin testing elements
-    cfg.currentTrial = starttrial; 
+    cfg.currentTrial = starttrial;
+    t = 1;   
 
 % add all static elements
 %draw_static(Sc, cfg)
 %Screen('Flip',Sc.window);
 
-introduce_observers
+%introduce_observers
+
+questionnaire
 
 ListenChar(1);
 

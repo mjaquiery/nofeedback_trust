@@ -9,17 +9,11 @@ help_string = '';
 
 resp = [];
 
-for o = 1:cfg.nobs
+for o = 1:cfg.advisors.count.real
     valid = false;
     
-    % load observer picture
-    obs_data = imread([cfg.path.stims '/observer' num2str(cfg.observer.pic(o)) '.jpg']);
-    
-    % make texture image out of image matrix 'observer data'
-    obs_tex  = Screen('MakeTexture', Sc.window, obs_data);    
-    
     % draw observer picture
-    Screen('DrawTexture', Sc.window, obs_tex, [], CenterRectOnPoint([0 0 258 325],Sc.center(1),Sc.center(2)));
+    drawAdvisor(Sc, cfg, o);
     
     % Draw instructions
     DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.rect(4) .* .1)

@@ -6,8 +6,8 @@ pressKey = 'Press any key';
 bounds = Screen('TextBounds',Sc.window,pressKey);
 for obs = observers
     drawAdvisor(Sc, cfg, obs);
-    speech = PsychPortAudio('Open', [], [], 0, cfg.introSpeechFreq{cfg.observer.voice(obs)}, cfg.introSpeechChannels{cfg.observer.voice(obs)});
-    PsychPortAudio('FillBuffer',speech , cfg.introSpeechData{cfg.observer.voice(obs)}); 
+    speech = PsychPortAudio('Open', [], [], 0, cfg.introSpeechFreq{cfg.advisor(obs).voice}, cfg.introSpeechChannels{cfg.advisor(obs).voice});
+    PsychPortAudio('FillBuffer',speech , cfg.introSpeechData{cfg.advisor(obs).voice}); 
     ti=GetSecs;
     Screen('DrawText', Sc.window, 'Press any key', Sc.center(1)-bounds(3)/2, Sc.rect(4)*.8);
     onset_pic(obs) = Screen('Flip',Sc.window,ti);

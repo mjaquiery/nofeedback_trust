@@ -1,8 +1,8 @@
-if ~isnan(trials(t).obstype)
+if ~isnan(trials(t).advisorID)
     
-    freq = cfg.speechFreq(trials(t).voice,:,:);
-    chan = cfg.speechChannels(trials(t).voice,:,:);
-    data = cfg.speechData(trials(t).voice,:,:);
+    freq = cfg.speechFreq(cfg.advisor(trials(t).advisorID).voice,:,:);
+    chan = cfg.speechChannels(cfg.advisor(trials(t).advisorID).voice,:,:);
+    data = cfg.speechData(cfg.advisor(trials(t).advisorID).voice,:,:);
     
     % with this if obsacc=1, i=wherelarger, but if obsacc=0, i=3-wherelarger
     i = abs((3* (1 - trials(t).obsacc) ) - trials(t).wherelarger); 
