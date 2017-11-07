@@ -179,10 +179,8 @@ for t = starttrial:length(trials)
     
     %% Choice of advisor
     if ~isempty(trials(t).choice)
-        obsL = buildAdvisor(trials(t).choice(1), cfg);
-        obsR = buildAdvisor(trials(t).choice(2), cfg);
         % get the judge's choice
-        [choice, trials(t).choiceTime] = getAdvisorChoice(Sc, cfg, obsL, obsR);
+        [choice, trials(t).choiceTime] = getAdvisorChoice(Sc, cfg, trials(t).choice(1), trials(t).choice(2));
         trials(t).choiceDecision = trials(t).choice(choice);
         % fill in the remaining trial details from the choice
         trials(t).obstype = trials(t).choiceDecision-1;
@@ -269,7 +267,7 @@ for t = starttrial:length(trials)
     
     %--close audio/screen buffers
     Screen('Close');
-    resetPPA
+    resetPPA;
     
     %% feedback
     if trials(t).block<3

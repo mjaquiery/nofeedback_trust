@@ -36,7 +36,7 @@ for ii = 1: length(question)
     question(ii).response_t = NaN;              % initialize response time variable
     key = 1;
     while sum(key) ~= 0
-        [T key question(ii).response_t keycode] = evalc('KbCheck');        % present only when release button
+        [T, key, question(ii).response_t, keycode] = evalc('KbCheck');        % present only when release button
     end
     key = 'firstMove';
     if trials(t).block == 3
@@ -107,19 +107,19 @@ for ii = 1: length(question)
         end
 
         % wait for key press
-        [key keycode question(ii).response_t] = deal(0);                   % start collecting keyboard response
+        [key, keycode, question(ii).response_t] = deal(0);                   % start collecting keyboard response
         while sum(key) == 0
-            [T key question(ii).response_t keycode] = evalc('KbCheck');    % get timing and key
+            [T, key, question(ii).response_t, keycode] = evalc('KbCheck');    % get timing and key
         end
         %update answer
         key = KbName(keycode);
         if iscell(key), key = key{1}; end                                        % if two buttons at the same time
         switch key                                                  % sort answer
-            case 'LeftArrow',       
+            case 'LeftArrow'       
                 key = 'bottom';
                 question(ii).ans = question(ii).ans -1;
                 question(ii).haschanged = 1;
-            case 'space',           
+            case 'space'           
                 key = 'space';
                 if question(ii).haschanged
                     break;
@@ -127,7 +127,7 @@ for ii = 1: length(question)
                     question(ii).haschanged = 1;
                     KbReleaseWait;
                 end
-            case 'RightArrow',        
+            case 'RightArrow'        
                 key = 'top';
                 question(ii).ans = question(ii).ans +1;
                 question(ii).haschanged = 1;
@@ -143,7 +143,7 @@ for ii = 1: length(question)
 
     end
 end
-[Y I] = sort([question.id]);
+[Y, I] = sort([question.id]);
 question(1:3*length(questionList)) = question(I); % sort questions in the original order
 trials(t).qanswers = question;
 

@@ -1,31 +1,44 @@
-function [] = draw_static(Sc,cfg,suppressFixation,suppressResponseInstr)
-
-if nargin < 4,    suppressResponseInstr = 0; end
-if nargin < 3,    suppressFixation = 0;      end
+function draw_static(Sc,cfg,drawMask)
+%% draw the static screen elements
+% 
+% usage: 
+%   draw_static(Sc, cfg)
+%   draw_static(Sc, cfg, [1 0 1 1 1]);
+%
+% Sc - screen with an Sc.window to draw to
+% cfg - configuration file
+% drawMask - logical 1-dimensional array indicating which elements to draw
+%       1 - progression bar
+%       2 - fixation cross
+%       3 - scale
+%       4 - landmarks
+%       5 - response instructions
+if nargin < 3,    drawMask = ones(1,5);      end
 
 % set font size
 Screen('TextSize', Sc.window, 13);
 
 %-- add progression bar. Helps motivation
-draw_progression_bar(Sc, cfg);
+if drawMask(1)
+    draw_progression_bar(Sc, cfg);
+end
 
 % add fixation
-if ~suppressFixation
+if drawMask(2)
     add_fixation;
 end
 
 % draw scale
-%if(cfg.debug)   disp('Drawing scale_'); end
-draw_scale_(Sc,cfg);
-
-% draw confidence and interval landmarks
-%if(cfg.debug)   disp('Drawing landmarks'); end
-draw_landmarks(Sc,cfg);
-
-% add response instructions
-if ~suppressResponseInstr
-    %if(cfg.debug)   disp('Adding responseinstr'); end
-    add_responseinstr(Sc, cfg);
+if drawMask(3)
+    draw_scale_(Sc,cfg);
 end
 
-return
+% draw confidence and interval landmarks
+if drawMask(4)
+    draw_landmarks(Sc,cfg);
+end
+
+% add response instructions
+if drawMask(5)
+    add_responseinstr(Sc, cfg);
+end

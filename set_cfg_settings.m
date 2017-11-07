@@ -22,6 +22,7 @@ cfg.stim.durstim     = .160; % stimulus duration
 cfg.stim.RSI1        = 1; % response-stimulus interval (cj1 -- advice-prompt)
 cfg.stim.RSI2        = 1; % response-stimulus interval (advice-prompt -- advice)
 cfg.stim.initialDotDifference = 20;
+if cfg.debug, cfg.stim.initialDotDifference = 60; end
 
 % define observer-related variables
 cfg.nobs                    = 3; % number of obstypes (0:baseline, 1:same bias, 2:different bias)
@@ -64,12 +65,13 @@ end
 %% Set display variables
 cfg.display.portrait.width = 258;
 cfg.display.portrait.height = 325;
+cfg.display.portrait.nameTextOffset = 20;
+cfg.display.portrait.nameTextSize = 20;
 cfg.display.choice.offset = 500;
 cfg.display.choice.frame.width = 10;
 cfg.display.choice.frame.gap = cfg.display.choice.frame.width + 5; % gap between the portrait and the frame
 cfg.display.choice.frame.color = [.8 .8 .8];
 cfg.display.choice.instructionTextOffset = cfg.display.portrait.height/2 + 50;
-cfg.display.choice.nameTextOffset = 20;
 
 % Reseed the random-number generator for each expt.
 cfg.resetrn = sum(100*clock);

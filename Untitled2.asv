@@ -1,0 +1,11 @@
+function drawAdvisor(Sc, cfg, advisorID, centerOn, hideName)
+%% Shows the advisor portrait 
+%
+% Usage: 
+%   drawAdvisor(Sc, cfg, advisorID [, centerOn [, hideName]])
+%
+% Inputs:
+%   Sc - screen object 
+%   cfg - configuration object
+%   advisorID - advisor id
+%   centero

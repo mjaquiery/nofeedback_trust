@@ -17,3 +17,7 @@ cfg.instr.estimated_obsacc  = {'Your baseline accuracy (before any advice) was 7
     'In the next screen you will be prompted to enter a value' ...
     'Press any button when you are ready' ...
     'Enter a number between 0 and 100 and press Enter: '};
+
+cfg.instr.textSize.small    = 20;
+cfg.instr.textSize.medium   = 30;
+cfg.instr.textSize.large    = 40;

@@ -1,24 +1,24 @@
  %% STUDY 3 - agreement in confidence and uncertainty  #####################
 %% script by Niccolo Pescetelli %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% niccolo.pescetelli@psy.ox.ac.uk
+% niccolo.pescetelli@psy.ox.ac.uk   
 %% Extensions by Matt Jaquiery
 % matt.jaquiery@psy.ox.ac.uk
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-cd('G:\Documents\University\Programming\nofeedback_trust/')
+cd('G:\Documents\University\Programming\nofeedback_trust_matt\')
 
 %% clear workspace and create directories
 clear all;
-close all;
-clc;
+close all; 
+clc;  
 feedbackEnabled = 0;
 debugMode = 1;
-set_path
-
+set_path  
+   
 %% PTB compatibility
 % check for Opengl compatibility, abort otherwise
-AssertOpenGL;
+AssertOpenGL;        
 
-
+          
 %% Subjects' details and directory
 create_subject_directory
 
@@ -70,15 +70,19 @@ trials(1).dotdifference = cfg.stim.initialDotDifference;
 trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %% Begin testing elements
-    cfg.currentTrial = starttrial;
+    cfg.currentTrial = starttrial; 
 
 % add all static elements
-draw_static(Sc, cfg)
-Screen('Flip',Sc.window);
+%draw_static(Sc, cfg)
+%Screen('Flip',Sc.window);
+
+introduce_observers
+
+ListenChar(1);
 
 % collect response
-if(cfg.debug)   disp('Collecting first response...'); end
-[trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(Sc, cfg); % responded is 1 or 0; cj1 is the first confidence judgement
+% if(cfg.debug)   disp('Collecting first response...'); end
+% [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(Sc, cfg); % responded is 1 or 0; cj1 is the first confidence judgement
     
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%

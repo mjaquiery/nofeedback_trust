@@ -1,4 +1,4 @@
-function [choice,time] = getAdvisorChoice(Sc,cfg,advisorL,advisorR)
+function [choice,time] = getAdvisorChoice(Sc,cfg,advisorLID,advisorRID)
 % Usage:
 % [choice time] = getAdvisorChoice(Sc,cfg,advisorL,advisorR)
 % Inputs:
@@ -19,7 +19,7 @@ tnow = GetSecs;
 tmin = tnow + 0.25;
 
 %% Draw the options
-drawPortraitChoiceDisplay(Sc, cfg, advisorL, advisorR, choice);
+drawPortraitChoiceDisplay(Sc, cfg, advisorLID, advisorRID, choice);
 
 %% Show mouse pointer
 ShowCursor('Arrow');
@@ -35,7 +35,7 @@ while ~(any(buttons) && ~choice==0 && tnow>tmin)
     end
 
     %--- display response
-    drawPortraitChoiceDisplay(Sc, cfg, advisorL, advisorR, choice);
+    drawPortraitChoiceDisplay(Sc, cfg, advisorLID, advisorRID, choice);
     tnow = GetSecs;
 end
 % we now have a click so we consider our choice confirmed
@@ -50,25 +50,16 @@ return
 
 function drawPortraitChoiceDisplay(Sc, cfg, obsL, obsR, choice)
 %% draw static elements
-draw_progression_bar(Sc, cfg);
-add_fixation;
+draw_static(Sc, cfg, [1 1 0 0 0]);
 
-obsL_tex = Screen('MakeTexture', Sc.window, obsL.data);
-obsR_tex = Screen('MakeTexture', Sc.window, obsR.data);
-
-% draw observer pictures
-Screen('DrawTexture', Sc.window, obsL_tex, [],...
-    CenterRectOnPoint([0 0 cfg.display.portrait.width cfg.display.portrait.height],...
-    Sc.center(1)-cfg.display.choice.offset, Sc.center(2)));
-Screen('DrawTexture', Sc.window, obsR_tex, [],...
-    CenterRectOnPoint([0 0 cfg.display.portrait.width cfg.display.portrait.height],...
-    Sc.center(1)+cfg.display.choice.offset, Sc.center(2)));
+drawAdvisor(Sc, cfg, obsL, [Sc.center(1)-cfg.display.choice.offset, Sc.center(2)]);
+drawAdvisor(Sc, cfg, obsR, [Sc.center(1)+cfg.display.choice.offset, Sc.center(2)]);
 
 %% draw dynamic elements
 if choice~=0    
     rect = [0 0 ...
-        cfg.display.portrait.width+cfg.display.choice.frame.gap ...
-        cfg.display.portrait.height+cfg.display.choice.frame.gap];
+        cfg.display.portrait.width+cfg.display.choice.frame.gap*2 ...
+        cfg.display.portrait.height+cfg.display.choice.frame.gap*2];
 
     switch choice
         case -1 % draw a box around the left portrait
@@ -81,23 +72,12 @@ if choice~=0
 end
 
 %% add some text instructions
-Screen('TextSize', Sc.window, 16);
-Screen('TextFont', Sc.window, 'Myriad Pro');
+Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
 txt = cfg.instr.chooseAdvisor{1};
 textLength = Screen('TextBounds', Sc.window, txt, 0, 0);
 DrawFormattedText(Sc.window, txt,...
     Sc.center(1)-textLength(3)/2,...
     Sc.center(2)-cfg.display.choice.instructionTextOffset);
-txt = getAdvisorName(obsL.voice);
-textLength = Screen('TextBounds', Sc.window, txt, 0, 0);
-Screen('DrawText', Sc.window, txt,...
-    Sc.center(1) - cfg.display.choice.offset - textLength(3)/2,...
-    Sc.center(2) + cfg.display.portrait.height/2 + cfg.display.choice.nameTextOffset);
-txt = getAdvisorName(obsR.voice);
-textLength = Screen('TextBounds', Sc.window, txt, 0, 0);
-Screen('DrawText', Sc.window, txt,...
-    Sc.center(1) + cfg.display.choice.offset - textLength(3)/2,...
-    Sc.center(2) + cfg.display.portrait.height/2 + cfg.display.choice.nameTextOffset);
 
 %% execute drawings
 Screen('Flip', Sc.window);
