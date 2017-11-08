@@ -24,8 +24,10 @@ trial.instr         = false; % whether the trial is prepended with instructions
 trial.questionnaire = false; % whether the trial includes a questionnaire presentation
 
 %% answer variables
+trial.cor               = NaN; % whether the trial was correct (summarises .cor1 and .cor2)
 trial.qanswers          = []; % answers to questionnaires
 trial.cj1               = []; % confidence judgement 1
+trial.cor1               = NaN; % whether trial was correct
 trial.choiceDecision    = NaN; % judge's choice of advisor (1=left or 2=right)
 trial.choiceTime        = NaN; % time the judge's choice of advisor was made
 trial.estim_obsacc      = []; % estimated accuracy of the advisor

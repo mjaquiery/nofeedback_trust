@@ -15,8 +15,9 @@ function draw_static(Sc,cfg,drawMask)
 %       5 - response instructions
 if nargin < 3,    drawMask = ones(1,5);      end
 
-% set font size
-Screen('TextSize', Sc.window, 13);
+if cfg.debug
+    debugTrialInfo(Sc, cfg);
+end
 
 %-- add progression bar. Helps motivation
 if drawMask(1)
@@ -25,7 +26,7 @@ end
 
 % add fixation
 if drawMask(2)
-    add_fixation;
+    add_fixation(Sc, cfg);
 end
 
 % draw scale

@@ -12,22 +12,13 @@ resp = [];
 for o = 1:cfg.advisors.count.real
     valid = false;
     
-    % draw observer picture
-    drawAdvisor(Sc, cfg, o);
-    
-    % Draw instructions
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.rect(4) .* .1)
-    Screen('TextSize', Sc.window, 20);
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{2},'center', Sc.rect(4) .* .15)
-    Screen('TextSize', Sc.window, 13);
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{3},'center', Sc.rect(4) .* cfg.bar.positiony)
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{4},'center', Sc.rect(4) .* cfg.bar.positiony + 50)
-    
+    drawEstimPrompts(Sc, cfg);
     % flip screen
     ft = Screen('Flip',Sc.window);
     
     % avoid button press overlaps
-    WaitSecs(2);
+    WaitSecs(1.5);    
+    drawEstimPrompts(Sc, cfg, true);
     
     % wait for button press
     collect_response(cfg,inf);
@@ -57,3 +48,18 @@ for o = 1:cfg.advisors.count.real
 end
 
 return
+
+function drawEstimPrompts(Sc, cfg, allowKeys)
+if nargin < 3, allowKeys = false; end
+% draw observer picture
+drawAdvisor(Sc, cfg, o);
+
+% Draw instructions
+DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.rect(4) .* .1)
+Screen('TextSize', Sc.window, 20);
+DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{2},'center', Sc.rect(4) .* .15)
+Screen('TextSize', Sc.window, 13);
+DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{3},'center', Sc.rect(4) .* cfg.bar.positiony)
+if allowKeys
+    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{4},'center', Sc.rect(4) .* cfg.bar.positiony + 50)
+end

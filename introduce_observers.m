@@ -9,10 +9,12 @@ for obs = observers
     speech = PsychPortAudio('Open', [], [], 0, cfg.introSpeechFreq{cfg.advisor(obs).voice}, cfg.introSpeechChannels{cfg.advisor(obs).voice});
     PsychPortAudio('FillBuffer',speech , cfg.introSpeechData{cfg.advisor(obs).voice}); 
     ti=GetSecs;
-    Screen('DrawText', Sc.window, 'Press any key', Sc.center(1)-bounds(3)/2, Sc.rect(4)*.8);
     onset_pic(obs) = Screen('Flip',Sc.window,ti);
     onset_speech(obs)  = PsychPortAudio('Start', speech, 1);
     [startTime offset_speech(obs) xruns ~] = PsychPortAudio('Stop', speech,1);
+    drawAdvisor(Sc, cfg, obs);
+    Screen('DrawText', Sc.window, 'Press any key', Sc.center(1)-bounds(3)/2, Sc.rect(4)*.8);
+    Screen('Flip',Sc.window,ti+2);
     PsychPortAudio('Close', speech);
     [resp offset_pic(obs) kcode] = collect_response(cfg,inf);
     Screen('Flip',Sc.window);

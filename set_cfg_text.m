@@ -21,3 +21,4 @@ cfg.instr.estimated_obsacc  = {'Your baseline accuracy (before any advice) was 7
 cfg.instr.textSize.small    = 20;
 cfg.instr.textSize.medium   = 30;
 cfg.instr.textSize.large    = 40;
+cfg.instr.textColor.default = [0 0 0];

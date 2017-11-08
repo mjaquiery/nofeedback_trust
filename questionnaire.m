@@ -13,7 +13,6 @@ ch=5;
 brct=CenterRectOnPoint([0 0 (ns *cw) (ch)],Sc.center(1),Sc.center(2)+Sc.size(2)/5);
 bl = brct(3)- brct(1);
 advisorCenter = [Sc.center(1) Sc.rect(4)*.4];
-add_fixation;
 Screen('Flip', Sc.window);
 id=0;
 question=[];
@@ -147,7 +146,6 @@ trials(t).qanswers = question;
 
 %% pause before next stimuli session
 Screen('TextSize',Sc.window,18);
-add_fixation;
 if trials(t).block==3 && trials(t-1).block==2 % baseline questionnaire
     DrawFormattedText(Sc.window, 'Press any button to start the experiment','center', Sc.center(2)-50, [0 0 0]);
 else
@@ -156,6 +154,5 @@ end
 Screen('Flip', Sc.window);
 WaitSecs(.25);
 collect_response(cfg.response, inf);
-add_fixation;
 Screen('Flip', Sc.window);
 WaitSecs(.5);

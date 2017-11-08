@@ -36,16 +36,6 @@ while ~hasconfirmed
     while any(buttons) || ~haschanged   % wait for release and change of cj and confirmation
         [resp_x, resp_y, buttons] = GetMouse();
         
-        % record response (and bound it to the scale length)
-%         if resp_x>=cfg.bar.barrect(1) && resp_x<cfg.bar.gaprect(1) % if mouse's on the left rect
-%             resp = ceil((resp_x-cfg.bar.gaprect(1))/cfg.bar.cursorwidth);
-%             haschanged = true;
-%             int = -1;
-%         elseif resp_x>cfg.bar.gaprect(3) && resp_x<=cfg.bar.barrect(3) % if mouse's on the right rect
-%             resp = floor((resp_x-cfg.bar.gaprect(3))/cfg.bar.cursorwidth);
-%             haschanged = true;
-%             int = 1;
-%         end
         if resp_x>=cfg.bar.barrect(1) && resp_x<Sc.center(1) % if mouse's on the left rect
             resp = find(resp_x < (cfg.bar.xshift+cfg.bar.cursorwidth.*.5),1) - cfg.bar.maxScale-1;
             haschanged = true;
@@ -58,13 +48,6 @@ while ~hasconfirmed
             if isempty(resp), resp=cfg.bar.maxScale;end
         end
         
-        % bound response to maximum value
-%         if resp<-(cfg.bar.maxScale-round(cfg.bar.gap_size/2)),
-%             resp=-(cfg.bar.maxScale-round(cfg.bar.gap_size/2));
-%         elseif resp>(cfg.bar.maxScale-round(cfg.bar.gap_size/2)),
-%             resp=(cfg.bar.maxScale-round(cfg.bar.gap_size/2));
-%         end 
-%         
         %--- display response
         if isempty(cj1)
             ft = display_response_(Sc,cfg,[haschanged,resp]);

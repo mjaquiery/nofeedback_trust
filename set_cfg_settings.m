@@ -15,20 +15,22 @@ if ~isfield(cfg,'pause'),           cfg.pause = 'P';end
 if ~isfield(cfg,'until_release'),   cfg.until_release = true;end
 if ~isfield(cfg,'restarted'),       cfg.restarted = false;end
 if ~isfield(cfg, 'debug'),          cfg.debug = debugMode;end
+if ~isfield(cfg, 'shortMode')       cfg.shortMode = shortMode; end
 
 %% initialize variables
 % define stimulus related variables
 cfg.stim.durstim     = .160; % stimulus duration
+cfg.stim.SRI1        = 0.09; % stimulus-response interval (stimulus--cj1)
 cfg.stim.RSI1        = 1; % response-stimulus interval (cj1 -- advice-prompt)
 cfg.stim.RSI2        = 1; % response-stimulus interval (advice-prompt -- advice)
 cfg.stim.initialDotDifference = 20;
 if cfg.debug 
-    cfg.stim.initialDotDifference = 60; 
-    cfg.stim.durstim = .3;
+    %cfg.stim.initialDotDifference = 60; 
+    %cfg.stim.durstim = .3;
 end
 
 %% Define advisors
-cfg.advisors.count.real = 3; % number of obstypes (0:baseline, 1:same bias, 2:different bias)
+cfg.advisors.count.real = 3; % number of adviceTypes (0:baseline, 1:same bias, 2:different bias)
 cfg.advisors.count.practice = 1;
 cfg.advisors.count.all = cfg.advisors.count.real + cfg.advisors.count.practice;
 cfg.advisors.duration = 2; % duration of the sound files in s
@@ -43,7 +45,7 @@ for i = 1:cfg.advisors.count.all
     cfg.advisor(i).name = getAdvisorName(cfg.advisor(i).voice);
     if i > cfg.advisors.count.real 
         cfg.advisors.practice = i; 
-        cfg.advisor(i).adviceType = 0;
+        cfg.advisor(i).adviceType = 0; % practice advisor is unbiased - always 70|30
     end
 end
 % don't forget the 'no advice' advisor
@@ -56,20 +58,21 @@ cfg.xymatrix = [repmat([-57,-51,-45,-39,-33,-27,-21,-15,-9,-3,3,9,15,21,27,33,39
 
 %% define trial and block structure variables
 % Each block contains a number of trialsets.
-% Each trialset contains x trials where x = nobs * choice * nochoice + null
-% + (nobs * include_void_choice)
-cfg.block_count                     = 12; % number of blocks
-cfg.trialset.choice                 = 2; % choice trials lead by each advisor (1/2 of all choice trials in a trialset)
+% Each trialset contains x trials where 
+% x = ac * (choice*(ac-1 + include_void_choice) + nochoice) + null
+% ac = cfg.advisors.count.real
+cfg.block_count                     = 8; % number of blocks
+cfg.trialset.choice                 = 2; % choice trials with each advisor on the left (1/2 of all choice trials in a trialset)
 cfg.trialset.include_void_choice    = 1; % include choices of an observer versus no feedback
 cfg.trialset.nochoice               = 1; % no-choice trials for each advisor
 cfg.trialset.null                   = cfg.advisors.count.real * 2; % number of null trials = number of observers x 2
 cfg.block.trialset_count            = 2; % number of trial sets in each block
-cfg.block.questionnaire_frequency   = 4; % include questionnaires after each how many blocks?
+cfg.block.questionnaire_frequency   = 2; % include questionnaires after each how many blocks?
 
 cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;
 
-if cfg.debug==1
+if cfg.shortMode==1
     cfg.block_count = 1; 
     cfg.trialset.choice = 1; 
     cfg.trialset.nochoice = 0; 
@@ -82,6 +85,7 @@ if cfg.debug==1
 end
 
 %% Set display variables
+cfg.display.fixationXsize = 20; % font size for the fixation + 
 cfg.display.portrait.width = 258;
 cfg.display.portrait.height = 325;
 cfg.display.portrait.nameTextOffset = 20;

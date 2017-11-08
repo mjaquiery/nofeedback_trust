@@ -29,7 +29,7 @@ for q =1:4
 end
 
 %% proportions of steps
-toi = [trials.cor]==1;
+toi = [trials.cor1]==1;
 C= count([trials(toi).step]);
 tot = sum(C(1:3,2));
 props(s,:) = [sum(sum([trials.step]==-1))./tot;

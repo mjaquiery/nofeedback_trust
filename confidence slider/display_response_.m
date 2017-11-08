@@ -22,8 +22,7 @@ gs = round(cfg.bar.gap_size/2);
 
 %% display response
 % draw static elements
-add_fixation
-draw_static(Sc, cfg)
+draw_static(Sc, cfg, [1 1 1 1 1]);
 
 % display previous confidence
 if show_cj1

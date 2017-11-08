@@ -12,6 +12,7 @@ close all;
 clc;
 feedbackEnabled = 0;
 debugMode = 1;
+shortMode = 1;
 set_path
 
 %% PTB compatibility
@@ -49,6 +50,8 @@ end
 
 Sc = start_psychtb(subject.screen);
 Screen('Preference','SuppressAllWarnings', 1);
+Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
+Screen('TextColor',Sc.window,cfg.instr.textColor.default);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cfg.fps = Sc.fps;                                                               % refresh rate (Hz). IMPORTANT! Make sure this value equals the RR of the screen used AND the RR in the start_psychtb.m function
@@ -84,6 +87,10 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 %text_on_screen_vars
 
 for t = starttrial:length(trials)
+    disp(['text color: ' int2str(sum(Screen('TextColor',Sc.window)))]);
+    % update current trial number
+    cfg.currentTrialNumber = t;
+    cfg.currentTrial = trials(t);
     %% experimenter output
     if t > 1
         disp(['trial: ' num2str(t-1)])
@@ -122,12 +129,12 @@ for t = starttrial:length(trials)
     end
     
     %% start trial
-    % update current trial number
-    cfg.currentTrial = t;
     % add all static elements
-    draw_static(Sc, cfg)
+    draw_static(Sc, cfg, [1 1 1 1 0])
     
     trials(t).time_starttrial = Screen('Flip',Sc.window);
+    
+    WaitSecs(.2); % brief delay so the fixation cross cues the stimulus
     
     % define time: if first trial of block getTime; if normal trial, time =
     % end of previous trial
@@ -145,6 +152,8 @@ for t = starttrial:length(trials)
     trials(t).wheredots = logical(trials(t).wheredots);
     
     %% First-order stimulus and decision
+    % update trial description for debugging
+    cfg.currentTrial = trials(t);
     
     % draw stimulus rectangles
     Screen('DrawLines',Sc.window,innerrect1out,3,255);
@@ -153,18 +162,21 @@ for t = starttrial:length(trials)
     Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(2,:))), 2, 255, center2, 2);
     
     % draw confidence scale
-    draw_static(Sc, cfg)
+    draw_static(Sc, cfg, [1 1 1 1 0])
     
     % Show stimulus on screen at next possible display refresh cycle,
     % and record stimulus onset time in 'onsetstim':
     [VBLTimestamp, trials(t).onsetstim, Fts, trials(t).tmissed_onset1] = Screen('Flip', Sc.window, time + cfg.stim.RSI2 - cfg.frame);
     
     % draw confidence scale
-    draw_static(Sc, cfg)
+    draw_static(Sc, cfg, [1 1 1 1 0])
     
-    % stimulus is shown for 160 ms and then disappears
-    % no response collection before 160 ms
+    % stimulus is shown for durstim (.160)s and then disappears
     [VBLts, trials(t).offsetstim, Fts, trials(t).tmissed_offset1] = Screen('Flip',Sc.window,trials(t).onsetstim + cfg.stim.durstim - cfg.frame);
+    
+    % after a SRI1 (.09)s delay the instructions appear and responding is enabled
+    draw_static(Sc, cfg);
+    [V, trials(t).responsestart] = Screen('Flip',Sc.window,trials(t).offsetstim + cfg.stim.SRI1 - cfg.frame);
     
     % collect 1st response
     [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(Sc, cfg); % responded is 1 or 0; cj1 is the first confidence judgement
@@ -173,10 +185,15 @@ for t = starttrial:length(trials)
     time = trials(t).resp1_time;
     
     % define correct response
-    trials(t).cor = ((trials(t).int1>0)+1) == trials(t).wherelarger;
+    %trials(t).cor = ((trials(t).int1>0)+1) == trials(t).wherelarger;
+    trials(t).cor1 = trials(t).int1 == trials(t).wherelarger;
+    trials(t).cor = trials(t).cor1;
     
     % define RT1
     trials(t).rt1 = trials(t).resp1_time - trials(t).offsetstim;
+    
+    % update trial description for debugging
+    cfg.currentTrial = trials(t);
         
     %% Advisor stuff
     if trials(t).block>1
@@ -189,17 +206,15 @@ for t = starttrial:length(trials)
         [trials(t).choiceDecision, trials(t).choiceTime] = getAdvisorChoice(Sc, cfg, trials(t).choice(1), trials(t).choice(2));
         % fill in the remaining trial details from the choice
         trials(t).advisorID = trials(t).choice(trials(t).choiceDecision);
-%         if ~isnan(trials(t).advisorID)
-%             trials(t).pic = cfg.observer.pic(trials(t).choiceDecision);
-%             trials(t).voice = cfg.observer.voice(trials(t).choiceDecision);
-%         end
     end
     
-    %% define observer behaviour
+    %% define advisor behaviour
+    % NOTE: advisor behaviour depends on initial judgements, not
+    % post-advice judgements
     if ~isnan(trials(t).advisorID)
-        if trials(t).cor == 1
+        if trials(t).cor1 == 1
             clear toi
-            toi = [trials.cor] == 1 & ... % use last 2 blocks for reference dsitribution
+            toi = [trials(1:t).cor1] == 1 & ... % use last 2 blocks for reference dsitribution
                 ([trials(1:t).block] == trials(t).block-1 | [trials(1:t).block] == trials(t).block-2); 
             [trials(t).agree, trials(t).step] = ...
                 agreementf(trials(t).cj1,cfg.advisor(trials(t).advisorID).adviceType,abs([trials(toi).cj1]),'stepwise');
@@ -223,8 +238,11 @@ for t = starttrial:length(trials)
     
     %% load the observer
     if trials(t).block > 1
-        load_observer;
+        load_observer_audio;
     end
+    
+    % update trial description for debugging
+    cfg.currentTrial = trials(t);
         
     %% Advice and final decision
     if trials(t).block > 1 
@@ -239,7 +257,9 @@ for t = starttrial:length(trials)
             time = trials(t).resp2_time;
             
             % define correct response
-            trials(t).cor2 = ((trials(t).int2>0)+1) == trials(t).wherelarger;
+            %trials(t).cor2 = ((trials(t).int2>0)+1) == trials(t).wherelarger;
+            trials(t).cor2 = trials(t).int2 == trials(t).wherelarger;
+            trials(t).cor = trials(t).cor2;
             
             % define RT2
             trials(t).rt2 = trials(t).resp2_time - trials(t).resp_advice_rt;
@@ -251,6 +271,9 @@ for t = starttrial:length(trials)
     else % 1st practice block
         time                        = GetSecs;
     end
+    
+    % update trial description for debugging
+    cfg.currentTrial = trials(t);
     
     %--close audio/screen buffers
     Screen('Close');

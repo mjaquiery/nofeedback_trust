@@ -11,7 +11,8 @@ clear all;
 close all; 
 clc;  
 feedbackEnabled = 0;
-debugMode = 1;
+debugMode = 0;
+shortMode = 0; 
 set_path  
    
 %% PTB compatibility
@@ -73,7 +74,8 @@ trials(1).dotdifference = cfg.stim.initialDotDifference;
 trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %% Begin testing elements
-    cfg.currentTrial = starttrial;
+    cfg.currentTrialNumber = starttrial;
+    cfg.currentTrial = trials(starttrial);
     t = 1;   
 
 % add all static elements

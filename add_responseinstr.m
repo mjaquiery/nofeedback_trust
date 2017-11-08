@@ -17,8 +17,9 @@ if ~isfield(cfg,'instr') || ~isfield(cfg.instr,'instr')
 end
 
 %% add response istructions
-Screen('TextSize', Sc.window, 13);Screen('TextFont', Sc.window, 'Myriad Pro');
+oldTextSize = Screen('TextSize', Sc.window, 13);
+Screen('TextFont', Sc.window, 'Myriad Pro');
 DrawFormattedText(Sc.window, cfg.instr.instr{1}, 'center', (Sc.rect(4)).*cfg.bar.positiony+80, 0);
 DrawFormattedText(Sc.window, cfg.instr.instr{2}, 'center', (Sc.rect(4)).*cfg.bar.positiony+100, 0);
-
+Screen('TextSize', Sc.window, oldTextSize);
 return

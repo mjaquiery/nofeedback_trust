@@ -1,5 +1,5 @@
 % add fixation
-add_fixation;
+add_fixation(Sc, cfg);
 
 
 Screen('TextSize', Sc.window, 13);

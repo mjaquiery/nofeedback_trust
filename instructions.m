@@ -52,6 +52,5 @@ switch trials(t).block
     otherwise
 end
 
-add_fixation;
 Screen('Flip',Sc.window);
 WaitSecs(1.000);
