@@ -16,7 +16,7 @@ advisorCenter = [Sc.center(1) Sc.rect(4)*.4];
 Screen('Flip', Sc.window);
 id=0;
 question=[];
-for obs= 1 : 3
+for obs= 1 : cfg.advisors.count.real
     for q = 1: 4
         id          = id+1;
         question(id).id = id;
@@ -141,7 +141,7 @@ for ii = 1: length(question)
     end
 end
 [Y, I] = sort([question.id]);
-question(1:3*length(questionList)) = question(I); % sort questions in the original order
+question(1:cfg.advisors.count.real*length(questionList)) = question(I); % sort questions in the original order
 trials(t).qanswers = question;
 
 %% pause before next stimuli session

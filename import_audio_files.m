@@ -27,7 +27,7 @@ for obs = 1:4
 end
 
 % voices recorded through audacity at http://www.oddcast.com/home/demos/tts/tts_example.php
-for obs= 1:4 % one is going to be used for practice, the others for the experiment
+for obs= 1:cfg.advisors.count.all % one is going to be used for practice, the others for the experiment
     for h=1:2 % 1=normal / 2=reverse order
         for i=1:2 %1=left / 2=right
             %observers' speeches

@@ -12,16 +12,18 @@ resp = [];
 for o = 1:cfg.advisors.count.real
     valid = false;
     
-    drawEstimPrompts(Sc, cfg);
+    drawEstimPrompts(Sc, cfg, o);
     % flip screen
     ft = Screen('Flip',Sc.window);
     
     % avoid button press overlaps
     WaitSecs(1.5);    
-    drawEstimPrompts(Sc, cfg, true);
+    drawEstimPrompts(Sc, cfg, o, true);
     
     % wait for button press
     collect_response(cfg,inf);
+    Screen('Flip', Sc.window);
+    oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
     
     while ~valid % continue prompting until valid value has entered
         % ask for estimated accuracy
@@ -45,14 +47,16 @@ for o = 1:cfg.advisors.count.real
         end
     end
     
+    Screen('TextSize', Sc.window, oldTextSize);
+    
 end
 
 return
 
-function drawEstimPrompts(Sc, cfg, allowKeys)
-if nargin < 3, allowKeys = false; end
+function drawEstimPrompts(Sc, cfg, advisorID, allowKeys)
+if nargin < 4, allowKeys = false; end
 % draw observer picture
-drawAdvisor(Sc, cfg, o);
+drawAdvisor(Sc, cfg, advisorID);
 
 % Draw instructions
 DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.rect(4) .* .1)

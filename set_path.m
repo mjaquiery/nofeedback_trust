@@ -10,6 +10,6 @@ switch 'MattHome'
         end
         stims_path    = 'G:\Documents\University\Programming\nofeedback_trust_matt\stims';
         addpath(my_path);
-        addpath([my_path '\confidence_slider']);
+        addpath([my_path '\confidenceSlider']);
         im_path = 'G:\Documents\University\Programming\nofeedback_trust_matt\internalExternal';
 end

@@ -30,7 +30,7 @@ if cfg.debug
 end
 
 %% Define advisors
-cfg.advisors.count.real = 3; % number of adviceTypes (0:baseline, 1:same bias, 2:different bias)
+cfg.advisors.count.real = 2; % number of adviceTypes (0:baseline, 1:same bias, 2:different bias)
 cfg.advisors.count.practice = 1;
 cfg.advisors.count.all = cfg.advisors.count.real + cfg.advisors.count.practice;
 cfg.advisors.duration = 2; % duration of the sound files in s
@@ -39,7 +39,7 @@ voice = randperm(cfg.advisors.count.all);
 % generate advisor objects
 for i = 1:cfg.advisors.count.all
     cfg.advisor(i).id = i;
-    cfg.advisor(i).adviceType = i-1;
+    cfg.advisor(i).adviceType = i; % skip baseline advisor
     cfg.advisor(i).pic = pic(i);
     cfg.advisor(i).voice = voice(i);
     cfg.advisor(i).name = getAdvisorName(cfg.advisor(i).voice);
@@ -61,13 +61,13 @@ cfg.xymatrix = [repmat([-57,-51,-45,-39,-33,-27,-21,-15,-9,-3,3,9,15,21,27,33,39
 % Each trialset contains x trials where 
 % x = ac * (choice*(ac-1 + include_void_choice) + nochoice) + null
 % ac = cfg.advisors.count.real
-cfg.block_count                     = 8; % number of blocks
-cfg.trialset.choice                 = 2; % choice trials with each advisor on the left (1/2 of all choice trials in a trialset)
-cfg.trialset.include_void_choice    = 1; % include choices of an observer versus no feedback
-cfg.trialset.nochoice               = 1; % no-choice trials for each advisor
-cfg.trialset.null                   = cfg.advisors.count.real * 2; % number of null trials = number of observers x 2
-cfg.block.trialset_count            = 2; % number of trial sets in each block
-cfg.block.questionnaire_frequency   = 2; % include questionnaires after each how many blocks?
+cfg.block_count                     = 12; % number of blocks
+cfg.trialset.choice                 = 5; % choice trials with each advisor on the left (1/2 of all choice trials in a trialset)
+cfg.trialset.include_void_choice    = 0; % include choices of an observer versus no feedback
+cfg.trialset.nochoice               = 10; % no-choice trials for each advisor
+cfg.trialset.null                   = 3; % number of null trials = number of observers x 2
+cfg.block.trialset_count            = 1; % number of trial sets in each block
+cfg.block.questionnaire_frequency   = 3; % include questionnaires after each how many blocks?
 
 cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;
