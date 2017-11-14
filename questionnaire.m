@@ -5,17 +5,18 @@
 
 %%
 %---- subjective ratings
-maxS=50;
-minS=1;
-ns=50; 
-cw=Sc.size(1)/100;
-ch=5;
+maxS=50; % max score
+minS=1; % min score
+ns=50; % number of points
+cw=cfg.bar.cursorwidth; % cursor [visual indicator] width
+ch=cfg.bar.cursorheight; % cursor height 
 brct=CenterRectOnPoint([0 0 (ns *cw) (ch)],Sc.center(1),Sc.center(2)+Sc.size(2)/5);
-bl = brct(3)- brct(1);
+bl = brct(3)- brct(1); % length (width) of the scale rectangle
 advisorCenter = [Sc.center(1) Sc.rect(4)*.4];
 Screen('Flip', Sc.window);
 oldTextSize = Screen('TextSize',Sc.window,cfg.instr.textSize.small);
 Screen('TextFont', Sc.window, 'Myriad Pro');
+ShowCursor('Arrow');
 id=0;
 question=[];
 for obs= 1 : cfg.advisors.count.real
@@ -36,11 +37,8 @@ for ii = 1: length(question)
     question(ii).presentation_order = ii; %record the presentation order
     question(ii).haschanged = 0;                % to avoid automatic responses
     question(ii).response_t = NaN;              % initialize response time variable
-    key = 1;
-    while sum(key) ~= 0
-        [T, key, question(ii).response_t, keycode] = evalc('KbCheck');        % present only when release button
-    end
-    key = 'firstMove';
+    question(ii).onset_t = NaN;
+    
     if trials(t).block == 3
         questionList={'How accurate do you think this person will be performing the task?'...
             'How much are you going to like this person?'...
@@ -86,41 +84,47 @@ for ii = 1: length(question)
         drawAdvisor(Sc, cfg, obs, advisorCenter);
         %disp(question(ii).haschanged);
         % display response bar
-        if strcmp (key,'firstMove')
-            Screen('Flip', Sc.window, question(ii).response_t + .100); % add lag to avoid too fast moving of the cursor
+        tm = Screen('Flip', Sc.window);
+        % record onset time if necessary
+        if isnan(question(ii).onset_t)
+            question(ii).onset_t = tm;
         end
-
-        if strcmp(key, 'bottom') || strcmp(key, 'top')
-            Screen('Flip', Sc.window, question(ii).response_t + .025); % add lag to avoid too fast moving of the cursor
-        end
-
-        % wait for key press
-        [key, keycode, question(ii).response_t] = deal(0);                   % start collecting keyboard response
-        while sum(key) == 0
-            [T, key, question(ii).response_t, keycode] = evalc('KbCheck');    % get timing and key
-        end
+        
         %update answer
-        key = KbName(keycode);
-        if iscell(key), key = key{1}; end                                        % if two buttons at the same time
-        switch key                                                  % sort answer
-            case 'LeftArrow'       
-                key = 'bottom';
-                question(ii).ans = question(ii).ans -1;
+        [x,~,buttons] = GetMouse;
+        if x < brct(1) % boundaries of the slider
+            x = brct(1);
+        elseif x > brct(3)
+            x = brct(3);
+        end
+        a = x - brct(1); % where abouts on the scale are we?
+        if a ~= question(ii).ans
+            question(ii).haschanged = 1;
+        end
+        question(ii).ans = ceil(a/cw);
+        if cfg.debug
+            Screen('DrawText', Sc.window, ['x:' int2str(ceil(x)) '; a:' int2str(a) '; btn:' int2str(any(buttons))], 0, 0);
+        end
+        
+        if any(buttons) % button clicked
+            if ~question(ii).haschanged
+                % mark that a change occurred
                 question(ii).haschanged = 1;
-            case 'space'           
-                key = 'space';
-                if question(ii).haschanged
-                    break;
-                else
-                    question(ii).haschanged = 1;
-                    KbReleaseWait;
-                end
-            case 'RightArrow'        
-                key = 'top';
-                question(ii).ans = question(ii).ans +1;
-                question(ii).haschanged = 1;
-            case 'ESCAPE'
-                sca
+            else
+                question(ii).response_t = GetSecs-question(ii).onset_t;
+                break;
+            end
+        end
+        
+        % check for escape key
+        [keydown, question(ii).response_t, keycode] = KbCheck;
+        if keydown
+            key = KbName(keycode);
+            if iscell(key), key = key{1}; end % if two buttons at the same time
+            switch key
+                case 'ESCAPE'
+                    sca
+            end
         end
         % bound visibility
         if question(ii).ans > maxS % max
@@ -130,6 +134,7 @@ for ii = 1: length(question)
         end
 
     end
+    WaitSecs(0.5);
 end
 [Y, I] = sort([question.id]);
 question(1:cfg.advisors.count.real*length(questionList)) = question(I); % sort questions in the original order
@@ -149,3 +154,5 @@ Screen('Flip', Sc.window);
 WaitSecs(.5);
 
 Screen('TextSize', Sc.window, oldTextSize);
+HideCursor;
+clear tm cw ch bl ns maxS minS brct advisorCenter id question;
