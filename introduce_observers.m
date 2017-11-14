@@ -1,6 +1,6 @@
 cfg.expositionTime = [];
 cfg.expositionTime=[];
-observers = randperm(3);
+observers = randperm(cfg.advisors.count.real);
 Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
 pressKey = 'Press any key';
 bounds = Screen('TextBounds',Sc.window,pressKey);
