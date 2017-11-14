@@ -24,7 +24,7 @@ switch pathRoot
         addpath(my_path);
         addpath([my_path 'confidenceSlider']);
         slash = '\';
-        screenNumber = 2; % this tells psychtoolbox which screen to draw on
+        screenNumber = 0; % this tells psychtoolbox which screen to draw 
         
     case 'MattWork'
         my_path = 'C:\Users\mj221\Documents\Programming\MATLAB\nofeedback_trust\'; % working directory
