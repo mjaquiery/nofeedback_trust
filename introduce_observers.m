@@ -1,7 +1,7 @@
 cfg.expositionTime = [];
 cfg.expositionTime=[];
 observers = randperm(cfg.advisors.count.real);
-Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
+oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
 pressKey = 'Press any key';
 bounds = Screen('TextBounds',Sc.window,pressKey);
 for obs = observers
@@ -23,3 +23,5 @@ end
 
 cfg.obsIntro_times = [onset_pic; offset_pic; onset_speech; offset_speech];
 clear startTime xruns resp kcode ti speech imagedata texture bounds pressKey
+
+Screen('TextSize', Sc.window, oldTextSize);

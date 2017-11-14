@@ -35,6 +35,8 @@ res = Screen('Resolution',Sc.nb);
 if isfield(Sc,'size')
     res.width = Sc.size(1);
     res.height = Sc.size(2);
+else
+    Sc.size = [res.width res.height];
 end
 
 [Sc.window, Sc.rect] = Screen('OpenWindow', Sc.nb, Sc.bkgCol);  % start psychtoobox window

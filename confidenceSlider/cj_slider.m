@@ -1,6 +1,8 @@
 %---- subjective rating of confidence on continuous double scale
 t_ = Screen('Flip', Sc.window);
 
+oldTextSize = Screen('TextSize',Sc.window,cfg.instr.textSize.small);
+Screen('TextFont', Sc.window, 'Myriad Pro');
 
 key = 1;
 while sum(key) ~= 0
@@ -14,7 +16,7 @@ gs = round(gap_size/2);
 resp = 0;while resp< gs && resp>-gs, resp = randi(nScale) - maxScale+1;end
 while true
         %add response istructions
-        Screen('TextSize', Sc.window, 13);Screen('TextFont', Sc.window, 'Myriad Pro');
+        Screen('TextSize', Sc.window, cfg.instr.textSize.small);
         Screen('DrawText', Sc.window, instr{1}, Sc.center(1)- (Ibounds{1}(3)/2), Sc.center(2)+0.35*(Sc.size(2)), 0);
         Screen('DrawText', Sc.window, instr{2}, Sc.center(1)- (Ibounds{2}(3)/2), Sc.center(2)+0.35*(Sc.size(2))+50, 0);
 %         disp(haschanged);
@@ -26,7 +28,6 @@ while true
                 Sc.center(1) -((nScale*cursorwidth/2)+cursorwidth) + (maxScale * cursorwidth  + cursorwidth/2), Sc.center(2)+ Sc.size(2)/5);
             rect = [barrect' cursorrect' gap'];
             Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]' [.5 .5 .5]'],rect);
-            Screen('TextFont', Sc.window, 'Myriad Pro');
             
             % draw confidence landmarks
             Screen('DrawText', Sc.window, rTxt, Sc.center(1)+ barlength/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
@@ -36,7 +37,6 @@ while true
             % draw interval landmarks
             Screen('DrawText', Sc.window, interval{1}, Sc.center(1)- barlength/3.5 - LintBounds(3)/2, Sc.center(2)+(Sc.size(2)/4), 0);
             Screen('DrawText', Sc.window, interval{2}, Sc.center(1)+ barlength/3.5 - RintBounds(3)/2, Sc.center(2)+(Sc.size(2)/4), 0);
-            
             
             % Flip on screen
             Screen('Flip', Sc.window, resp_t +.05); % add lag to avoid too fast moving of the cursor
@@ -49,7 +49,6 @@ while true
                 Sc.center(1) -((nScale*cursorwidth/2)+cursorwidth) + (maxScale * cursorwidth  + cursorwidth/2), Sc.center(2)+ Sc.size(2)/5);
             rect = [barrect' cursorrect' gap'];
             Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]' [.5 .5 .5]'],rect);
-            Screen('TextFont', Sc.window, 'Myriad Pro');
 
             % draw confidence landmarks
             Screen('DrawText', Sc.window, rTxt, Sc.center(1)+ barlength/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
@@ -97,4 +96,6 @@ while true
             resp = resp +gap_size;
         end
 resp
-    end
+end
+    
+Screen('TextSize',Sc.window,oldTextSize);

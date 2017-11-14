@@ -76,7 +76,7 @@ if cfg.shortMode==1
     cfg.block_count = 1; 
     cfg.trialset.choice = 1; 
     cfg.trialset.nochoice = 1; 
-    cfg.trialset.null = cfg.advisors.count.real * 0; 
+    cfg.trialset.null = 1;%cfg.advisors.count.real * 0; 
     cfg.block.trialset_count = 1;
     cfg.block.questionnaire_frequency = 4;
 

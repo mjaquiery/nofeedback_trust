@@ -1,5 +1,5 @@
 function drawAdvisor(Sc, cfg, advisorID, centerOn, hideName)
-%% Shows the advisor portrait 
+%% Shows the advisor portrait - by Matt Jaquiery
 %
 % Usage: 
 %   drawAdvisor(Sc, cfg, advisorID [, centerOn [, hideName]])

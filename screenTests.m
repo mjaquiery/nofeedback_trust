@@ -4,16 +4,6 @@
 %% Extensions by Matt Jaquiery
 % matt.jaquiery@psy.ox.ac.uk
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-cd('G:\Documents\University\Programming\nofeedback_trust_matt\')
-
-%% clear workspace and create directories
-clear all;
-close all; 
-clc;  
-feedbackEnabled = 0;
-debugMode = 0;
-shortMode = 0; 
-set_path  
    
 %% PTB compatibility
 % check for Opengl compatibility, abort otherwise

@@ -12,7 +12,7 @@ function [] = draw_landmarks(Sc,cfg)
 % Niccolo Pescetelli
 
 %% define font and font size
-Screen('TextSize', Sc.window, 13);
+oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.small);
 Screen('TextFont', Sc.window, 'Myriad Pro');
 
 %% check for required fields
@@ -36,4 +36,5 @@ for i=1:length(cfg.instr.xshift)
         cfg.instr.xshift(i) - xbump, ypos);
 end
 
+Screen('TextSize', Sc.window, oldTextSize);
 return

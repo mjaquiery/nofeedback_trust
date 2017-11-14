@@ -35,13 +35,14 @@ switch pathRoot
         end
         stims_path    = [my_path 'stims'];
         addpath(my_path);
-        addpath([my_path 'confidenceSlider']);
+        addpath([my_path 'confidenceSlider']); 
         slash = '\';
         screenNumber = 1;
 end
 
 % set some path extensions depending on the OS's slash direction
 stim_folder = [slash 'sounds' slash 'Voice'];
-        
+         
 cd(my_path)
-main
+screenTests
+%main

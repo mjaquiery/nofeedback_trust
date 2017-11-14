@@ -14,6 +14,8 @@ brct=CenterRectOnPoint([0 0 (ns *cw) (ch)],Sc.center(1),Sc.center(2)+Sc.size(2)/
 bl = brct(3)- brct(1);
 advisorCenter = [Sc.center(1) Sc.rect(4)*.4];
 Screen('Flip', Sc.window);
+oldTextSize = Screen('TextSize',Sc.window,cfg.instr.textSize.small);
+Screen('TextFont', Sc.window, 'Myriad Pro');
 id=0;
 question=[];
 for obs= 1 : cfg.advisors.count.real
@@ -50,12 +52,13 @@ for ii = 1: length(question)
             'How trustworthy are the opinions of this person?'...
             'How much are you influenced by the opinions of this person?'};
     end
-    Screen('TextSize', Sc.window, 13);
+    Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
+    Qbounds         = Screen('TextBounds',Sc.window,questionList{q});
+    Screen('TextSize',Sc.window,cfg.instr.textSize.small);
     rightText       = 'Extremely';
     middleRightText = 'Fairly';
     middleLeftText  = 'Not so much';
     leftText        = 'Not at all';
-    Qbounds         = Screen('TextBounds',Sc.window,questionList{q});
     RTbounds        = Screen('TextBounds',Sc.window,rightText);
     MRTbounds       = Screen('TextBounds',Sc.window,middleRightText);
     MLTbounds       = Screen('TextBounds',Sc.window,middleLeftText);
@@ -65,11 +68,11 @@ for ii = 1: length(question)
     Ibounds{1}  = Screen('TextBounds',Sc.window,inst{1});
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
     while true
+        Screen('TextSize',Sc.window,cfg.instr.textSize.small);
         %add response istructions
-        Screen('TextSize', Sc.window, 13);Screen('TextFont', Sc.window, 'Myriad Pro');
         Screen('DrawText', Sc.window, inst{1}, Sc.center(1)- (Ibounds{1}(3)/2), Sc.center(2)+0.35*(Sc.size(2)), 0);
         Screen('DrawText', Sc.window, inst{2}, Sc.center(1)- (Ibounds{2}(3)/2), Sc.center(2)+0.35*(Sc.size(2))+50, 0);
-        disp(question(ii).haschanged);
+        %disp(question(ii).haschanged);
         % display response bar
         if strcmp (key,'firstMove')
             cursorrect = CenterRectOnPoint([0,0,cw,ch],...
@@ -77,7 +80,9 @@ for ii = 1: length(question)
             rect = [brct' cursorrect'];
             Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]'],rect);
             Screen('TextFont', Sc.window, 'Myriad Pro');
+            Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
             Screen('DrawText', Sc.window, questionList{q}, Sc.center(1)- (Qbounds(3)/2), Sc.center(2)+(Sc.size(2)/9), 0);
+            Screen('TextSize',Sc.window,cfg.instr.textSize.small);
             Screen('DrawText', Sc.window, rightText, Sc.center(1)+ bl/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
             Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
             Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
@@ -145,7 +150,7 @@ question(1:cfg.advisors.count.real*length(questionList)) = question(I); % sort q
 trials(t).qanswers = question;
 
 %% pause before next stimuli session
-Screen('TextSize',Sc.window,18);
+Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
 if trials(t).block==3 && trials(t-1).block==2 % baseline questionnaire
     DrawFormattedText(Sc.window, 'Press any button to start the experiment','center', Sc.center(2)-50, [0 0 0]);
 else
@@ -156,3 +161,5 @@ WaitSecs(.25);
 collect_response(cfg.response, inf);
 Screen('Flip', Sc.window);
 WaitSecs(.5);
+
+Screen('TextSize', Sc.window, oldTextSize);
