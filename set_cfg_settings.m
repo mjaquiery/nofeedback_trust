@@ -75,7 +75,7 @@ cfg.practice.trial_count            = 25;
 if cfg.shortMode==1
     cfg.block_count = 1; 
     cfg.trialset.choice = 1; 
-    cfg.trialset.nochoice = 0; 
+    cfg.trialset.nochoice = 1; 
     cfg.trialset.null = cfg.advisors.count.real * 0; 
     cfg.block.trialset_count = 1;
     cfg.block.questionnaire_frequency = 4;
@@ -98,7 +98,7 @@ cfg.display.choice.instructionTextOffset = cfg.display.portrait.height/2 + 50;
 
 % Reseed the random-number generator for each expt.
 cfg.resetrn = sum(100*clock);
-rand('state',cfg.resetrn);
+rng(cfg.resetrn);
 
 set_cfg_text
 

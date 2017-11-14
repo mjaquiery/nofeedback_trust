@@ -4,20 +4,9 @@
 % For the most part, these output variables are meaningless unless
 % you have a firm understanding of audio properties or driver playback
 
-switch cfg.os
-    case 'Windows_NT'
-        pstim_folder = '\sounds\practice\';
-        stim_folder  = '\sounds\Voice';
-        slash        = '\';
-    case 'Linux'
-        pstim_folder = '/sounds/practice/';
-        stim_folder = '/sounds/Voice';
-        slash        = '/';
-end
-
 %introduction sentences
 clear h i j gender
-for obs = 1:4
+for obs = 1:cfg.advisors.count.all
     %observers' speeches
     [introSpeechFile, cfg.introSpeechFreq{obs}] = audioread([cfg.path.stims stim_folder num2str(obs) slash 'introduction.wav']);
     % The following lines of code are necessary for PsychPortAudio's handling of the wav file.
@@ -27,7 +16,7 @@ for obs = 1:4
 end
 
 % voices recorded through audacity at http://www.oddcast.com/home/demos/tts/tts_example.php
-for obs= 1:4 % one is going to be used for practice, the others for the experiment
+for obs= 1:cfg.advisors.count.all % one is going to be used for practice, the others for the experiment
     for h=1:2 % 1=normal / 2=reverse order
         for i=1:2 %1=left / 2=right
             %observers' speeches
