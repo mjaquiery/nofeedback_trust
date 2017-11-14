@@ -1,5 +1,5 @@
-% prompt dubject info
-prompt = {'Subject ID:','Gender(m/f):','Age:',...
+% prompt subject info
+prompt = {'Subject ID:','Gender(m/f/o):','Age:',...
     'Experiment restarted? Yes=1 or No=0: '};
 answer = inputdlg(prompt);
 
@@ -10,7 +10,7 @@ subject.restarted   = str2num(answer{4});
 subject.date        = date;
 subject.start_time  = clock;
 subject.name        = num2str(subject.id);  
-subject.screen      = 0;
+subject.screen      = screenNumber;
 
 % testing mode
 if isempty(subject.id) || isempty(subject.restarted)
@@ -18,7 +18,7 @@ if isempty(subject.id) || isempty(subject.restarted)
     subject.male            = NaN;
     subject.age             = NaN;
     subject.right_handed    = NaN;
-    subject.screen          = 0; % small size screen:1
+    subject.screen          = screenNumber; % small size screen:1
     subject.name            = 'test';
     subject.id              = 999;
     subject.restarted       = 0;

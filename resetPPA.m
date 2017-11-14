@@ -1,3 +1,3 @@
 %% reset Psych Port Audio
-PsychPortAudio('Close')
-PsychPortAudio('Open')
+PsychPortAudio('Close');
+PsychPortAudio('Open');

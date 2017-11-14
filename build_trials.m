@@ -1,29 +1,15 @@
 trials = [];
 trialid = 0;
-index=1;
 [block_trials0, block_trials1] =deal([]); %initialize as empty vectors
 
-
 % practice trials
-for b = 1: cfg.nblocksprac
+for b = 1: cfg.practice.block_count
     block_trials0 = []; %clear vector
-    for t = 1:cfg.ntrialsprac
+    for t = 1:cfg.practice.trial_count
         trialid                                 = trialid+1;
-        block_trials0(end+1).trialid            = trialid;
-        block_trials0(end).estim_obsacc         = [];
-        block_trials0(end).block                = b;
-        block_trials0(end).feedback             = true; 
-        block_trials0(end).cj1                  = [];
-        block_trials0(end).obsacc               = NaN;
-        block_trials0(end).qanswers             = [];
+        block_trials0 = [block_trials0 getNewTrial(trialid, b)];
         if b > 1
-            block_trials0(end).obstype          = 0; % practice
-            block_trials0(end).pic              = cfg.observer.pic(4);     % practice picture
-            block_trials0(end).voice            = cfg.observer.voice(4);   % practice voice
-        else
-            block_trials0(end).obstype          = NaN;
-            block_trials0(end).pic              = NaN;
-            block_trials0(end).voice            = NaN;
+            block_trials0(end).advisorID = cfg.advisors.practice;
         end
     end
     block_trials0   = block_trials0(randperm(length(block_trials0)));      % randomize trials within block
@@ -31,46 +17,49 @@ for b = 1: cfg.nblocksprac
 end
 
 % experimental trials
-for b = b+1 : cfg.nblocks+cfg.nblocksprac
+for b = b+1 : cfg.practice.block_count+cfg.block_count
     block_trials1 = [];
-    for o = 1:cfg.nobs
-        for t = 1:((cfg.ntrials - cfg.nullt) ./ 3) % 10 presentations of observers/block
-            trialid                                 = trialid+1;
-            block_trials1(end+1).trialid            = trialid;
-            block_trials1(end).estim_obsacc         = [];
-            block_trials1(end).block                = b;
-            block_trials1(end).feedback             = false;
-            block_trials1(end).cj1                  = [];
-            block_trials1(end).obsacc               = NaN; % conditional on subjects confidence
-            block_trials1(end).obstype              = o-1;
-            block_trials1(end).pic                  = cfg.observer.pic(o); 
-            block_trials1(end).voice                = cfg.observer.voice(o); 
-            block_trials1(end).qanswers             = [];
+    for ts = 1 : cfg.block.trialset_count % trialset
+        for o = 1:cfg.advisors.count.real
+            for c = 1:cfg.trialset.choice % choice trials
+                for oo = 1:cfg.advisors.count.real
+                    if oo ~= o % don't give choices with the same option each side
+                        trialid = trialid + 1;
+                        block_trials1 = [block_trials1 getNewTrial(trialid, b)];
+                        block_trials1(end).choice = [o oo];
+                    elseif cfg.trialset.include_void_choice
+                        trialid = trialid + 1;
+                        block_trials1 = [block_trials1 getNewTrial(trialid, b)];
+                        block_trials1(end).choice = [NaN o];
+                        % shuffle the choice since we don't counterbalance this
+                        block_trials1(end).choice = block_trials1(end).choice(randperm(2)); 
+                    end
+                end
+            end   
+            for nc = 1:cfg.trialset.nochoice % no-choice trials
+                trialid = trialid + 1;
+                block_trials1 = [block_trials1 getNewTrial(trialid, b)];
+                block_trials1(end).advisorID = o;
+            end
         end
-    end
-    for t = 1:cfg.nullt % 5 null trials per block
-        trialid                                 = trialid+1;
-        block_trials1(end+1).trialid            = trialid;
-        block_trials1(end).estim_obsacc         = [];
-        block_trials1(end).block                = b;
-        block_trials1(end).feedback             = false;
-        block_trials1(end).cj1                  = [];
-        block_trials1(end).obsacc               = NaN; 
-        block_trials1(end).obstype              = NaN;
-        block_trials1(end).pic                  = NaN;
-        block_trials1(end).voice                = NaN;
-        block_trials1(end).qanswers             = [];
+        for t = 1:cfg.trialset.null % null trials per trialset
+            trialid = trialid + 1;
+            block_trials1(end+1) = getNewTrial(trialid, b);
+        end
     end
     block_trials1    = block_trials1(randperm(length(block_trials1)));         % randomize trials within a block
     trials    = cat(2,trials,block_trials1);                                   % concatenate to main trial vector
 end
-clear  block_trial*;
 
-wl0 = repmat([1 2],1,(cfg.ntrialsprac/2) * cfg.nblocksprac);
+% this fills an appropriately sized list with 1, 2, 1, 2, 1, 2, ...
+% It gets shuffled with randperm later.
+practice_trial_count = length(block_trials0)*cfg.practice.block_count;
+wl0 = repmat([1 2],1,ceil(practice_trial_count/2));
 
 % this method for where larger computation has been implemented only for
 % study3f. Check previous versions of the study!
-wl1 = repmat([1 2],1,(cfg.ntrials./2) * cfg.nblocks);
+wl1 = repmat([1 2],1,length(trials)-practice_trial_count);
+
 %% WARNING! Massive problem detected. 
 % This way of assigning wherelarger is imbalanced!
 % wl1 = repmat([1 2],1,(cfg.ntrials./2 +cfg.nullt) * cfg.nblocks);
@@ -90,25 +79,18 @@ clear wl
 for t = 1:length(trials)
     %-- add breaks and instruction points
     if t == 1
-        trials(t).break         = false;
         trials(t).instr         = true;
-        trials(t).questionnaire = false;
-    elseif ...
-            trials(t-1).block ~= trials(t).block 
+    elseif trials(t-1).block ~= trials(t).block % first trial in a new block
         trials(t).break = true;
         trials(t).feedback = true;
-        if trials(t).block <= cfg.nblocksprac+1
+        if trials(t).block <= cfg.practice.block_count+1 % first trials in practice blocks
             trials(t).instr = true;
-        else trials(t).instr = false;
         end
-        if ismember(trials(t).block,[3:2:cfg.nblocks+cfg.nblocksprac]), % questionnaires every 2 blocks
-            trials(t).questionnaire = true; 
-        else trials(t).questionnaire = false; 
+        if ismember(trials(t).block,[3:cfg.block.questionnaire_frequency:cfg.block_count+cfg.practice.block_count]) % questionnaires every few blocks
+            if cfg.debug==0 % don't put questionnaires in the debgging routine
+                trials(t).questionnaire = true; 
+            end
         end
-    else
-        trials(t).break         = false;
-        trials(t).instr         = false;
-        trials(t).questionnaire = false;
     end
 end
 
@@ -119,12 +101,16 @@ for f= 1:length(fields)
         disp(['Empty fields in ' fields{f} '!']);
     end
 end
-clear f
-if 0
-    % check the design manually
-    % after randomization
-    img_dsg(trials,{'block', 'feedback', 'obstype', 'instr' 'wherelarger'})
-    figure(gcf+1);
-    [z index] = sort([trials.trialid]);clear z;
-    img_dsg(trials(index),{'block', 'feedback', 'obstype','instr' 'wherelarger'})
-end
+
+% clean the workspace up a bit
+% these variables are retrievable later since they are calculated from
+% specified variables which ARE recorded
+clear  f block_trial* b c fields nc o oo practice_trial_count t trialid ts wl0 wl1;
+cfg.ntrialsall = length(trials); % record this for the progress bar
+
+%     % check the design manually
+%     % after randomization
+%     img_dsg(trials,{'block', 'feedback', 'obstype', 'instr' 'wherelarger'})
+%     figure(gcf+1);
+%     [z index] = sort([trials.trialid]);clear z;
+%     img_dsg(trials(index),{'block', 'feedback', 'obstype','instr' 'wherelarger'})

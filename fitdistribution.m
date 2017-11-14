@@ -9,13 +9,13 @@ sum([trials.step]==1)./tot];
 hold on
 colors={'gd','rs','bs'};
 for o = 1:3
-    toi = [trials.step]==-1 & [trials.obstype]==o-1;
+    toi = [trials.step]==-1 & [trials.advisorID]==o;
     X(1) = mean([trials(toi).agree]);
     
-    toi = [trials.step]==0 & [trials.obstype]==o-1;
+    toi = [trials.step]==0 & [trials.advisorID]==o;
     X(2) = mean([trials(toi).agree]);
     
-    toi = [trials.step]==1 & [trials.obstype]==o-1;
+    toi = [trials.step]==1 & [trials.advisorID]==o;
     X(3) = mean([trials(toi).agree]);
     
     plot(X,colors{o},'LineWidth',3)

@@ -1,8 +1,8 @@
-function Sc = start_psychtb(p,experiment)
-if nargin < 1 || (size(p,2)==1 && p==0)
-    position = [];
+function Sc = start_psychtb(targetScreen,experiment)
+if nargin < 1
+    position = 0;
 else 
-    position = p;
+    position = targetScreen;
 end
 if nargin < 2
     experiment = 'behavioral';
@@ -15,12 +15,10 @@ Sc.ppd      = 30;                                                           % pi
 
 %-- editable parameters
 %Sc.size = [1600 900];                                                      % size of the screen
-Sc.size = [1920 1200];                                                       % size of the screen
+%Sc.size = [1920 1200];                                                       % size of the screen
 if ~isempty(position)
-    Sc.position = position;                                                 % screen position: default1
-    Sc.nb = 0; % left screen used
+    Sc.nb = position; % left screen used
 else
-    Sc.position = [];
     switch experiment
         case 'meg', Sc.nb = 1; % left screen used
         otherwise, Sc.nb = max(Screen('Screens')); % maximum available screen
@@ -34,9 +32,14 @@ Sc.frameDuration = 1;                                                       % up
 % setup hardware
 AssertOpenGL;
 res = Screen('Resolution',Sc.nb);
-res.width = Sc.size(1);
-res.height = Sc.size(2);
-[Sc.window, Sc.rect] = Screen('OpenWindow', Sc.nb, Sc.bkgCol,Sc.position);  % start psychtoobox window
+if isfield(Sc,'size')
+    res.width = Sc.size(1);
+    res.height = Sc.size(2);
+else
+    Sc.size = [res.width res.height];
+end
+
+[Sc.window, Sc.rect] = Screen('OpenWindow', Sc.nb, Sc.bkgCol);  % start psychtoobox window
 Sc.center = Sc.rect(3:4)/2;
 [Sc.x,Sc.y] = Screen('WindowSize',Sc.window);
 Sc.fps = Screen('FrameRate',Sc.window);

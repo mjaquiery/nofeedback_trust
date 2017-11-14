@@ -9,34 +9,21 @@ help_string = '';
 
 resp = [];
 
-for o = 1:cfg.nobs
+for o = 1:cfg.advisors.count.real
     valid = false;
     
-    % load observer picture
-    obs_data = imread([cfg.stims_path '/observer' num2str(cfg.observer.pic(o)) '.jpg']);
-    
-    % make texture image out of image matrix 'observer data'
-    obs_tex  = Screen('MakeTexture', Sc.window, obs_data);    
-    
-    % draw observer picture
-    Screen('DrawTexture', Sc.window, obs_tex, [], CenterRectOnPoint([0 0 258 325],Sc.center(1),Sc.center(2)));
-    
-    % Draw instructions
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.size(2) .* .1)
-    Screen('TextSize', Sc.window, 20);
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{2},'center', Sc.size(2) .* .15)
-    Screen('TextSize', Sc.window, 13);
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{3},'center', Sc.size(2) .* cfg.bar.positiony)
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{4},'center', Sc.size(2) .* cfg.bar.positiony + 50)
-    
+    drawEstimPrompts(Sc, cfg, o);
     % flip screen
     ft = Screen('Flip',Sc.window);
     
     % avoid button press overlaps
-    WaitSecs(2);
+    WaitSecs(1.5);    
+    drawEstimPrompts(Sc, cfg, o, true);
     
     % wait for button press
     collect_response(cfg,inf);
+    Screen('Flip', Sc.window);
+    oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
     
     while ~valid % continue prompting until valid value has entered
         % ask for estimated accuracy
@@ -60,6 +47,23 @@ for o = 1:cfg.nobs
         end
     end
     
+    Screen('TextSize', Sc.window, oldTextSize);
+    
 end
 
 return
+
+function drawEstimPrompts(Sc, cfg, advisorID, allowKeys)
+if nargin < 4, allowKeys = false; end
+% draw observer picture
+drawAdvisor(Sc, cfg, advisorID);
+
+% Draw instructions
+DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.rect(4) .* .1)
+Screen('TextSize', Sc.window, 20);
+DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{2},'center', Sc.rect(4) .* .15)
+Screen('TextSize', Sc.window, 13);
+DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{3},'center', Sc.rect(4) .* cfg.bar.positiony)
+if allowKeys
+    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{4},'center', Sc.rect(4) .* cfg.bar.positiony + 50)
+end
