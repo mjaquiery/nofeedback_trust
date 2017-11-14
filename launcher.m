@@ -42,7 +42,7 @@ end
 
 % set some path extensions depending on the OS's slash direction
 stim_folder = [slash 'sounds' slash 'Voice'];
-         
+          
 cd(my_path)
 screenTests
 %main

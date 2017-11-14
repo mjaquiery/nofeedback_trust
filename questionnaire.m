@@ -68,43 +68,29 @@ for ii = 1: length(question)
     Ibounds{1}  = Screen('TextBounds',Sc.window,inst{1});
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
     while true
+        Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
+        Screen('DrawText', Sc.window, questionList{q}, Sc.center(1)- (Qbounds(3)/2), Sc.center(2)+(Sc.size(2)/9), 0);
         Screen('TextSize',Sc.window,cfg.instr.textSize.small);
+        Screen('TextFont', Sc.window, 'Myriad Pro');
         %add response istructions
         Screen('DrawText', Sc.window, inst{1}, Sc.center(1)- (Ibounds{1}(3)/2), Sc.center(2)+0.35*(Sc.size(2)), 0);
         Screen('DrawText', Sc.window, inst{2}, Sc.center(1)- (Ibounds{2}(3)/2), Sc.center(2)+0.35*(Sc.size(2))+50, 0);
+        cursorrect = CenterRectOnPoint([0,0,cw,ch],...
+            Sc.center(1) -((ns*cw/2)+cw) + (question(ii).ans* cw  + cw/2), Sc.center(2)+ Sc.size(2)/5);
+        rect = [brct' cursorrect'];
+        Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]'],rect);
+        Screen('DrawText', Sc.window, rightText, Sc.center(1)+ bl/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+        Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+        Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+        Screen('DrawText', Sc.window, leftText, Sc.center(1)- bl/2 - LTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+        drawAdvisor(Sc, cfg, obs, advisorCenter);
         %disp(question(ii).haschanged);
         % display response bar
         if strcmp (key,'firstMove')
-            cursorrect = CenterRectOnPoint([0,0,cw,ch],...
-                Sc.center(1) -((ns*cw/2)+cw) + (question(ii).ans* cw  + cw/2), Sc.center(2)+ Sc.size(2)/5);
-            rect = [brct' cursorrect'];
-            Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]'],rect);
-            Screen('TextFont', Sc.window, 'Myriad Pro');
-            Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
-            Screen('DrawText', Sc.window, questionList{q}, Sc.center(1)- (Qbounds(3)/2), Sc.center(2)+(Sc.size(2)/9), 0);
-            Screen('TextSize',Sc.window,cfg.instr.textSize.small);
-            Screen('DrawText', Sc.window, rightText, Sc.center(1)+ bl/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawText', Sc.window, leftText, Sc.center(1)- bl/2 - LTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            drawAdvisor(Sc, cfg, obs, advisorCenter);
-
             Screen('Flip', Sc.window, question(ii).response_t + .100); % add lag to avoid too fast moving of the cursor
         end
 
         if strcmp(key, 'bottom') || strcmp(key, 'top')
-            cursorrect = CenterRectOnPoint([0,0,cw,ch],...
-                Sc.center(1)- ((ns*cw/2)+cw) + (question(ii).ans* cw  + cw/2), Sc.center(2)+ Sc.size(2)/5);
-            rect = [brct' cursorrect'];
-            Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]'],rect);
-            Screen('TextFont', Sc.window, 'Myriad Pro');
-            Screen('DrawText', Sc.window, questionList{q}, Sc.center(1)- (Qbounds(3)/2), Sc.center(2)+(Sc.size(2)/9), 0);
-            Screen('DrawText', Sc.window, rightText, Sc.center(1)+ bl/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            Screen('DrawText', Sc.window, leftText, Sc.center(1)- bl/2 - LTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-            drawAdvisor(Sc, cfg, obs, advisorCenter);
-
             Screen('Flip', Sc.window, question(ii).response_t + .025); % add lag to avoid too fast moving of the cursor
         end
 
