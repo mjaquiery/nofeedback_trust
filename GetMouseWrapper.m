@@ -12,5 +12,5 @@ function [x, y, buttons] = GetMouseWrapper(Sc)
 %   y - mouse y coordinate within Sc.rect
 %   buttons - logical array where pressed buttons are represented by 1
 [x, y, buttons] = GetMouse;
-x = x - Sc.rect(1);
-y = y - Sc.rect(2);
+x = x - Sc.onscreenRect(1);
+y = y - Sc.onscreenRect(2);

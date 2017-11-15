@@ -36,9 +36,9 @@ if isempty(Sc.size)
     Sc.size = [res.width res.height]; % default to fullscreen if we're not forced to a given resolution in cfg.display.forceResolution
 end
 
-Sc.rect = CenterRectOnPoint([0 0 Sc.size(1) Sc.size(2)], res.width/2, res.height/2);
+Sc.onscreenRect = CenterRectOnPoint([0 0 Sc.size(1) Sc.size(2)], res.width/2, res.height/2);
 
-[Sc.window, Sc.rect] = Screen('OpenWindow', Sc.nb, Sc.bkgCol, Sc.rect);  % start psychtoobox window
+[Sc.window, Sc.rect] = Screen('OpenWindow', Sc.nb, Sc.bkgCol, Sc.onscreenRect);  % start psychtoobox window
 Sc.center = Sc.rect(3:4)/2;
 [Sc.x,Sc.y] = Screen('WindowSize',Sc.window);
 Sc.fps = Screen('FrameRate',Sc.window);
