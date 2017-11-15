@@ -1,4 +1,4 @@
-function Sc = start_psychtb(targetScreen,experiment)
+function Sc = start_psychtb(targetScreen, cfg, experiment)
 if nargin < 1
     position = 0;
 else 

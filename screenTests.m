@@ -31,7 +31,7 @@ starttrial=1;
 
 %%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Sc = start_psychtb(subject.screen);
+Sc = start_psychtb(subject.screen, cfg);
 Screen('Preference','SuppressAllWarnings', 1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

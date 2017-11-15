@@ -20,7 +20,7 @@ if ~isfield(cfg, 'shortMode')       cfg.shortMode = shortMode; end
 %% initialize variables
 % define stimulus related variables
 cfg.stim.durstim     = .160; % stimulus duration
-cfg.stim.SRI1        = 0.09; % stimulus-response interval (stimulus--cj1)
+cfg.stim.SRI1        = 0.2; % stimulus-response interval (stimulus--cj1)
 cfg.stim.RSI1        = 1; % response-stimulus interval (cj1 -- advice-prompt)
 cfg.stim.RSI2        = 1; % response-stimulus interval (advice-prompt -- advice)
 cfg.stim.initialDotDifference = 20;
@@ -85,6 +85,7 @@ if cfg.shortMode==1
 end
 
 %% Set display variables
+cfg.display.forceResolution = [1300 600];
 cfg.display.fixationXsize = 20; % font size for the fixation + 
 cfg.display.portrait.width = 258;
 cfg.display.portrait.height = 325;
@@ -100,9 +101,9 @@ cfg.display.choice.instructionTextOffset = cfg.display.portrait.height/2 + 50;
 cfg.resetrn = sum(100*clock);
 rng(cfg.resetrn);
 
-set_cfg_text
-
 % save paths in cfg
 cfg.path.base               = my_path;
 cfg.path.results            = results_path;
 cfg.path.stims              = stims_path;
+
+set_cfg_text

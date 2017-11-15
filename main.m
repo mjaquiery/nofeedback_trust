@@ -37,7 +37,7 @@ else
 end
 %%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Sc = start_psychtb(subject.screen);
+Sc = start_psychtb(subject.screen, cfg);
 Screen('Preference','SuppressAllWarnings', 1);
 Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
 Screen('TextColor',Sc.window,cfg.instr.textColor.default);
@@ -106,7 +106,7 @@ for t = starttrial:length(trials)
     end
     %% instructions
     if trials(t).instr
-        instructions
+        instructions(Sc, cfg, trials(t).block);
     end
     %% introduce observers
     if trials(t).block==3 && trials(t-1).block==2
@@ -118,8 +118,8 @@ for t = starttrial:length(trials)
     end
     
     %% start trial
-    % add all static elements
-    draw_static(Sc, cfg, [1 1 1 1 0])
+    % add progression bar and fixation cross
+    draw_static(Sc, cfg, [1 1 0 0 0])
     
     trials(t).time_starttrial = Screen('Flip',Sc.window);
     
@@ -149,16 +149,13 @@ for t = starttrial:length(trials)
     Screen('DrawLines',Sc.window,innerrect2out,3,255);
     Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(1,:))), 2, 255, center1, 2);
     Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(2,:))), 2, 255, center2, 2);
-    
-    % draw confidence scale
-    draw_static(Sc, cfg, [1 1 1 1 0])
+    draw_static(Sc, cfg, [1 1 0 0 0])
     
     % Show stimulus on screen at next possible display refresh cycle,
     % and record stimulus onset time in 'onsetstim':
     [VBLTimestamp, trials(t).onsetstim, Fts, trials(t).tmissed_onset1] = Screen('Flip', Sc.window, time + cfg.stim.RSI2 - cfg.frame);
     
-    % draw confidence scale
-    draw_static(Sc, cfg, [1 1 1 1 0])
+    draw_static(Sc, cfg, [1 1 0 0 0])
     
     % stimulus is shown for durstim (.160)s and then disappears
     [VBLts, trials(t).offsetstim, Fts, trials(t).tmissed_offset1] = Screen('Flip',Sc.window,trials(t).onsetstim + cfg.stim.durstim - cfg.frame);
