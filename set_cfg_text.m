@@ -22,6 +22,7 @@ cfg.instr.textSize.small    = 16;
 cfg.instr.textSize.medium   = 24;
 cfg.instr.textSize.large    = 32;
 cfg.instr.textColor.default = [0 0 0];
+cfg.instr.textBackground.default = [.5 .5 .5];
 
 % Instruction Intro Images
 x = [cfg.path.base 'instructions' slash 'instr'];

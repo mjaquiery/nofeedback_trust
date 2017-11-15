@@ -1,11 +1,11 @@
-function [choice,time] = getAdvisorChoice(Sc,cfg,advisorTID,advisorBID)
+function [choice,time] = getAdvisorChoice(Sc,cfg,advisorTID,advisorRID)
 % Usage:
-% [choice time] = getAdvisorChoice(Sc,cfg,advisorT,advisorB)
+% [choice time] = getAdvisorChoice(Sc,cfg,advisorL,advisorR)
 % Inputs:
 % Sc: Sc structure
 % cfg: cfg structure
-% advisorTID: advisor object for the top advisor
-% advisorBID: advisor object for the bottom advisor
+% advisorL: advisor object for the left advisor - see images_texture.m
+% advisorR: advisor object for the right advisor
 %
 % choice is 1 (left) or 2 (right)
 % time is a GetSecs time
@@ -26,16 +26,16 @@ ShowCursor('Arrow');
 
 %% collect response
 while ~(any(buttons) && ~choice==0 && tnow>tmin)
-    [~, resp_y, buttons] = GetMouseWrapper(Sc);
+    [resp_x, ~, buttons] = GetMouseWrapper(Sc);
         
-    if resp_y<Sc.center(2) % if mouse on the top
+    if resp_x<Sc.center(1) % if mouse on the left
         choice = -1;
-    elseif resp_y>=Sc.center(2) % if mouse on the bottom
+    elseif resp_x>=Sc.center(1) % if mouse on the right
         choice = 1;
     end
 
     %--- display response
-    drawPortraitChoiceDisplay(Sc, cfg, advisorTID, advisorBID, choice);
+    drawPortraitChoiceDisplay(Sc, cfg, advisorLID, advisorRID, choice);
     tnow = GetSecs;
 end
 % we now have a click so we consider our choice confirmed
@@ -48,24 +48,24 @@ HideCursor;
 
 return
 
-function drawPortraitChoiceDisplay(Sc, cfg, obsT, obsB, choice)
+function drawPortraitChoiceDisplay(Sc, cfg, obsL, obsR, choice)
 %% draw static elements
-%draw_static(Sc, cfg, [1 0 0 0 0]);
+draw_static(Sc, cfg, [1 1 0 0 0]);
 
-drawAdvisor(Sc, cfg, obsT, [Sc.center(1), Sc.center(2)-cfg.display.choice.offset*Sc.rect(4)], true);
-drawAdvisor(Sc, cfg, obsB, [Sc.center(1), Sc.center(2)+cfg.display.choice.offset*Sc.rect(4)], true, 2);
+drawAdvisor(Sc, cfg, obsL, [Sc.center(1)-cfg.display.choice.offset, Sc.center(2)]);
+drawAdvisor(Sc, cfg, obsR, [Sc.center(1)+cfg.display.choice.offset, Sc.center(2)]);
 
 %% draw dynamic elements
 if choice~=0    
     rect = [0 0 ...
-        cfg.display.choice.portraitSize(1)+cfg.display.choice.frame.gap*2 ...
-        cfg.display.choice.portraitSize(2)+cfg.display.choice.frame.gap*2];
+        cfg.display.portrait.width+cfg.display.choice.frame.gap*2 ...
+        cfg.display.portrait.height+cfg.display.choice.frame.gap*2];
 
     switch choice
-        case -1 % draw a box around the top portrait
-            rect = CenterRectOnPoint(rect, Sc.center(1), Sc.center(2)-cfg.display.choice.offset*Sc.rect(4));
-        case 1 % draw a box around the bottom portrait
-            rect = CenterRectOnPoint(rect, Sc.center(1), Sc.center(2)+cfg.display.choice.offset*Sc.rect(4));
+        case -1 % draw a box around the left portrait
+            rect = CenterRectOnPoint(rect, Sc.center(1)-cfg.display.choice.offset, Sc.center(2));
+        case 1 % draw a box around the right portrait
+            rect = CenterRectOnPoint(rect, Sc.center(1)+cfg.display.choice.offset, Sc.center(2));
     end
 
     Screen('FrameRect', Sc.window, cfg.display.choice.frame.color, rect, cfg.display.choice.frame.width);
@@ -77,7 +77,7 @@ txt = cfg.instr.chooseAdvisor{1};
 textLength = Screen('TextBounds', Sc.window, txt, 0, 0);
 DrawFormattedText(Sc.window, txt,...
     Sc.center(1)-textLength(3)/2,...
-    Sc.center(2));
+    Sc.center(2)-cfg.display.choice.instructionTextOffset);
 
 %% execute drawings
 Screen('Flip', Sc.window);

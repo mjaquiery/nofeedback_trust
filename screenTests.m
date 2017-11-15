@@ -74,7 +74,9 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %introduce_observers
 
-questionnaire
+%questionnaire
+
+getAdvisorChoice(Sc, cfg, 1, 2);
 
 ListenChar(1);
 

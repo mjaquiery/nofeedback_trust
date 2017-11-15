@@ -88,14 +88,15 @@ end
 cfg.display.forceResolution = [1300 600];
 cfg.display.fixationXsize = 20; % font size for the fixation + 
 cfg.display.portrait.width = 258;
-cfg.display.portrait.height = 325;
+cfg.display.portrait.height = 325; 
 cfg.display.portrait.nameTextOffset = 20;
 cfg.display.portrait.nameTextSize = 20;
-cfg.display.choice.offset = 500;
-cfg.display.choice.frame.width = 10;
-cfg.display.choice.frame.gap = cfg.display.choice.frame.width + 5; % gap between the portrait and the frame
+cfg.display.choice.offset = 0.25;
+cfg.display.choice.frame.width = 2;
+cfg.display.choice.frame.gap = cfg.display.choice.frame.width + 2; % gap between the portrait and the frame
 cfg.display.choice.frame.color = [.8 .8 .8];
 cfg.display.choice.instructionTextOffset = cfg.display.portrait.height/2 + 50;
+cfg.display.choice.portraitSize = [cfg.display.portrait.width/2 cfg.display.portrait.height/2];
 
 % Reseed the random-number generator for each expt.
 cfg.resetrn = sum(100*clock);

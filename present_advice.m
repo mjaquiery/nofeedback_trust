@@ -1,7 +1,7 @@
-drawAdvisor(Sc, cfg, trials(t).advisorID);
-
 % draw static elements
 draw_static(Sc, cfg, [1 0 1 1 0]);
+
+drawAdvisor(Sc, cfg, trials(t).advisorID);
 
 % start voice play
 trials(t).onsetobsspeech = PsychPortAudio('Start', trials(t).whichspeech, 1,GetSecs,1); %startTime = PsychPortAudio('Start', pahandle [, repetitions=1] [, when=0] [, waitForStart=0] [, stopTime=inf] [, resume=0]);

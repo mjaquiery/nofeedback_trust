@@ -51,14 +51,12 @@ if namePosition ~= 0
     switch namePosition
         case 2 % draw above
             y = centerOn(2) - portraitEdge - cfg.display.portrait.nameTextOffset;
-            ybase = 0;
         otherwise
             y = centerOn(2) + portraitEdge + cfg.display.portrait.nameTextOffset;
-            ybase = 1;
     end
     Screen('DrawText', Sc.window, advisor.name,...
         floor(centerOn(1) - textLength(3)/2),...
-        floor(y), cfg.instr.textColor.default, cfg.instr.textBackground.default, ybase);
+        floor(y), []);
 end
 
 %% cleanup
