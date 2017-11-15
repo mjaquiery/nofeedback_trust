@@ -14,8 +14,8 @@ try    Screen('CloseAll'); end;                                             % re
 Sc.ppd      = 30;                                                           % pixels per degree of visual angle (assuming ~60 cm between screen and participants' eyes)
 
 %-- editable parameters
-%Sc.size = [1600 900];                                                      % size of the screen
-%Sc.size = [1920 1200];                                                       % size of the screen
+Sc.size = cfg.display.forceResolution; % this is ignored if not set
+
 if ~isempty(position)
     Sc.nb = position; % left screen used
 else
@@ -32,14 +32,13 @@ Sc.frameDuration = 1;                                                       % up
 % setup hardware
 AssertOpenGL;
 res = Screen('Resolution',Sc.nb);
-if isfield(Sc,'size')
-    res.width = Sc.size(1);
-    res.height = Sc.size(2);
-else
-    Sc.size = [res.width res.height];
+if isempty(Sc.size)
+    Sc.size = [res.width res.height]; % default to fullscreen if we're not forced to a given resolution in cfg.display.forceResolution
 end
 
-[Sc.window, Sc.rect] = Screen('OpenWindow', Sc.nb, Sc.bkgCol);  % start psychtoobox window
+Sc.rect = CenterRectOnPoint([0 0 Sc.size(1) Sc.size(2)], res.width/2, res.height/2);
+
+[Sc.window, Sc.rect] = Screen('OpenWindow', Sc.nb, Sc.bkgCol, Sc.rect);  % start psychtoobox window
 Sc.center = Sc.rect(3:4)/2;
 [Sc.x,Sc.y] = Screen('WindowSize',Sc.window);
 Sc.fps = Screen('FrameRate',Sc.window);

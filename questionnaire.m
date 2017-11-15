@@ -66,7 +66,7 @@ for ii = 1: length(question)
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
   
     while true
-        [x, ~, buttons] = GetMouse;
+        [x, ~, buttons] = GetMouseWrapper(Sc);
         [keydown, question(ii).response_t, keycode] = KbCheck;
         % only draw if buttons are held down or it's the first run
         if ~question(ii).haschanged || any(buttons) || keydown

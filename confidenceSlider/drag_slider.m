@@ -30,11 +30,11 @@ end
 
 %% collect response
 while ~any(buttons) % wait for click
-    [x,y,buttons] = GetMouse;
+    [x,y,buttons] = GetMouseWrapper(Sc);
 end
 while ~hasconfirmed
     while any(buttons) || ~haschanged   % wait for release and change of cj and confirmation
-        [resp_x, resp_y, buttons] = GetMouse();
+        [resp_x, resp_y, buttons] = GetMouseWrapper(Sc);
         
         if resp_x>=cfg.bar.barrect(1) && resp_x<Sc.center(1) % if mouse's on the left rect
             resp = find(resp_x < (cfg.bar.xshift+cfg.bar.cursorwidth.*.5),1) - cfg.bar.maxScale-1;
@@ -60,11 +60,11 @@ while ~hasconfirmed
     if ~hasconfirmed
         switch 'keyboard'
             case 'mouse'
-                [x,y,buttons] = GetMouse;
+                [x,y,buttons] = GetMouseWrapper(Sc);
                 if buttons(3)==1, hasconfirmed = true;end
                 resp_t = GetSecs;
             case 'keyboard'
-                [x,y,buttons] = GetMouse;
+                [x,y,buttons] = GetMouseWrapper(Sc);
                 [isdown resp_t keycode] = KbCheck;                 % get timing and key
                 % translate key code into key name
                 name = KbName(keycode);

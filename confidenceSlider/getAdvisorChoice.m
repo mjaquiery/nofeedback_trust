@@ -26,7 +26,7 @@ ShowCursor('Arrow');
 
 %% collect response
 while ~(any(buttons) && ~choice==0 && tnow>tmin)
-    [resp_x, ~, buttons] = GetMouse();
+    [resp_x, ~, buttons] = GetMouseWrapper(Sc);
         
     if resp_x<Sc.center(1) % if mouse on the left
         choice = -1;
