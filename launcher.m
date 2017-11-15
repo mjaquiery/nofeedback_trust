@@ -23,7 +23,7 @@ switch pathRoot
         stims_path    = [my_path 'stims'];
         addpath(my_path);
         addpath([my_path 'confidenceSlider']);
-        slash = '\';
+        slash = '\'; 
         screenNumber = 2; % this tells psychtoolbox which screen to draw on
         
     case 'MattWork'
@@ -44,5 +44,5 @@ end
 stim_folder = [slash 'sounds' slash 'Voice'];
           
 cd(my_path)
-screenTests
-%main
+%screenTests
+main

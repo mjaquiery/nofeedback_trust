@@ -5,9 +5,9 @@
 
 %%
 %---- subjective ratings
-maxS=50; % max score
+maxS=100; % max score
 minS=1; % min score
-ns=50; % number of points
+ns=100; % number of points
 cw=cfg.bar.cursorwidth; % cursor [visual indicator] width
 ch=cfg.bar.cursorheight; % cursor height 
 brct=CenterRectOnPoint([0 0 (ns *cw) (ch)],Sc.center(1),Sc.center(2)+Sc.size(2)/5);
@@ -32,7 +32,7 @@ clear id
 for ii = 1: length(question)
     obs = question(ii).obs;
     q = question(ii).quest;
-    question(ii).ans = randi(ns);
+    question(ii).ans = NaN;
     question(ii).initial_position = question(ii).ans; % remember the initial position so we can check anchoring later
     question(ii).presentation_order = ii; %record the presentation order
     question(ii).haschanged = 0;                % to avoid automatic responses
@@ -61,78 +61,84 @@ for ii = 1: length(question)
     MRTbounds       = Screen('TextBounds',Sc.window,middleRightText);
     MLTbounds       = Screen('TextBounds',Sc.window,middleLeftText);
     LTbounds        = Screen('TextBounds',Sc.window,leftText);
-    inst{1}    = 'Move the cursor with Left and Right Arrows (keyboard).';
-    inst{2}    = 'Press spacebar to provide response.';
+    inst            = cfg.instr.instr;
     Ibounds{1}  = Screen('TextBounds',Sc.window,inst{1});
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
+  
     while true
-        Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
-        Screen('DrawText', Sc.window, questionList{q}, Sc.center(1)- (Qbounds(3)/2), Sc.center(2)+(Sc.size(2)/9), 0);
-        Screen('TextSize',Sc.window,cfg.instr.textSize.small);
-        Screen('TextFont', Sc.window, 'Myriad Pro');
-        %add response istructions
-        Screen('DrawText', Sc.window, inst{1}, Sc.center(1)- (Ibounds{1}(3)/2), Sc.center(2)+0.35*(Sc.size(2)), 0);
-        Screen('DrawText', Sc.window, inst{2}, Sc.center(1)- (Ibounds{2}(3)/2), Sc.center(2)+0.35*(Sc.size(2))+50, 0);
-        cursorrect = CenterRectOnPoint([0,0,cw,ch],...
-            Sc.center(1) -((ns*cw/2)+cw) + (question(ii).ans* cw  + cw/2), Sc.center(2)+ Sc.size(2)/5);
-        rect = [brct' cursorrect'];
-        Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]'],rect);
-        Screen('DrawText', Sc.window, rightText, Sc.center(1)+ bl/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-        Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-        Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-        Screen('DrawText', Sc.window, leftText, Sc.center(1)- bl/2 - LTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
-        drawAdvisor(Sc, cfg, obs, advisorCenter);
-        %disp(question(ii).haschanged);
-        % display response bar
-        tm = Screen('Flip', Sc.window);
-        % record onset time if necessary
-        if isnan(question(ii).onset_t)
-            question(ii).onset_t = tm;
-        end
-        
-        %update answer
-        [x,~,buttons] = GetMouse;
-        if x < brct(1) % boundaries of the slider
-            x = brct(1);
-        elseif x > brct(3)
-            x = brct(3);
-        end
-        a = x - brct(1); % where abouts on the scale are we?
-        if a ~= question(ii).ans
-            question(ii).haschanged = 1;
-        end
-        question(ii).ans = ceil(a/cw);
-        if cfg.debug
-            Screen('DrawText', Sc.window, ['x:' int2str(ceil(x)) '; a:' int2str(a) '; btn:' int2str(any(buttons))], 0, 0);
-        end
-        
-        if any(buttons) % button clicked
-            if ~question(ii).haschanged
-                % mark that a change occurred
-                question(ii).haschanged = 1;
-            else
-                question(ii).response_t = GetSecs-question(ii).onset_t;
-                break;
-            end
-        end
-        
-        % check for escape key
+        [x, ~, buttons] = GetMouse;
         [keydown, question(ii).response_t, keycode] = KbCheck;
-        if keydown
-            key = KbName(keycode);
-            if iscell(key), key = key{1}; end % if two buttons at the same time
-            switch key
-                case 'ESCAPE'
-                    sca
+        % only draw if buttons are held down or it's the first run
+        if ~question(ii).haschanged || any(buttons) || keydown
+            Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
+            Screen('DrawText', Sc.window, questionList{q}, Sc.center(1)- (Qbounds(3)/2), Sc.center(2)+(Sc.size(2)/9), 0);
+            Screen('TextSize',Sc.window,cfg.instr.textSize.small);
+            Screen('TextFont', Sc.window, 'Myriad Pro');
+            %add response istructions
+            Screen('DrawText', Sc.window, inst{1}, Sc.center(1)- (Ibounds{1}(3)/2), Sc.center(2)+0.35*(Sc.size(2)), 0);
+            Screen('DrawText', Sc.window, inst{2}, Sc.center(1)- (Ibounds{2}(3)/2), Sc.center(2)+0.35*(Sc.size(2))+50, 0);
+            if ~isnan(question(ii).ans)
+                cursorrect = CenterRectOnPoint([0,0,cw,ch],...
+                    Sc.center(1) -((ns*cw/2)+cw) + (question(ii).ans* cw  + cw/2), Sc.center(2)+ Sc.size(2)/5);
+                rect = [brct' cursorrect'];
+                Screen('FillRect', Sc.window, [[.2 .2 .2]' [.8 .8 .8]'],rect);
+            else
+                Screen('FillRect', Sc.window, [.2 .2 .2]', brct');
+            end
+            Screen('DrawText', Sc.window, rightText, Sc.center(1)+ bl/2 - RTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+            Screen('DrawText', Sc.window, middleRightText, Sc.center(1)+ bl/6 - MRTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+            Screen('DrawText', Sc.window, middleLeftText, Sc.center(1)- bl/6 - MLTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+            Screen('DrawText', Sc.window, leftText, Sc.center(1)- bl/2 - LTbounds(3)/2, Sc.center(2)+(Sc.size(2)/7), 0);
+            drawAdvisor(Sc, cfg, obs, advisorCenter);
+            %disp(question(ii).haschanged);
+            % display response bar
+            tm = Screen('Flip', Sc.window);
+            % record onset time if necessary
+            if isnan(question(ii).onset_t)
+                question(ii).onset_t = tm;
+            end
+
+            %update answer if we clicked            
+            if any(buttons) % button clicked
+                if x < brct(1) % boundaries of the slider
+                    x = brct(1);
+                elseif x > brct(3)
+                    x = brct(3);
+                end
+                a = x - brct(1); % where abouts on the scale are we?
+                if a ~= question(ii).ans
+                    question(ii).haschanged = 1;
+                end
+                question(ii).ans = ceil(a/cw);
+                if cfg.debug
+                    Screen('DrawText', Sc.window, ['x:' int2str(ceil(x)) '; a:' int2str(a) '; btn:' int2str(any(buttons))], 0, 0);
+                end
+            end
+
+            % check for keys
+            if keydown
+                key = KbName(keycode);
+                if iscell(key), key = key{1}; end % if two buttons at the same time
+                switch key
+                    case 'space'                        
+                        if ~question(ii).haschanged
+                            % mark that a change occurred
+                            question(ii).haschanged = 1;
+                        else
+                            question(ii).response_t = GetSecs-question(ii).onset_t;
+                            break;
+                        end
+                    case 'ESCAPE'
+                        sca
+                end
+            end
+            % bound visibility
+            if question(ii).ans > maxS % max
+                question(ii).ans = maxS;
+            elseif question(ii).ans < minS % minScale
+                question(ii).ans = minS;
             end
         end
-        % bound visibility
-        if question(ii).ans > maxS % max
-            question(ii).ans = maxS;
-        elseif question(ii).ans < minS % minScale
-            question(ii).ans = minS;
-        end
-
     end
     WaitSecs(0.5);
 end
