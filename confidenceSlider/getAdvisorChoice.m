@@ -14,6 +14,7 @@ function [choice,time] = getAdvisorChoice(Sc,cfg,advisorTID,advisorBID)
 
 %% initalize variables
 choice = 0; 
+validChoice = false;
 buttons = [];
 tnow = GetSecs;
 tmin = tnow + 0.25;
@@ -25,13 +26,20 @@ drawPortraitChoiceDisplay(Sc, cfg, advisorTID, advisorBID, choice);
 ShowCursor('Arrow');
 
 %% collect response
-while ~(any(buttons) && ~choice==0 && tnow>tmin)
+while ~(any(buttons) && ~choice==0 && tnow>tmin && validChoice)
+    validChoice = false;
     [~, resp_y, buttons] = GetMouseWrapper(Sc);
         
     if resp_y<Sc.center(2) % if mouse on the top
         choice = -1;
+        if advisorTID~=0
+            validChoice = true;
+        end
     elseif resp_y>=Sc.center(2) % if mouse on the bottom
         choice = 1;
+        if advisorBID ~= 0
+            validChoice = true;
+        end
     end
 
     %--- display response
@@ -55,8 +63,9 @@ function drawPortraitChoiceDisplay(Sc, cfg, obsT, obsB, choice)
 drawAdvisor(Sc, cfg, obsT, [Sc.center(1), Sc.center(2)-cfg.display.choice.offset*Sc.rect(4)], true);
 drawAdvisor(Sc, cfg, obsB, [Sc.center(1), Sc.center(2)+cfg.display.choice.offset*Sc.rect(4)], true, 2);
 
-%% draw dynamic elements
-if choice~=0    
+%% draw selection box
+% only draw if we're considering a valid option
+if choice~=0 && ~((choice==-1 && obsT==0) || (choice==1 && obsB==0))
     rect = [0 0 ...
         cfg.display.choice.portraitSize(1)+cfg.display.choice.frame.gap*2 ...
         cfg.display.choice.portraitSize(2)+cfg.display.choice.frame.gap*2];

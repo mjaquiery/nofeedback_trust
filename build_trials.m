@@ -9,7 +9,9 @@ for b = 1: cfg.practice.block_count
         trialid                                 = trialid+1;
         block_trials0 = [block_trials0 getNewTrial(trialid, b)];
         if b > 1
-            block_trials0(end).advisorID = cfg.advisors.practice;
+            block_trials0(end).advisorID = getRandomAdvisor(cfg, 2);
+            block_trials0(end).choice = [0 block_trials0(end).advisorID];
+            block_trials0(end).choice = block_trials0(end).choice(randperm(2));
         end
     end
     block_trials0   = block_trials0(randperm(length(block_trials0)));      % randomize trials within block

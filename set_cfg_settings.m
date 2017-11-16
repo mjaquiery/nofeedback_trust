@@ -31,7 +31,7 @@ end
 
 %% Define advisors
 cfg.advisors.count.real = 2; % number of adviceTypes (0:baseline, 1:same bias, 2:different bias)
-cfg.advisors.count.practice = 1;
+cfg.advisors.count.practice = 2;
 cfg.advisors.count.all = cfg.advisors.count.real + cfg.advisors.count.practice;
 cfg.advisors.duration = 2; % duration of the sound files in s
 pic = randperm(cfg.advisors.count.all);
@@ -43,13 +43,13 @@ for i = 1:cfg.advisors.count.all
     cfg.advisor(i).pic = pic(i);
     cfg.advisor(i).voice = voice(i);
     cfg.advisor(i).name = getAdvisorName(cfg.advisor(i).voice);
-    if i > cfg.advisors.count.real 
-        cfg.advisors.practice = i; 
+    if i > cfg.advisors.count.real  
         cfg.advisor(i).adviceType = 0; % practice advisor is unbiased - always 70|30
     end
 end
-% don't forget the 'no advice' advisor
+% don't forget the 'no advice' and 'no choice' advisors
 cfg.nullAdvisor.id = NaN; cfg.nullAdvisor.name = getAdvisorName(NaN);
+cfg.noAdvisorChoice.id = 0; cfg.noAdvisorChoice.name = getAdvisorName(0);
  
 %% the grid for the placement of the dots:
 cfg.xymatrix = [repmat([-57,-51,-45,-39,-33,-27,-21,-15,-9,-3,3,9,15,21,27,33,39,45,51,57],1,20);...

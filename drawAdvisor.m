@@ -19,7 +19,9 @@ if nargin < 5,  drawSmall = false; end
 if nargin < 4,  centerOn = Sc.center; end
 
 %% get advisor variables
-if ~isnan(advisorID)
+if advisorID==0
+    advisor = cfg.noAdvisorChoice;
+elseif ~isnan(advisorID)
     advisor = cfg.advisor(advisorID);
 else
     advisor = cfg.nullAdvisor;
@@ -40,7 +42,7 @@ Screen('DrawTexture', Sc.window, texture, [],...
     centerOn(1),centerOn(2)));
 
 %% write observer name
-if namePosition ~= 0
+if namePosition ~= 0 && ~isempty(advisor.name)
     Screen('TextSize', Sc.window, cfg.display.portrait.nameTextSize);
     textLength = Screen('TextBounds', Sc.window, advisor.name);
     if drawSmall

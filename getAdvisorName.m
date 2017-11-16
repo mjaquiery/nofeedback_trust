@@ -2,8 +2,6 @@ function [advisorName] = getAdvisorName(advisorVoiceID)
 % returns a string of the name the advisor uses to introduce themselves
 % for voice advisorVoiceID
 
-advisorName = 'No advice';
-
 switch advisorVoiceID
     case 1
         advisorName = 'Annie';
@@ -13,4 +11,8 @@ switch advisorVoiceID
         advisorName = 'Kate';
     case 4
         advisorName = 'Debbie';
+    case NaN
+        advisorName = 'No advice';
+    otherwise % no choice
+        advisorName = '';
 end

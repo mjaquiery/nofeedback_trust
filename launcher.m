@@ -9,7 +9,7 @@ clc;
 feedbackEnabled = 0; 
 debugMode = 1;
 shortMode = 1;
-pathRoot = 'MattWork';
+pathRoot = 'MattHome';
 
 %% set path 
 switch pathRoot
@@ -23,7 +23,7 @@ switch pathRoot
         stims_path    = [my_path 'stims'];
         addpath(my_path);
         addpath([my_path 'confidenceSlider']);
-        slash = '\'; 
+        osSlash = '\'; 
         screenNumber = 2; % this tells psychtoolbox which screen to draw on
         
     case 'MattWork'
@@ -36,13 +36,13 @@ switch pathRoot
         stims_path    = [my_path 'stims'];
         addpath(my_path);
         addpath([my_path 'confidenceSlider']); 
-        slash = '\';
+        osSlash = '\';
         screenNumber = 1;
 end
 
 % set some path extensions depending on the OS's slash direction
-stim_folder = [slash 'sounds' slash 'Voice'];
+stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-screenTests
-%main
+%screenTests
+main

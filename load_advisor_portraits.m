@@ -4,4 +4,4 @@ for id = 1:cfg.advisors.count.all
 end
 
 cfg.nullAdvisor.imdata = imread([cfg.path.stims '/silouette.jpg']);
-%cfg.nullAdvisor.texture = Screen('MakeTexture', Sc.window, cfg.nullAdvisor.imdata); 
+cfg.noAdvisorChoice.imdata = imread([cfg.path.stims '/x.jpg']);
