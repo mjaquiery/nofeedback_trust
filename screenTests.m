@@ -14,7 +14,13 @@ AssertOpenGL;
 create_subject_directory
 
 tic
+%%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global Sc;
+Sc = start_psychtb(subject.screen, forceResolution);
+Screen('Preference','SuppressAllWarnings', 1);
+
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global cfg;
 set_cfg_settings
 
 %% Read in audio files
@@ -29,10 +35,8 @@ build_trials
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 starttrial=1;
 
-%%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Sc = start_psychtb(subject.screen, cfg);
-Screen('Preference','SuppressAllWarnings', 1);
+Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
+Screen('TextColor',Sc.window,cfg.instr.textColor.default);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cfg.fps = Sc.fps;                                                               % refresh rate (Hz). IMPORTANT! Make sure this value equals the RR of the screen used AND the RR in the start_psychtb.m function
@@ -76,13 +80,15 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %questionnaire
 
-getAdvisorChoice(Sc, cfg, 1, 2);
+%getAdvisorChoice(1, 2);
+
+estimated_obsacc();
 
 ListenChar(1);
 
 % collect response
 % if(cfg.debug)   disp('Collecting first response...'); end
-% [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(Sc, cfg); % responded is 1 or 0; cj1 is the first confidence judgement
+% [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement
     
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%

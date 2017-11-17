@@ -4,11 +4,7 @@
 % display properties, the random generation seed, and path stuff
 %
 % Next, we execute the text definition script which defines text strings
-% for instructions as well as some display properties of those text
-% strings.
-%
-% Last, we execute a script which defines the bars we draw at various
-% points such as the progress, confidence, and questionnaire bars.
+% for instructions as well as some display i
 
 cfg.computer                = computer;
 cfg.os                      = getenv('OS');

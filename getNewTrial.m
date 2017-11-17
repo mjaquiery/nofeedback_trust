@@ -1,23 +1,24 @@
-function [trial] = getNewTrial(trialID, block)
+function [trial] = getNewTrial(trialId, block)
 %% Returns a trial object with blanked entries for filling in later
-% 
+% - by Matt Jaquiery
+%
 % Usage: 
 %   block_trials = [block_trials getNewTrial(block_trials(end).id+1,block)];
 %
 % Inputs:
-%   trialID - the numerical identifier of the trial
+%   trialId - the numerical identifier of the trial
 %   block   - the block number
 %
 % Ouputs:
 %   trial - a trial object with blank/default parameters
 %
-trial.id            = trialID; % numerical identifer (gives creation order even when shuffled)
+trial.id            = trialId; % numerical identifer (gives creation order even when shuffled)
 trial.block         = block; % block number
 trial.feedback      = false; % whether feedback is provided on the trial
 trial.obsacc        = NaN; % accuracy of the advisor
 trial.agree         = NaN; % whether advisor and judge agree
 trial.step          = NaN; % see agreementf.m
-trial.advisorID     = NaN; % the advisor id
+trial.advisorId     = NaN; % the advisor id
 trial.choice        = []; % choice of advisors presented to the judge
 trial.break         = false; % whether to include a break before the trial
 trial.instr         = false; % whether the trial is prepended with instructions

@@ -40,7 +40,7 @@ if show_cj1
     cj1rect = CenterRectOnPoint([0,0,cfg.bar.cursorwidth,cfg.bar.cursorheight],...
     positions(abs(cj1)), ...
     Sc.rect(4).*cfg.bar.positiony);
-    Screen('FillRect', Sc.window, cfg.bar.color.cj1, cj1rect );
+    Screen('FillRect', Sc.window, cfg.bar.ccolor, cj1rect );
 end
 
 % define response cursor position

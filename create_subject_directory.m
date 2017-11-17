@@ -1,5 +1,5 @@
 % prompt subject info
-prompt = {'Subject ID:','Gender(m/f/o):','Age:',...
+prompt = {'Subject Id:','Gender(m/f/o):','Age:',...
     'Experiment restarted? Yes=1 or No=0: '};
 answer = inputdlg(prompt);
 
@@ -29,12 +29,12 @@ end
 
 
 %%-- saving directory
-if 0
+if ~feedbackEnabled
     %non feedback
     subject.dir = subject.name;
 else
     %feedback
-    subject.dir = ['f' subject.name];
+    subject.dir = ['f_' subject.name];
 end
 % create directory if does not already exist
 if ~exist([results_path subject.dir '/behaviour'], 'dir'), 
@@ -42,4 +42,4 @@ if ~exist([results_path subject.dir '/behaviour'], 'dir'),
 end
 
 %-- Unique filename depending on computer clock (avoids overwriting)
-subject.fileName = [num2str(round(datenum(subject.start_time)*100000)) '_' num2str(subject.id)];
+subject.fileName = [char(datetime('now','Format','yyyy-MM-dd''T''HHmmss')) '_' num2str(subject.id)];

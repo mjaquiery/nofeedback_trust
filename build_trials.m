@@ -9,8 +9,8 @@ for b = 1: cfg.practice.block_count
         trialid                                 = trialid+1;
         block_trials0 = [block_trials0 getNewTrial(trialid, b)];
         if b > 1
-            block_trials0(end).advisorID = getRandomAdvisor(cfg, 2);
-            block_trials0(end).choice = [0 block_trials0(end).advisorID];
+            block_trials0(end).advisorId = getRandomAdvisor(cfg, 2);
+            block_trials0(end).choice = [0 block_trials0(end).advisorId];
             block_trials0(end).choice = block_trials0(end).choice(randperm(2));
         end
     end
@@ -41,18 +41,24 @@ for b = b+1 : cfg.practice.block_count+cfg.block_count
             for nc = 1:cfg.trialset.nochoice % no-choice trials
                 trialid = trialid + 1;
                 block_trials1 = [block_trials1 getNewTrial(trialid, b)];
-                block_trials1(end).advisorID = o;
+                block_trials1(end).advisorId = o;
+                block_trials1(end).choice = [0 o]; % force a choice between non-selectable option and this advisor
+                % shuffle the choice since we don't counterbalance this
+                block_trials1(end).choice = block_trials1(end).choice(randperm(2)); 
             end
         end
         for t = 1:cfg.trialset.null % null trials per trialset
             trialid = trialid + 1;
             block_trials1(end+1) = getNewTrial(trialid, b);
+            block_trials1(end).choice = [NaN 0]; % forced choice of null
+            block_trials1(end).choice = block_trials1(end).choice(randperm(2)); % randomise the force selection of no advisor top/bottom
         end
     end
     block_trials1    = block_trials1(randperm(length(block_trials1)));         % randomize trials within a block
     trials    = cat(2,trials,block_trials1);                                   % concatenate to main trial vector
 end
 
+%% Calculate answers
 % this fills an appropriately sized list with 1, 2, 1, 2, 1, 2, ...
 % It gets shuffled with randperm later.
 practice_trial_count = length(block_trials0)*cfg.practice.block_count;
@@ -62,12 +68,6 @@ wl0 = repmat([1 2],1,ceil(practice_trial_count/2));
 % study3f. Check previous versions of the study!
 wl1 = repmat([1 2],1,length(trials)-practice_trial_count);
 
-%% WARNING! Massive problem detected. 
-% This way of assigning wherelarger is imbalanced!
-% wl1 = repmat([1 2],1,(cfg.ntrials./2 +cfg.nullt) * cfg.nblocks);
-% Has this method been implemented for study3???
-%
-%% 
 wl0 = wl0(randperm(length(wl0)));
 wl1 = wl1(randperm(length(wl1)));
 wl  = cat(2,wl0,wl1);
@@ -77,7 +77,7 @@ for t = 1 : length(trials)
 end
 clear wl
 
-%-- extra information at each trial
+%% Add extra information at each trial
 for t = 1:length(trials)
     %-- add breaks and instruction points
     if t == 1
@@ -109,10 +109,3 @@ end
 % specified variables which ARE recorded
 clear  f block_trial* b c fields nc o oo practice_trial_count t trialid ts wl0 wl1;
 cfg.ntrialsall = length(trials); % record this for the progress bar
-
-%     % check the design manually
-%     % after randomization
-%     img_dsg(trials,{'block', 'feedback', 'obstype', 'instr' 'wherelarger'})
-%     figure(gcf+1);
-%     [z index] = sort([trials.trialid]);clear z;
-%     img_dsg(trials(index),{'block', 'feedback', 'obstype','instr' 'wherelarger'})

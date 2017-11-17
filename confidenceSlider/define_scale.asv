@@ -1,7 +1,7 @@
-cfg.bar.maxScale            = 55;
+cfg.bar.maxScale            = 50;
 cfg.bar.minScale            = -55;
 cfg.bar.nScale              = length([cfg.bar.minScale:cfg.bar.maxScale]);
-cfg.bar.cursorwidth         = 10;
+cfg.bar.cursorwidth         = 15;
 cfg.bar.cursorheight        = 20;
 cfg.bar.positiony           = .5;
 cfg.bar.barrect             = CenterRectOnPoint([0 0 (cfg.bar.nScale*cfg.bar.cursorwidth) (cfg.bar.cursorheight)], ...
@@ -14,9 +14,6 @@ cfg.bar.gaplength           = 10;
 cfg.bar.color.bar           = [.3 .3 .3]'; % bar colour
 cfg.bar.color.cursor        = [.8 .8 .8]'; % cursor colour
 cfg.bar.color.cj1           = [.99 .99 .0]'; % colour of the first confidence judgement indicator
-
-% Questionnaire bar
-cfg.bar.Q.y                 = Sc.size(2)*.8;
 
 % define the text offsets here since they depend on the bar details
 cfg.instr.xshift = [...

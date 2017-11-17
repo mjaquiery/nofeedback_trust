@@ -1,28 +1,29 @@
-function drawAdvisor(Sc, cfg, advisorID, centerOn, drawSmall, namePosition)
-%% Shows the advisor portrait - by Matt Jaquiery
+function drawAdvisor(advisorId, centerOn, drawSmall, namePosition)
+%% Shows the advisor portrait 
+% - by Matt Jaquiery
 %
-% Usage: 
-%   drawAdvisor(Sc, cfg, advisorID [, centerOn [, hideName]])
+% Usage: drawAdvisor(advisorId[, centerOn [, hideName]])
 %
 % Inputs:
-%   Sc - screen object 
-%   cfg - configuration object
-%   advisorID - advisor id
-%   centerOn - [x y] coordinates to centre the portrait (not
-%   portrait+name!). Default to Sc.center
-%   namePosition - whereabouts to draw the name: 0=don't draw;
+% advisorId - advisor id
+% centerOn - [x y] coordinates to centre the portrait (not
+% portrait+name!). Default to Sc.center
+% namePosition - whereabouts to draw the name: 0=don't draw;
 %   1(default)=draw below; 2=draw above
 
+global cfg; % configuration object
+global Sc; % screen object
+
 %% default argument handling
-if nargin < 6,  namePosition = 1; end
-if nargin < 5,  drawSmall = false; end
-if nargin < 4,  centerOn = Sc.center; end
+if nargin < 4,  namePosition = 1; end
+if nargin < 3,  drawSmall = false; end
+if nargin < 2,  centerOn = Sc.center; end
 
 %% get advisor variables
-if advisorID==0
+if advisorId==0
     advisor = cfg.noAdvisorChoice;
-elseif ~isnan(advisorID)
-    advisor = cfg.advisor(advisorID);
+elseif ~isnan(advisorId)
+    advisor = cfg.advisor(advisorId);
 else
     advisor = cfg.nullAdvisor;
 end
@@ -60,7 +61,7 @@ if namePosition ~= 0 && ~isempty(advisor.name)
     end
     Screen('DrawText', Sc.window, advisor.name,...
         floor(centerOn(1) - textLength(3)/2),...
-        floor(y), cfg.instr.textColor.default, cfg.instr.textBackground.default, ybase);
+        floor(y), cfg.instr.textColor.default, cfg.display.color.background, ybase);
 end
 
 %% cleanup

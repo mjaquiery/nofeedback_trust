@@ -7,6 +7,7 @@ clear all;
 close all;
 clc;
 feedbackEnabled = 0; 
+forceResolution = [1300 600];
 debugMode = 1;
 shortMode = 1;
 pathRoot = 'MattHome';
@@ -30,7 +31,7 @@ switch pathRoot
         my_path = 'C:\Users\mj221\Documents\Programming\MATLAB\nofeedback_trust\'; % working directory
         if ~feedbackEnabled
             results_path = 'C:\Users\mj221\Documents\Results\AdvisorChoice\';
-        else
+        else  
             results_path = 'C:\Users\mj221\Documents\Results\AdvisorChoice\';
         end
         stims_path    = [my_path 'stims'];
@@ -44,5 +45,5 @@ end
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-%screenTests
-main
+screenTests
+%  main

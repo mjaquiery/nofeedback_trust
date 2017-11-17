@@ -1,12 +1,36 @@
 function [agree, step] = agreementf(rawx,type,distribution,funct)
-% use : [agree step] = agreementf(raw-x,obstype,distribution,function type)
+%% Agreement function for advisors
+% - by Niccolo Pescetelli
 %
-% agree: logical 
-% step: -1-left tail, 0-central mass, 1-right tail of the distribution
+% usage : [agree step] = agreementf(raw-x,obstype,distribution,function type)
+% Inputs:
 % raw-x : current confidence judgment
-% obstype: 1-agree in confidence, 2-agree in uncertainty, 0- baseline 70%
+% type: (adviceType) 1-agree in confidence, 2-agree in uncertainty, 0- baseline 70%
 % distribution: vector containing (correct) confidence judgments so far 
 % function: one among 'semilinear' 'sigmoid' 'stepwise'
+%
+% Outputs:
+% agree: (logical) whether the advisor agrees with the participant
+% step: whether the participant's answer is given which low (-1), medium
+%   (0), or high (1) confidence given their recent use of the confidence scale
+%
+% This function calculates whether or not the advisor agrees with the
+% participant. The confidence value of the participant's answer is assessed
+% in terms of the confidence values provided by that participant in the
+% last two blocks. Different adviceType profiles have different agreement
+% probabilities depending upon how confident the participant is (relative
+% to their idiosyncratic usage of the scale). 
+% 
+% The baseline advice type (0) agrees with the participant 70% of the time
+% regardless of confidence. Other advice types either agree more often when
+% the participant is highly confident (top 30% of confidence ratings) or
+% very unconfidenct (bottom 30%). All advisors agree at the baseline rate
+% of 70% when the participant is moderately confident (middle 40%). 
+%
+% This function is only invoked when the participant is CORRECT. All
+% advisors agree 30% of the time with a participant when they are mistaken,
+% and this value is irrespective of confidence.
+%
 x =abs(rawx);
 b = quantile(distribution,[.3 .7]); % boundaries (30% and 70% of the mass)
 

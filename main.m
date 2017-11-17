@@ -13,7 +13,12 @@ AssertOpenGL;
 create_subject_directory
 
 tic
+%%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global Sc;
+Sc = start_psychtb(subject.screen, forceResolution);
+
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global cfg;
 set_cfg_settings
 
 %% Read in audio files
@@ -35,9 +40,7 @@ if (subject.restarted)
 else
     starttrial=1;
 end
-%%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Sc = start_psychtb(subject.screen, cfg);
 Screen('Preference','SuppressAllWarnings', 1);
 Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
 Screen('TextColor',Sc.window,cfg.instr.textColor.default);
@@ -86,9 +89,9 @@ for t = starttrial:length(trials)
         disp(['accuracy: ' num2str(trials(t-1).cor)])
         disp(['1st confidence: ' num2str(trials(t-1).cj1)])
         disp(['2nd confidence: ' num2str(trials(t-1).cj2)])
-        disp(['Advisor: ' num2str(trials(t-1).advisorID)]);
-        if ~isnan(trials(t-1).advisorID)
-            disp(['advice type: ' num2str(cfg.advisor(trials(t-1).advisorID).adviceType)]);
+        disp(['Advisor: ' num2str(trials(t-1).advisorId)]);
+        if ~isnan(trials(t-1).advisorId)
+            disp(['advice type: ' num2str(cfg.advisor(trials(t-1).advisorId).adviceType)]);
         end
         disp(['agree?: ' num2str(trials(t-1).agree)]);
         disp('------------------------------------------');
@@ -101,12 +104,12 @@ for t = starttrial:length(trials)
         Screen('TextSize',Sc.window,18);
         DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
         Screen('Flip', Sc.window);
-        collect_response(cfg.response, inf);
+        collect_response(inf);
         feedback_interblock
     end
     %% instructions
     if trials(t).instr
-        instructions(Sc, cfg, trials(t).block);
+        instructions(trials(t).block);
     end
     %% introduce observers
     if trials(t).block==3 && trials(t-1).block==2
@@ -119,8 +122,7 @@ for t = starttrial:length(trials)
     
     %% start trial
     % add progression bar and fixation cross
-    draw_static(Sc, cfg, [1 1 0 0 0])
-    
+    draw_static([1 1 0 0 0])    
     trials(t).time_starttrial = Screen('Flip',Sc.window);
     
     WaitSecs(.2); % brief delay so the fixation cross cues the stimulus
@@ -149,23 +151,23 @@ for t = starttrial:length(trials)
     Screen('DrawLines',Sc.window,innerrect2out,3,255);
     Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(1,:))), 2, 255, center1, 2);
     Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(2,:))), 2, 255, center2, 2);
-    draw_static(Sc, cfg, [1 1 0 0 0])
+    draw_static([1 1 0 0 0])
     
     % Show stimulus on screen at next possible display refresh cycle,
     % and record stimulus onset time in 'onsetstim':
     [VBLTimestamp, trials(t).onsetstim, Fts, trials(t).tmissed_onset1] = Screen('Flip', Sc.window, time + cfg.stim.RSI2 - cfg.frame);
     
-    draw_static(Sc, cfg, [1 1 0 0 0])
+    draw_static([1 1 0 0 0])
     
     % stimulus is shown for durstim (.160)s and then disappears
     [VBLts, trials(t).offsetstim, Fts, trials(t).tmissed_offset1] = Screen('Flip',Sc.window,trials(t).onsetstim + cfg.stim.durstim - cfg.frame);
     
     % after a SRI1 (.09)s delay the instructions appear and responding is enabled
-    draw_static(Sc, cfg);
+    draw_static();
     [V, trials(t).responsestart] = Screen('Flip',Sc.window,trials(t).offsetstim + cfg.stim.SRI1 - cfg.frame);
     
     % collect 1st response
-    [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(Sc, cfg); % responded is 1 or 0; cj1 is the first confidence judgement
+    [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement
     
     % define new timestamp
     time = trials(t).resp1_time;
@@ -189,21 +191,21 @@ for t = starttrial:length(trials)
     %% Choice of advisor
     if ~isempty(trials(t).choice)
         % get the judge's choice
-        [trials(t).choiceDecision, trials(t).choiceTime] = getAdvisorChoice(Sc, cfg, trials(t).choice(1), trials(t).choice(2));
+        [trials(t).choiceDecision, trials(t).choiceTime] = getAdvisorChoice(trials(t).choice(1), trials(t).choice(2));
         % fill in the remaining trial details from the choice
-        trials(t).advisorID = trials(t).choice(trials(t).choiceDecision);
+        trials(t).advisorId = trials(t).choice(trials(t).choiceDecision);
     end
     
     %% define advisor behaviour
     % NOTE: advisor behaviour depends on initial judgements, not
     % post-advice judgements
-    if ~isnan(trials(t).advisorID)
+    if ~isnan(trials(t).advisorId)
         if trials(t).cor1 == 1
             clear toi
             toi = [trials(1:t).cor1] == 1 & ... % use last 2 blocks for reference dsitribution
                 ([trials(1:t).block] == trials(t).block-1 | [trials(1:t).block] == trials(t).block-2); 
             [trials(t).agree, trials(t).step] = ...
-                agreementf(trials(t).cj1,cfg.advisor(trials(t).advisorID).adviceType,abs([trials(toi).cj1]),'stepwise');
+                agreementf(trials(t).cj1,cfg.advisor(trials(t).advisorId).adviceType,abs([trials(toi).cj1]),'stepwise');
         else
             trials(t).agree = rand < .3; % flat agreement on incorrect trials
             trials(t).step  = NaN;
@@ -232,12 +234,12 @@ for t = starttrial:length(trials)
         
     %% Advice and final decision
     if trials(t).block > 1 
-        if ~isnan(trials(t).advisorID)
+        if ~isnan(trials(t).advisorId)
             present_advice;
             
             % prompt new confidence judgment
             [trials(t).cj2, trials(t).resp2_time, trials(t).int2] = ...
-                drag_slider(Sc, cfg, trials(t).cj1);
+                drag_slider(trials(t).cj1);
             
             % define new timestamp
             time = trials(t).resp2_time;
@@ -268,7 +270,7 @@ for t = starttrial:length(trials)
     %% feedback
     if trials(t).block<3
         if ~trials(t).cor, Beeper; end
-        colors=[.8 .2 .2;.2 .8 .2];
+        %colors=[.8 .2 .2;.2 .8 .2];
         PsychPortAudio('Close');
     end
 end
@@ -279,7 +281,7 @@ questionnaire
 save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
 
 % collect estimated observers accuracy
-trials(t).estim_obsacc = estimated_obsacc(Sc,cfg);
+trials(t).estim_obsacc = estimated_obsacc();
 
 %% save final file
 save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_final'],'subject','cfg','trials');

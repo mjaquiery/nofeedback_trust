@@ -1,19 +1,34 @@
-function [resp t code]  = collect_response(cfg,delay)
-% resp returns 1 if keyIsDown, 0 if it is not, 2 if experimenter pressed ESCAPE
-% cfg.port : 'keyboard', or precised (parallel, etc)
- 
+function [resp t code]  = collect_response(delay)
+%% Listens for a keypress
+% - by Niccolo Pescetelli
+%
+% usage: [resp t code] = collect_response(delay);
+%
+% Inputs:
+%   delay - max seconds to wait for keypress
+%
+% Outputs:
+% resp - 1 if keyIsDown, 0 if it is not, 2 if experimenter pressed ESCAPE
+% t - time of keypress
+% code - keycode for pressed key
+%
+
+global cfg; % configuration object
+
 if ~isfield(cfg,'port'),            cfg.port = 'keyboard';end
 if ~isfield(cfg,'experimenter'),    cfg.experimenter = 'space';end
 if ~isfield(cfg,'escape'),          cfg.escape = 'ESCAPE';end
 if ~isfield(cfg,'pause'),           cfg.pause = 'P';end
 if ~isfield(cfg,'until_release'),   cfg.until_release = true;end
+
+delay = GetSecs + delay;
  
 %% get response
 resp                        = 0; % response key
 t                           = 0; % time of response
 code                        = '';
 while (sum(resp) == 0 || isempty(code)) && t <= delay
-    t           = GetSecs;
+    t = GetSecs;
     %experimenter
     [exp_resp exp_t exp_code]       = KbCheck;          % get cfg.timing and resp1 from keyboard
     % translate
@@ -63,6 +78,4 @@ if sum(resp) == 0
     resp = [];
     t = [];
     code = [];
-end
-
 end

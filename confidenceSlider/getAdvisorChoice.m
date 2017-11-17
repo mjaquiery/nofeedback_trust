@@ -1,67 +1,84 @@
-function [choice,time] = getAdvisorChoice(Sc,cfg,advisorTID,advisorBID)
+function [selection,time] = getAdvisorChoice(advisorTopId,advisorBottomId)
+%% Presents advisor choice screen and returns selection
+% - by Matt Jaquiery
+%
 % Usage:
-% [choice time] = getAdvisorChoice(Sc,cfg,advisorT,advisorB)
+% [choice time] = getAdvisorChoice(advisorTopId,advisorBottomId)
 % Inputs:
-% Sc: Sc structure
-% cfg: cfg structure
-% advisorTID: advisor object for the top advisor
-% advisorBID: advisor object for the bottom advisor
+% advisorTopId: advisor object for the top advisor
+% advisorBottomId: advisor object for the bottom advisor
 %
-% choice is 1 (left) or 2 (right)
-% time is a GetSecs time
+% Ouputs:
+% selection: which advisor was chosen: 1 (top) or 2 (bottom)
+% time: GetSecs time the choice was confirmed (clicked)
 %
-% function by matt.jaquiery@psy.ox.ac.uk
+% Participants are allowed a choice of advisor in some trials. This
+% function displays the portraits, one above and one below the center of
+% the screen, and prompts the participant to choose. 
+% Moving the mouse above or below the veritcal highlights a portrait by
+% surrounding it with a selection box, and clicking confirms the selection.
+% Click time is returned as time.
+% The choice variable is presented in the interval [1,2] to allow
+% derivation of the chosen advisor id by applying selection to the options
+% encoded in the trial: advisorId = trials(t).choice(selection);
+
+global cfg; % configuration object
+global Sc; % screen object
 
 %% initalize variables
-choice = 0; 
+selection = 0; 
 validChoice = false;
 buttons = [];
 tnow = GetSecs;
 tmin = tnow + 0.25;
 
 %% Draw the options
-drawPortraitChoiceDisplay(Sc, cfg, advisorTID, advisorBID, choice);
+drawPortraitChoiceDisplay(advisorTopId, advisorBottomId, selection);
 
 %% Show mouse pointer
 ShowCursor('Arrow');
 
 %% collect response
-while ~(any(buttons) && ~choice==0 && tnow>tmin && validChoice)
+while ~(any(buttons) && ~selection==0 && tnow>tmin && validChoice)
     validChoice = false;
-    [~, resp_y, buttons] = GetMouseWrapper(Sc);
+    [~, resp_y, buttons] = GetMouseWrapper;
         
     if resp_y<Sc.center(2) % if mouse on the top
-        choice = -1;
-        if advisorTID~=0
+        selection = -1;
+        if advisorTopId~=0
             validChoice = true;
         end
     elseif resp_y>=Sc.center(2) % if mouse on the bottom
-        choice = 1;
-        if advisorBID ~= 0
+        selection = 1;
+        if advisorBottomId ~= 0
             validChoice = true;
         end
     end
 
     %--- display response
-    drawPortraitChoiceDisplay(Sc, cfg, advisorTID, advisorBID, choice);
+    drawPortraitChoiceDisplay(advisorTopId, advisorBottomId, selection);
     tnow = GetSecs;
 end
 % we now have a click so we consider our choice confirmed
 
 time = GetSecs;
-choice = find([-1 1]==choice); % change choice to 1 or 2 rather than -1 or 1
+selection = find([-1 1]==selection); % change choice to 1 or 2 rather than -1 or 1
 
 %% hide back cursor
 HideCursor;
 
 return
 
-function drawPortraitChoiceDisplay(Sc, cfg, obsT, obsB, choice)
-%% draw static elements
-%draw_static(Sc, cfg, [1 0 0 0 0]);
+function drawPortraitChoiceDisplay(obsT, obsB, choice)
 
-drawAdvisor(Sc, cfg, obsT, [Sc.center(1), Sc.center(2)-cfg.display.choice.offset*Sc.rect(4)], true);
-drawAdvisor(Sc, cfg, obsB, [Sc.center(1), Sc.center(2)+cfg.display.choice.offset*Sc.rect(4)], true, 2);
+global cfg; % configuration object
+global Sc; % screen object
+
+%% draw static elements
+%draw_static([1 0 0 0 0]);
+
+drawAdvisor(obsT, [Sc.center(1), Sc.center(2)-cfg.display.choice.offset*Sc.rect(4)], true);
+drawAdvisor(obsB, [Sc.center(1), Sc.center(2)+cfg.display.choice.offset*Sc.rect(4)], true, 2);
 
 %% draw selection box
 % only draw if we're considering a valid option
@@ -82,7 +99,7 @@ end
 
 %% add some text instructions
 Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
-txt = cfg.instr.chooseAdvisor{1};
+txt = cfg.instr.chooseAdvisor.text{1};
 textLength = Screen('TextBounds', Sc.window, txt, 0, 0);
 DrawFormattedText(Sc.window, txt,...
     Sc.center(1)-textLength(3)/2,...

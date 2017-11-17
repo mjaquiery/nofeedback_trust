@@ -1,3 +1,4 @@
+% stimulus containers definition
 innerrect1 = [Sc.rect(3)/2-160,Sc.rect(3)/2-46;Sc.rect(4)/2-57,Sc.rect(4)/2+57];
 innerrect1outer = [Sc.rect(3)/2-167,Sc.rect(3)/2-39;Sc.rect(4)/2-64,Sc.rect(4)/2+64];
 innerrect1out = [Sc.rect(3)/2-167 Sc.rect(3)/2-39 ...

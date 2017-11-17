@@ -1,10 +1,30 @@
-function Sc = start_psychtb(targetScreen, cfg, experiment)
+function Sc = start_psychtb(targetScreen, forceResolution, experiment)
+%% Starts psychtoolbox and produces a screen object
+% 
+% usage: 
+%   Sc = start_psychtb([targetScreen[, forceResolution[, experiment]]])
+%
+% Inputs: 
+% targetScreen: which screen number to use (usually > 0; defaults
+%   to max(Screens()))
+% forceResolution: a [width height] vector specifying a target resoulution.
+%   Defaults to fullscreen
+% experiment: a string describing experiment type. Defaults to
+%   'behavioural'
+%
+% Outputs:
+% Sc: a screen object used by Psychtoolbox's functions
+
+
 if nargin < 1
-    position = 0;
+    position = [];
 else 
     position = targetScreen;
 end
 if nargin < 2
+    forceResolution = [];
+end
+if nargin < 3
     experiment = 'behavioral';
 end
 %% ---------------------- start psych toolbox ----------------------------
@@ -14,7 +34,7 @@ try    Screen('CloseAll'); end;                                             % re
 Sc.ppd      = 30;                                                           % pixels per degree of visual angle (assuming ~60 cm between screen and participants' eyes)
 
 %-- editable parameters
-Sc.size = cfg.display.forceResolution; % this is ignored if not set
+Sc.size = forceResolution; % this is ignored if not set
 
 if ~isempty(position)
     Sc.nb = position; % left screen used

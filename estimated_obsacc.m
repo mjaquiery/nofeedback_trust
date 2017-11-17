@@ -1,10 +1,18 @@
-function resp = estimated_obsacc(Sc, cfg)
-% This function asks the subejct to rate the estimated accuracy of
+function resp = estimated_obsacc()
+%% Ask participant for their assessement of the advisors' accuracy
+% - by Niccolo Pescetelli
+%
+% usage: resp = estimated_obsacc()
+%
+% This function asks the subject to rate the estimated accuracy of
 % different advisors by inputing through keyboard. Advisors are presented
 % according to the obstype order: 1.baseline, 2.agree in confidence, 3.
 % agree in uncertainty
 
-Screen('TextSize', Sc.window, 13);
+global cfg; % configuration object
+global Sc; % Screen object
+
+Screen('TextSize', Sc.window, cfg.instr.textSize.small);
 help_string = '';
 
 resp = [];
@@ -12,29 +20,30 @@ resp = [];
 for o = 1:cfg.advisors.count.real
     valid = false;
     
-    drawEstimPrompts(Sc, cfg, o);
+    drawEstimPrompts(o);
     % flip screen
-    ft = Screen('Flip',Sc.window);
+    Screen('Flip',Sc.window);
     
     % avoid button press overlaps
-    WaitSecs(1.5);    
-    drawEstimPrompts(Sc, cfg, o, true);
+    WaitSecs(1);    
+    drawEstimPrompts(o, true);
+    Screen('Flip', Sc.window);
     
     % wait for button press
-    collect_response(cfg,inf);
-    Screen('Flip', Sc.window);
+    collect_response(inf);
     oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
     
     while ~valid % continue prompting until valid value has entered
         % ask for estimated accuracy
-        reply=Ask(Sc.window,[help_string cfg.instr.estimated_obsacc{5}],[],[.5 .5 .5],'GetChar','center','center',13);
+        reply=Ask(Sc.window, [help_string cfg.instr.estimated_obsacc.text{5}], ...
+            cfg.instr.textColor.default, cfg.display.color.background, ...
+            'GetChar', 'center', 'center', cfg.instr.textSize.medium);
         try
             resp(o) = str2num(reply);
             valid = true;
-            help_string = '';
 
             % check value is within range
-            if resp(o)>=0 && resp(o)<=100,
+            if resp(o)>=0 && resp(o)<=100
                 valid = true;
                 help_string = '';
             else
@@ -51,19 +60,23 @@ for o = 1:cfg.advisors.count.real
     
 end
 
-return
 
-function drawEstimPrompts(Sc, cfg, advisorID, allowKeys)
-if nargin < 4, allowKeys = false; end
+function drawEstimPrompts(advisorId, allowKeys)
+global cfg; % configuration object
+global Sc; % Screen object
+
+if nargin < 2, allowKeys = false; end
 % draw observer picture
-drawAdvisor(Sc, cfg, advisorID);
+drawAdvisor(advisorId);
+
+oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
 
 % Draw instructions
-DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{1},'center', Sc.rect(4) .* .1)
-Screen('TextSize', Sc.window, 20);
-DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{2},'center', Sc.rect(4) .* .15)
-Screen('TextSize', Sc.window, 13);
-DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{3},'center', Sc.rect(4) .* cfg.bar.positiony)
+DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{2}, 'center', cfg.instr.estimated_obsacc.position.y(2))
+DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{1}, 'center', cfg.instr.estimated_obsacc.position.y(1))
+DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{3}, 'center', cfg.instr.estimated_obsacc.position.y(3))
 if allowKeys
-    DrawFormattedText(Sc.window,cfg.instr.estimated_obsacc{4},'center', Sc.rect(4) .* cfg.bar.positiony + 50)
+    DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{4}, 'center', cfg.instr.estimated_obsacc.position.y(4))
 end
+
+Screen('TextSize', Sc.window, oldTextSize);

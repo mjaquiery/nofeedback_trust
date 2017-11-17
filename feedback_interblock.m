@@ -1,5 +1,5 @@
 %-- add progression bar. Helps motivation
-draw_static(Sc, cfg, [1 1 0 0 0]);
+draw_static([1 1 0 0 0]);
 
 % continue instructions
 Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
@@ -15,7 +15,7 @@ DrawFormattedText(Sc.window, txtline, 'center',  Sc.center(2)-0.2*Sc.rect(4));
 
 Screen('Flip',Sc.window);
 WaitSecs(.5);
-collect_response(cfg,inf)
+collect_response(inf)
 Screen('Flip',Sc.window);
 WaitSecs(.5);
 
