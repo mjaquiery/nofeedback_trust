@@ -121,7 +121,13 @@ for t = starttrial:length(trials)
     end
     
     %% start trial
-        
+    % add progression bar and fixation cross
+    draw_static([1 1 0 0 0])    
+    trials(t).time_starttrial = Screen('Flip',Sc.window);
+    
+    WaitSecs(.5); % brief delay
+    fixationFlicker(); % 
+    
     % define time: if first trial of block getTime; if normal trial, time =
     % end of previous trial
     if t == 1 || cfg.restarted == 1 || trials(t-1).break == 1, time = GetSecs; end
@@ -140,14 +146,6 @@ for t = starttrial:length(trials)
     %% First-order stimulus and decision
     % update trial description for debugging
     cfg.currentTrial = trials(t);
-    
-    % add progression bar and fixation cross
-    draw_static([1 1 0 0 0])    
-    trials(t).time_starttrial = Screen('Flip',Sc.window);
-    
-    WaitSecs(cfg.stim.fixationFlicker.time.pre); % brief delay
-    fixationFlicker(); %  add a flicker so the fixation cross cues the stimulus
-    WaitSecs(cfg.stim.fixationFlicker.time.post);
     
     % draw stimulus rectangles
     Screen('DrawLines',Sc.window,innerrect1out,3,255);

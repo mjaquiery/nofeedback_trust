@@ -35,9 +35,13 @@ cfg.stim.SRI1        = 0.2; % stimulus-response interval (stimulus--cj1)
 cfg.stim.RSI1        = 1; % response-stimulus interval (cj1 -- advice-prompt)
 cfg.stim.RSI2        = 1; % response-stimulus interval (advice-prompt -- advice)
 cfg.stim.initialDotDifference = 20;
+% fixation cross flicker
+cfg.stim.fixationFlicker.time.pre       = .5;   % time between trial start and flick off
+cfg.stim.fixationFlicker.time.duration  = .1; % time cross is hidden during flicker
+cfg.stim.fixationFlicker.time.post      = .05; % time between cross reappear and stimulus onset
 if cfg.debug 
     %cfg.stim.initialDotDifference = 60; 
-    %cfg.stim.durstim = .3;
+    %cfg.stim.durstim = 3;
 end
 
 %% Define advisors

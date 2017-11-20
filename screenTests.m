@@ -80,9 +80,9 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %questionnaire
 
-%getAdvisorChoice(1, 2);
+getAdvisorChoice(NaN, 2);
 
-estimated_obsacc();
+%estimated_obsacc();
 
 ListenChar(1);
 
