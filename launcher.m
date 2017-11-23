@@ -45,5 +45,5 @@ end
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-%screenTests
-main
+screenTests
+%main
