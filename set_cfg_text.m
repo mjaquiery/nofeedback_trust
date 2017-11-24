@@ -9,7 +9,7 @@ cfg.instr.interval.text         = {'LEFT' 'RIGHT'};
 cfg.instr.tooslow.text          = {'Too slow.' 'Please press any key to continue.'};
 cfg.instr.wrongbutton.text      = {'Wrong button' 'Please press any key to continue.'};
 
-cfg.instr.cjtext.text           = {'certainly' 'maybe' 'maybe' 'certainly'};
+cfg.instr.cjtext.text           = {'sure' 'guessing' 'guessing' 'sure'};
 cfg.instr.cjtext.position.offsetY = 40;
 
 cfg.instr.chooseAdvisor.text    = {'Click on one of the advisors to hear their advice'};
@@ -58,11 +58,18 @@ cfg.instr.textSize.large    = 32;
 cfg.instr.textColor.default = [0 0 0]';
 
 % Instruction Intro Images
-x = [cfg.path.base 'instructions' osSlash 'instr'];
-cfg.intro = {...
-    {[x '1a.PNG'], [x '1b.PNG'], [x '1c.PNG'], [x '1d.PNG'], [x '1e.PNG']}, ...
-    {[x '2a.PNG'], [x '2b.PNG'], [x '2c.PNG'], [x '2d.PNG'], [x '2e.PNG'], [x '2f.PNG']}, ...
-    {[x '3.PNG']}, ...
-    {[x '4.PNG']} ...
-    };
-clear x;
+cfg.intro = {{} {} {} {}};
+slideCount = 15;
+slideGroups = [8 6 1 1]; % length of the slide groups
+x = [cfg.path.base 'instructions' osSlash 'Slide'];
+j = 0;
+for i = 1:slideCount
+    if j == 0 || i > sum(slideGroups(1:j))
+        j = j+1;
+        cfg.intro{j} = {[x int2str(i) '.PNG']};
+    else
+       cfg.intro{j}{length(cfg.intro{j})+1} = [x int2str(i) '.PNG']; 
+    end
+end
+
+clear x slideCount slideGroups j i;
