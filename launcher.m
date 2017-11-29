@@ -6,8 +6,9 @@
 clear all;
 close all;
 clc;
-feedbackEnabled = 0; 
+experimentName = 'AdvisorChoice';
 forceResolution = [1300 600];
+feedbackEnabled = 0; 
 debugMode = 1;
 shortMode = 1;
 pathRoot = 'MattWork';
@@ -21,9 +22,7 @@ switch pathRoot
         else
             results_path = 'G:\Documents\University\Oxford\Work\matlabResults\Feedback\';
         end
-        stims_path    = [my_path 'stims'];
-        addpath(my_path);
-        addpath([my_path 'confidenceSlider']);
+        stims_path    = [my_path 'stims '];
         osSlash = '\'; 
         screenNumber = 2; % this tells psychtoolbox which screen to draw on
         
@@ -34,12 +33,15 @@ switch pathRoot
         else  
             results_path = 'C:\Users\mj221\Filr\My Files\Results\AdvisorChoice\';
         end
-        stims_path    = [my_path 'stims'];
-        addpath(my_path);
-        addpath([my_path 'confidenceSlider']); 
+        stims_path    = [my_path 'stims']; 
         osSlash = '\';
         screenNumber = 1;
 end
+
+rmpath(genpath(my_path)); % remove the current path so we can add selectively
+addpath(my_path); % add base folder
+addpath(genpath([my_path experimentName])); % add experiment folder
+addpath(genpath([my_path 'core'])); % add core files
 
 % set some path extensions depending on the OS's slash direction
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];

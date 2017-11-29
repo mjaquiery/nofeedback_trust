@@ -293,7 +293,7 @@ save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_final'],'sub
 %% Thanks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-insimdata = imread(char('instructions/instr4.png'));
+insimdata = imread(cfg.intro{4}{1});
 texins = Screen('MakeTexture', Sc.window, insimdata);
 Screen('DrawTexture', Sc.window, texins);
 Screen('Flip',Sc.window);

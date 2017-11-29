@@ -59,7 +59,7 @@ cfg.instr.textColor.default = [0 0 0]';
 
 % Instruction Intro Images
 cfg.intro = {{} {} {} {}};
-slideCount = 15;
+slideCount = 16;
 slideGroups = [8 6 1 1]; % length of the slide groups
 x = [cfg.path.base 'instructions' osSlash 'Slide'];
 j = 0;
