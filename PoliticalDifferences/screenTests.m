@@ -84,10 +84,10 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %estimated_obsacc();
 
-global SECS;
-[a, b, SECS] = SECS();
+global SECSscore;
+[a, b, SECSscore] = SECS();
 
-showAdvisorPolitics(trials(t).advisorId);
+showAdvisorPolitics(1);
 
 ListenChar(1);
 

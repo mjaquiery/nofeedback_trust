@@ -79,8 +79,8 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 %text_on_screen_vars
 
 %% Present the SECS questionnaire
-global SECS;
-[~, ~, SECS] = SECS();
+global SECSscore;
+[~, ~, SECSscore] = SECS();
 
 for t = starttrial:length(trials)
     disp(['text color: ' int2str(sum(Screen('TextColor',Sc.window)))]);

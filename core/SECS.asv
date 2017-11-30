@@ -35,27 +35,50 @@ function [score, score_breakdown, answers] = SECS()
 global cfg; % configuration object
 global Sc; % screen object
 
-defineSECS();
-
+defineSECS
 answers = struct;
-
+cfg.SECS.prompt = 'Please indicate the extent to which you feel positive or negative towards each issue';
+cfg.SECS.labels = {'Negative', 'Neutral', 'Positive'};
+%% Define screen presentation details
+cfg.SECS.maxS=100; % max score
+cfg.SECS.minS=1; % min score
+cfg.SECS.ns=100; % number of points
+cfg.SECS.cw=cfg.bar.cursorwidth; % cursor [visual indicator] width
+cfg.SECS.ch=cfg.bar.cursorheight; % cursor height 
+cfg.SECS.by = Sc.size(2)*.7; % bar y position
+cfg.SECS.qy = Sc.size(2)*.4; % question position y
+cfg.SECS.qSize = 46; % question text size
+cfg.SECS.brct=CenterRectOnPoint([0 0 (ns *cw) (ch)], Sc.center(1), by);
+cfg.SECS.bl = brct(3)- brct(1); % length (width) of the scale rectangle
 Screen('Flip', Sc.window);
 oldTextSize = Screen('TextSize',Sc.window);
 Screen('TextFont', Sc.window, 'Myriad Pro');
 ShowCursor('Arrow');
 
 %% Show questionnaire
-for ii = 1: length(cfg.SECS.questions.text)
+for ii = 1: length(questions.text)
     a = struct;
-    a.text = cfg.SECS.questions.text{cfg.SECS.question_order(ii)};
+    a.text = cfg.SECS.questions.text{question_order(ii)};
     a.presentation_order = ii;
-    a.social = cfg.SECS.socialMask(cfg.SECS.question_order(ii));
-    a.reverse_scored = cfg.SECS.revMask(cfg.SECS.question_order(ii));
+    a.social = cfg.SECS.socialMask(question_order(ii));
+    a.reverse_scored = cfg.SECS.revMask(question_order(ii));
     a.rt = NaN; % initialize response time variable
     a.score = NaN;
-    name = cfg.SECS.questions.name{cfg.SECS.question_order(ii)};
+    name = cfg.SECS.questions.name{question_order(ii)};
     haschanged = false;   % to avoid automatic responses
     onset_t = NaN;
+    
+    %% Calculate the text bounds    
+    Screen('TextSize', Sc.window, qSize);
+    Qbounds = Screen('TextBounds', Sc.window, a.text);
+    Screen('TextSize', Sc.window, cfg.instr.textSize.small);
+    labelBounds = zeros(1,length(labels));
+    for j = 1:length(labels)
+        sb = Screen('TextBounds', Sc.window, labels{j});
+        labelBounds(j) = sb(3); % we only care about the width here    
+    end    
+    Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
+    promptBounds = Screen('TextBounds', Sc.window,prompt);
   
     %% detect response
     while true
@@ -63,8 +86,35 @@ for ii = 1: length(cfg.SECS.questions.text)
         [keydown, a.rt, keycode] = KbCheck;
         % only draw if buttons are held down or it's the first run
         if ~haschanged || any(buttons) || keydown
-            
-            tm = drawSECS(ii, a.score);
+            % draw question text
+            Screen('TextSize', Sc.window, cfg.SECS.qSize);
+            Screen('DrawText', Sc.window, a.text, Sc.center(1)- (Qbounds(3)/2), qy, 0);
+            % draw prompt
+            Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
+            Screen('DrawText', Sc.window, prompt, Sc.center(1) - promptBounds(3)/2, ...
+                by+cfg.instr.Q.position.labelOffsetY, 0);
+            %add labels
+            Screen('TextSize', Sc.window, cfg.instr.textSize.small);
+            Screen('DrawText', Sc.window, labels{1}, ...
+                Sc.center(1) - bl/2 - labelBounds(1)/2, ... center - half bar length - offset
+                by-cfg.instr.Q.position.labelOffsetY, 0);
+            Screen('DrawText', Sc.window, labels{2}, ...
+                Sc.center(1) - labelBounds(2)/2, ... center - offset
+                by-cfg.instr.Q.position.labelOffsetY, 0);
+            Screen('DrawText', Sc.window, labels{3}, ...
+                Sc.center(1) + bl/2 - labelBounds(3)/2, ... center - half bar length - offset
+                by-cfg.instr.Q.position.labelOffsetY, 0);
+            % draw response bar
+            if ~isnan(a.score)
+                % add cursor position
+                cursorrect = CenterRectOnPoint([0,0,cfg.SECS.cw,cfg.SECS.ch],...
+                    Sc.center(1) -((cfg.SECS.ns*cfg.SECS.cw/2)+cfg.SECS.cw) + (a.score * cfg.SECS.cw  + cfg.SECS.cw/2), cfg.SECS.by);
+                rect = [cfg.SECS.brct' cursorrect'];
+                Screen('FillRect', Sc.window, [cfg.bar.color.bar cfg.bar.color.cursor],rect);
+            else
+                Screen('FillRect', Sc.window, cfg.bar.color.bar, cfg.SECS.brct');
+            end
+            tm = Screen('Flip', Sc.window);
             % record onset time if necessary
             if isnan(onset_t)
                 onset_t = tm;
@@ -87,10 +137,10 @@ for ii = 1: length(cfg.SECS.questions.text)
                 end
                 
                 % bound visibility
-                if a.score > cfg.SECS.maxS % max
-                    a.score = cfg.SECS.maxS;
-                elseif a.score < cfg.SECS.minS % minScale
-                    a.score = cfg.SECS.minS;
+                if a.score > maxS % max
+                    a.score = maxS;
+                elseif a.score < minS % minScale
+                    a.score = minS;
                 end
             end
 
@@ -114,7 +164,7 @@ for ii = 1: length(cfg.SECS.questions.text)
         end
     end
     if a.reverse_scored
-        a.score = abs(a.score - cfg.SECS.maxS); % reverse the score
+        a.score = abs(a.score - maxS); % reverse the score
     end
     %a.score = round(a.score/10); % round score to the nearest 10
     answers.(name) = a; % store the answer
