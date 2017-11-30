@@ -1,12 +1,16 @@
 %% Launcher script
 % handles compatability across multiple installs on various machines.
 % by matt.jaquiery@psy.ox.ac.uk
+%
+% Invokes experiments by reference to experimentName which is the
+% experiment folder. The experiment folder MUST contain main.m which is
+% called by this script.
 
 %% clear workspace and create directories
 clear all;
 close all;
 clc;
-experimentName = 'AdvisorChoice';
+experimentName = 'PoliticalDifferences';
 forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 1;

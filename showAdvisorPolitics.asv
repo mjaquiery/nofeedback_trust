@@ -1,0 +1,6 @@
+function showAdvisorPolitics(advisorId)
+%% Display one 
+
+if nargin < 1
+    error('No advisor ID specified.');
+end
