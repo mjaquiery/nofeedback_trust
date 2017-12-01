@@ -1,7 +1,20 @@
+function questionnaire(advisorId)
 %% questionnaire for trust rating and reliability
+% 
+% usage: questionnaire([advisorId])
+% 
+% Inputs: 
+% advisorId - ID of the advisor to query participant about (if not set,
+% query all advisors)
+%
 % created from a previous script on visibility (get_visiiblity.m)
 % this function offer the subject the possibility to rate several questions
 % on semicontinous sliding bars 
+
+global cfg;
+global Sc;
+
+if nargin < 1, advisorId = NaN; end
 
 %%
 %---- subjective ratings
@@ -19,12 +32,20 @@ Screen('TextFont', Sc.window, 'Myriad Pro');
 ShowCursor('Arrow');
 id=0;
 question=[];
-for obs= 1 : cfg.advisors.count.real
-    for q = 1: 4
-        id          = id+1;
-        question(id).id = id;
-        question(id).obs = obs;
-        question(id).quest = q;
+if isnan(advisorId)
+    for obs= 1 : cfg.advisors.count.real
+        for q = 1: 4
+            id          = id+1;
+            question(id).id = id;
+            question(id).obs = obs;
+            question(id).quest = q;
+        end
+    end
+else
+    for q = 1:4        
+        question(q).id = 1;
+        question(q).obs = advisorId;
+        question(q).quest = q;
     end
 end
 question = question(randperm(length(question))); % randomize questions presentation
@@ -39,7 +60,7 @@ for ii = 1: length(question)
     question(ii).response_t = NaN;              % initialize response time variable
     question(ii).onset_t = NaN;
     
-    if trials(t).block == 3
+    if cfg.currenttrial.block == 3
         questionList = cfg.instr.Q.q.pro.text;
     else
         questionList = cfg.instr.Q.q.retro.text;
@@ -145,15 +166,12 @@ for ii = 1: length(question)
 end
 [Y, I] = sort([question.id]);
 question(1:cfg.advisors.count.real*length(questionList)) = question(I); % sort questions in the original order
-trials(t).qanswers = question;
+cfg.currenttrial.qanswers = question;
 
 %% pause before next stimuli session
 Screen('TextSize',Sc.window,cfg.instr.textSize.medium);
-if trials(t).block==3 && trials(t-1).block==2 % baseline questionnaire
-    DrawFormattedText(Sc.window, 'Press any button to start the experiment','center', Sc.center(2)-50, [0 0 0]);
-else
-    DrawFormattedText(Sc.window, 'Press any button to continue','center', Sc.center(2)-50, [0 0 0]);
-end
+DrawFormattedText(Sc.window, 'Press any button to continue','center', Sc.center(2)-50, [0 0 0]);
+
 Screen('Flip', Sc.window);
 WaitSecs(.25);
 collect_response(inf);

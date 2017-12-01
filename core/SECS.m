@@ -1,8 +1,12 @@
-function [score, score_breakdown, answers] = SECS()
+function [score, score_breakdown, answers] = SECS(showInstructions)
 %% Presentation of the Social + Economic Conseravtism Scale
 % - by Matt Jaquiery
 %
-% usage: [score, score_breakdown, answers] = SECS()
+% usage: [score, score_breakdown, answers] = SECS([showInstructions])
+%
+% Inputs:
+% showInstructions: whether to show participant instructions for filling in
+% the SECS. Defaults to false.
 %
 % Outputs: 
 % score: the raw score obtained by the participant
@@ -35,7 +39,13 @@ function [score, score_breakdown, answers] = SECS()
 global cfg; % configuration object
 global Sc; % screen object
 
+if nargin < 1, showInstructions = 0; end
+
 defineSECS();
+
+if showInstructions
+    instructions('SECS');
+end
 
 answers = struct;
 
@@ -64,7 +74,7 @@ for ii = 1: length(cfg.SECS.questions.text)
         % only draw if buttons are held down or it's the first run
         if ~haschanged || any(buttons) || keydown
             
-            tm = drawSECS(ii, a.score);
+            tm = drawSECS(cfg.SECS.question_order(ii), a.score);
             % record onset time if necessary
             if isnan(onset_t)
                 onset_t = tm;

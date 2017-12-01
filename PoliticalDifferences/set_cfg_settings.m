@@ -46,7 +46,7 @@ end
 
 %% Define advisors
 cfg.advisors.count.real = 2; % number of adviceTypes (0:baseline, 1:same bias, 2:different bias)
-cfg.advisors.count.practice = 2;
+cfg.advisors.count.practice = 1;
 cfg.advisors.count.all = cfg.advisors.count.real + cfg.advisors.count.practice;
 cfg.advisors.duration = 2; % duration of the sound files in s
 pic = randperm(cfg.advisors.count.all);
@@ -76,24 +76,24 @@ cfg.xymatrix = [repmat([-57,-51,-45,-39,-33,-27,-21,-15,-9,-3,3,9,15,21,27,33,39
 % Each trialset contains x trials where 
 % x = ac * (choice*(ac-1 + include_void_choice) + nochoice) + null
 % ac = cfg.advisors.count.real
-cfg.block_count                     = 12; % number of blocks
-cfg.trialset.choice                 = 5; % choice trials with each advisor on the left (1/2 of all choice trials in a trialset)
-cfg.trialset.include_void_choice    = 0; % include choices of an observer versus no feedback
-cfg.trialset.nochoice               = 10; % no-choice trials for each advisor
-cfg.trialset.null                   = 3; % number of null trials = number of observers x 2
+cfg.block_count                     = 6; % number of blocks
+cfg.trialset.real                   = 60;
+cfg.trialset.null                   = 5; % number of null trials = number of observers x 2
 cfg.block.trialset_count            = 1; % number of trial sets in each block
-cfg.block.questionnaire_frequency   = 3; % include questionnaires after each how many blocks?
+cfg.block.questionnaire_frequency   = 1; % include questionnaires after each how many blocks?
+cfg.block.advisorPolitics.start     = 5; % the block at which advisor politicial info begins
+cfg.block.advisorPolitics.frequency = 5; % the number of trials between presentations of political info
 
 cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;
 
 if cfg.shortMode==1
-    cfg.block_count = 1; 
-    cfg.trialset.choice = 1; 
-    cfg.trialset.nochoice = 1; 
-    cfg.trialset.null = 1;%cfg.advisors.count.real * 0; 
-    cfg.block.trialset_count = 1;
+    cfg.block_count = 2;  
+    cfg.trialset.real = 3;
+    cfg.trialset.null = 1; 
     cfg.block.questionnaire_frequency = 4;
+    cfg.block.advisorPolitics.start     = 3; 
+    cfg.block.advisorPolitics.frequency = 2;
 
     cfg.practice.block_count = 2;
     cfg.practice.trial_count = 2;    

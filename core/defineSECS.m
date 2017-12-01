@@ -44,6 +44,14 @@ cfg.SECS.socialMask = zeros(1,12);
 cfg.SECS.socialMask([1 3 4 7 8 11 12]) = 1; % identify the social subscale items
 cfg.SECS.prompt = 'Please indicate the extent to which you feel positive or negative towards each issue';
 cfg.SECS.labels = {'Negative', 'Neutral', 'Positive'};
+cfg.SECS.markerLabel.you.text = 'You';
+cfg.SECS.markerLabel.you.bgColor = [.99 .99 .0]';
+cfg.SECS.markerLabel.advisor.bgColor = [.2 .6 .99]';
+cfg.SECS.markerLabel.padding = 5;
+cfg.SECS.markerColor.advisor = [.2 .6 .99]';
+cfg.SECS.markerColor.you = [.99 .99 .0]';
+cfg.SECS.portrait.width = floor(cfg.display.portrait.width*.35);
+cfg.SECS.portrait.height = floor(cfg.display.portrait.height*.35); 
 
 %% Define screen presentation details
 cfg.SECS.maxS=100; % max score
@@ -57,4 +65,3 @@ cfg.SECS.qSize = 46; % question text size
 cfg.SECS.brct=CenterRectOnPoint([0 0 (cfg.SECS.ns *cfg.SECS.cw) (cfg.SECS.ch)], Sc.center(1), cfg.SECS.by);
 cfg.SECS.bl = cfg.SECS.brct(3)- cfg.SECS.brct(1); % length (width) of the scale rectangle
 
-cfg.SECS.advisorMarkerColor = [0 .99 .99];

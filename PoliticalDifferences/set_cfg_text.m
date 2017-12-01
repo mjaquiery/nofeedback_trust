@@ -72,4 +72,8 @@ for i = 1:slideCount
     end
 end
 
+%% special instructions can be defined in 
+% SECS instruction path
+cfg.specialInstructions.SECS = {[cfg.path.base 'instructions' osSlash 'SECS' osSlash 'Slide1.PNG']};
+
 clear x slideCount slideGroups j i;

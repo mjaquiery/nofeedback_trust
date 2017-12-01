@@ -85,28 +85,15 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 %estimated_obsacc();
 
 global SECSscore;
-[a, b, SECSscore] = SECS();
+% [a, b, SECSscore] = SECS();
 
 showAdvisorPolitics(1);
 
-ListenChar(1);
+KbWait();
 
 % collect response
 % if(cfg.debug)   disp('Collecting first response...'); end
 % [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement
-    
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Thanks
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-insimdata = imread(cfg.intro{4}{1});
-texins = Screen('MakeTexture', Sc.window, insimdata);
-Screen('DrawTexture', Sc.window, texins);
-Screen('Flip',Sc.window);
-Beeper(261.63,.4,1);
-WaitSecs(1.000);
-KbWait;
 
 %% close PTB
 Screen('CloseAll');

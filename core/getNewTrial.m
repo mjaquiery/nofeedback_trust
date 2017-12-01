@@ -23,6 +23,7 @@ trial.choice        = []; % choice of advisors presented to the judge
 trial.break         = false; % whether to include a break before the trial
 trial.instr         = false; % whether the trial is prepended with instructions
 trial.questionnaire = false; % whether the trial includes a questionnaire presentation
+trial.advisorPolitics = false; % whether the trial shows political info about the advisor
 
 %% answer variables
 trial.cor               = NaN; % whether the trial was correct (summarises .cor1 and .cor2)

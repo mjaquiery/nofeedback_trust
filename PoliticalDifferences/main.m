@@ -103,7 +103,7 @@ for t = starttrial:length(trials)
     %% save and break
     if trials(t).break
         %% Save dataon break trials
-        save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
+        save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't', 'SECSscore')
         %% break
         Screen('TextSize',Sc.window,18);
         DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
@@ -116,16 +116,44 @@ for t = starttrial:length(trials)
         instructions(trials(t).block);
     end
     %% introduce observers
-    if trials(t).block==3 && trials(t-1).block==2
-        introduce_observers
+    if trials(t).block>1 && trials(t-1).block<5 && trials(t).block ~= trials(t-1).block
+        if isnan(trials(t).advisorId) % first trial is a null trial
+           for n = t:cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null)
+               if n>0 && trials(n).block == trials(t).block && ~isnan(trials(n).advisorId)
+                   introduce_observers(trials(n).advisorId);
+                   break;
+               end
+           end
+        else
+            introduce_observers(trials(t).advisorId);
+        end
     end
     %% questionnaire
     if trials(t).questionnaire
-        questionnaire
+        if isnan(trials(t).advisorId) % this trial is a null trial
+           for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t-1
+               if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
+                   questionnaire(trials(n).advisorId);
+                   break;
+               end
+           end
+        else
+            questionnaire(trials(t).advisorId);
+        end
     end
     %% advisor political information
     if trials(t).advisorPolitics
-        showAdvisorPolitics(trials(t).advisorId);
+        if isnan(trials(t-1).advisorId) % last trial was a null trial so search for a trial with an advisorId
+           for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t+cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null)
+               if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
+                   showAdvisorPolitics(trials(t).advisorId);
+                   break;
+               end
+           end
+        else
+            showAdvisorPolitics(trials(t).advisorId);
+        end
+        WaitSecs(3);
     end
     %% start trial
         
@@ -210,23 +238,13 @@ for t = starttrial:length(trials)
     % NOTE: advisor behaviour depends on initial judgements, not
     % post-advice judgements
     if ~isnan(trials(t).advisorId)
-        if trials(t).cor1 == 1
-            clear toi
-            toi = [trials(1:t).cor1] == 1 & ... % use last 2 blocks for reference dsitribution
-                ([trials(1:t).block] == trials(t).block-1 | [trials(1:t).block] == trials(t).block-2); 
-            [trials(t).agree, trials(t).step] = ...
-                agreementf(trials(t).cj1,cfg.advisor(trials(t).advisorId).adviceType,abs([trials(toi).cj1]),'stepwise');
+        % advisors are always 80% accurate
+        if rand <= .8
+            trials(t).obsacc = 1;
+            trials(t).agree = trials(t).cor1;
         else
-            trials(t).agree = rand < .3; % flat agreement on incorrect trials
-            trials(t).step  = NaN;
-        end
-        % define observer's accuracy
-        if trials(t).agree == 1
-            trials(t).obsacc = trials(t).cor;
-        elseif trials(t).agree == 0
-            trials(t).obsacc = 1 - trials(t).cor;
-        else
-            disp('Hesher was here') % should never show
+            trials(t).obsacc = 0;
+            trials(t).agree = ~trials(t).cor1;
         end
     else % null
         trials(t).agree  = NaN;
@@ -284,17 +302,15 @@ for t = starttrial:length(trials)
         PsychPortAudio('Close');
     end
 end
-% collect last questionnaire
-questionnaire
 
 % save temporary final file
-save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
+save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't','SECSscore');
 
 % collect estimated observers accuracy
 trials(t).estim_obsacc = estimated_obsacc();
 
 %% save final file
-save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_final'],'subject','cfg','trials');
+save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_final'],'subject','cfg','trials','SECSscore');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks

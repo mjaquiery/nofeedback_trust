@@ -1,22 +1,24 @@
-function drawAdvisor(advisorId, centerOn, drawSmall, namePosition)
+function drawAdvisor(advisorId, centerOn, drawSize, namePosition)
 %% Shows the advisor portrait 
 % - by Matt Jaquiery
 %
-% Usage: drawAdvisor(advisorId[, centerOn [, hideName]])
+% Usage: drawAdvisor(advisorId[, centerOn [, drawSize[, namePosition]]])
 %
 % Inputs:
 % advisorId - advisor id
 % centerOn - [x y] coordinates to centre the portrait (not
 % portrait+name!). Default to Sc.center
+% drawSize - 1=normal, 2=small, [width height]=force dimensions
 % namePosition - whereabouts to draw the name: 0=don't draw;
 %   1(default)=draw below; 2=draw above
+%
 
 global cfg; % configuration object
 global Sc; % screen object
 
 %% default argument handling
 if nargin < 4,  namePosition = 1; end
-if nargin < 3,  drawSmall = false; end
+if nargin < 3,  drawSize = 1; end
 if nargin < 2,  centerOn = Sc.center; end
 
 %% get advisor variables
@@ -32,10 +34,12 @@ oldTextSize = Screen('TextSize', Sc.window);
 
 %% draw texture
 % make texture image out of image matrix 'imdata'
-if drawSmall
+if drawSize==1
     rect = [0 0 cfg.display.choice.portraitSize(1) cfg.display.choice.portraitSize(2)];
-else
+elseif drawSize==2
     rect = [0 0 cfg.display.portrait.width cfg.display.portrait.height];
+else
+    rect = [0 0 drawSize(1) drawSize(2)];
 end
 texture = Screen('MakeTexture', Sc.window, advisor.imdata);
 Screen('DrawTexture', Sc.window, texture, [],...
@@ -46,7 +50,7 @@ Screen('DrawTexture', Sc.window, texture, [],...
 if namePosition ~= 0 && ~isempty(advisor.name)
     Screen('TextSize', Sc.window, cfg.display.portrait.nameTextSize);
     textLength = Screen('TextBounds', Sc.window, advisor.name);
-    if drawSmall
+    if drawSize
         portraitEdge = cfg.display.choice.portraitSize(2)/2;
     else
         portraitEdge = cfg.display.portrait.height/2;

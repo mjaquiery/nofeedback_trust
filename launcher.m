@@ -17,7 +17,7 @@ debugMode = 1;
 shortMode = 1;
 pathRoot = 'MattWork';
 
-%% set path 
+%% set path   
 switch pathRoot
     case 'MattHome'  
         my_path = 'G:\Documents\University\Programming\nofeedback_trust_matt\'; % working directory
@@ -51,5 +51,5 @@ addpath(genpath([my_path 'core'])); % add core files
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-screenTests
-%main
+%screenTests
+main

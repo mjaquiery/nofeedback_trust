@@ -14,10 +14,14 @@ global Sc; % Screen object
 
 % input parameter screen
 if nargin < 2, stage = 1; end
-
+if class(block)~='double'
+    inst = cfg.specialInstructions.(block);
+else
+    inst = cfg.intro{block};
+end
 % make and draw the stage instructions
-a = imread(cfg.intro{block}{stage});
-stages = length(cfg.intro{block});
+a = imread(inst{stage});
+stages = length(inst);
 h = Screen('MakeTexture', Sc.window, a);
 Screen('DrawTexture', Sc.window, h);
 Screen('Flip', Sc.window);
@@ -37,7 +41,7 @@ switch keycode
         end
     otherwise
         % onwards and upwards
-        if stage < length(cfg.intro{block})
+        if stage < length(inst)
             stage = stage + 1;
         else
             WaitSecs(1.000);

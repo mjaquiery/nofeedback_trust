@@ -13,7 +13,6 @@ function showAdvisorPolitics(advisorId)
 % display that new value. 
 % If all values are taken, issue a warning and repeat a value at random.
 %
-% 
 
 if nargin < 1
     error('No advisor ID specified.');
@@ -23,10 +22,11 @@ global cfg;
 global SECSscore;
 sigma = 1.94; % derived from human variance information from SECS paper
 qnum = NaN; % question number
+qname = '';
 ascore = NaN; % advisor score
 pscore = NaN; % participant score
 
-if ~isfield(cfg.advisor(advisorId), 'SECSscore')
+if ~isfield(cfg.advisor(advisorId), 'SECSscore') || ~length(cfg.advisor(advisorId).SECSscore)
     % If the advisor has no opinions, create the skeleton
     cfg.advisor(advisorId).SECSscore.names = fields(SECSscore);
     cfg.advisor(advisorId).SECSscore.values = NaN(1,length(cfg.advisor(advisorId).SECSscore.names));
@@ -38,8 +38,9 @@ if ~isempty(find(isnan(cfg.advisor(advisorId).SECSscore.values)))
     % get a random unfilled field
     qnum = randi([1, length(nans)]);
     qnum = nans(qnum)
+    qname = cfg.advisor(advisorId).SECSscore.names{qnum}
     % find the participant's score for that field
-    pscore = SECSscore.(cfg.advisor(advisorId).SECSscore.names{qnum}).score;
+    pscore = SECSscore.(qname).score;
     if cfg.advisor(advisorId).adviceType == 1
         % advisor answer is close to participant's
         ascore = normrnd(pscore, sigma);
@@ -51,15 +52,14 @@ if ~isempty(find(isnan(cfg.advisor(advisorId).SECSscore.values)))
     cfg.advisor(advisorId).SECSscore.values(qnum) = ascore; 
 else
     % No empty option, so issue a warning and repeat a value at random
-    qnum = randi([1, length(cfg.advisor(advisorId).SECSscore.values)]);
+    qnum = randi([1, length(cfg.advisor(advisorId).SECSscore.values)])
+    qname = cfg.advisor(advisorId).SECSscore.names{qnum}
     % find the scores for that field
-    pscore = SECSscore.(cfg.advisor(advisorId).SECSscore.names{qnum}).score;
+    pscore = SECSscore.(qname).score;
     ascore = cfg.advisor(advisorId).SECSscore.values(qnum);
 end
 
-cfg.advisor(advisorId).SECSscore.names{qnum}
-pscore
-ascore
+% get the universal qnum rather than the advisor's shuffled version
+qnum = find(contains(cfg.SECS.questions.name, qname));
 
-drawSECS(qnum, pscore, ascore);
-WaitSecs(2);
+drawSECS(qnum, pscore, ascore, advisorId);
