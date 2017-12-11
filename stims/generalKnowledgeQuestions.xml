@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+	<question>
+		<text>Grand Central Terminal, Park Avenue, New York is the world's</text>
+		<answer>largest railway station</answer>
+		<distractor>highest railway station</distractor>
+	</question>
+	<question>
+		<text>Entomology is the science that studies</text>
+		<answer>insects</answer>
+		<distractor>the origin and history of technical and scientific terms</distractor>
+	</question>
+	<question>
+		<text>Eritrea, which became the 182nd member of the UN in 1993, is on the continent of</text>
+		<answer>Africa</answer>
+		<distractor>Asia</distractor>
+	</question>
+	<question>
+		<text>Garampani sanctuary is located at</text>
+		<answer>Assam, India</answer>
+		<distractor>Gujarat, India</distractor>
+	</question>
+	<question>
+		<text>The Nobel Prize disciplines are Chemistry, Literature, Maths, Peace, Physics, and Psychology.</text>
+		<answer>false</answer>
+		<distractor>true</distractor>
+	</question>
+	<question>
+		<text>Hitler's political party, which came to power in 1933, is known as</text>
+		<answer>Nazi party</answer>
+		<distractor>Ku-Klux-Klan</distractor>
+	</question>
+	<question>
+		<text>Epsom, England, is a place associated with</text>
+		<answer>horse racing</answer>
+		<distractor>snooker</distractor>
+	</question>
+	<question>
+		<text>The first human heart transplant operation, conducted by Dr. Christiaan Barnard on Louis Washkansky, took place in</text>
+		<answer>1967</answer>
+		<distractor>1922</distractor>
+	</question>
+	<question>
+		<text>Galileo was an Italian astronomer who developed the telescope and discovered</text>
+		<answer>four moons of Jupiter</answer>
+		<distractor>the planets Uranus and Mercury</distractor>
+	</question>
+	<question>
+		<text>The writ of Habeas Corpus, which protects against unlawful detention or imprisonment in many legal systems, originated in</text>
+		<answer>the 17th century</answer>
+		<distractor>the 18th century</distractor>
+	</question>
+	<question>
+		<text>Professional golfer Vijay Singh is from</text>
+		<answer>Fiji</answer>
+		<distractor>USA</distractor>
+	</question>
+	<question>
+		<text>The First Afghan War, between British Imperial India and the Emirate of Afghanistan, took place in</text>
+		<answer>1839-42</answer>
+		<distractor>1922-25</distractor>
+	</question>
+	<question>
+		<text>For the Olympics and World Tournaments, the dimensions of a basketball court are</text>
+		<answer>28 x 15m (91.9 x 49.2 feet)</answer>
+		<distractor>26 x 17m (85.3 x 55.8 feet)</distractor>
+	</question>
+	<question>
+		<text>The Federation Cup, World Cup, Allywyn International Trophy, and Challenge Cup, are prizes awarded for</text>
+		<answer>Volleyball</answer>
+		<distractor>Tennis</distractor>
+	</question>
+	<question>
+		<text>World Red Cross and Red Crescent Day is celebrated each year on the</text>
+		<answer>8th of May</answer>
+		<distractor>8th of August</distractor>
+	</question>
+	<question>
+		<text>A group of temples famous for their erotic sculptures are located in</text>
+		<answer>Khajuraho, India</answer>
+		<distractor>Mahabalipuram, India</distractor>
+	</question>
+	<question>
+		<text>Gravity setting chambers are used in industries to remove</text>
+		<answer>suspended particulate matter</answer>
+		<distractor>carbon monoxide and oxides of sulphur</distractor>
+	</question>
+	<question>
+		<text>The Angkor Wat is a Hindu temple located in</text>
+		<answer>Cambodia</answer>
+		<distractor>India</distractor>
+	</question>
+	<question>
+		<text>Friction can be reduced by switching</text>
+		<answer>from sliding to rolling</answer>
+		<distractor>from rolling to sliding</distractor>
+	</question>
+	<question>
+		<text>The Antarctic Treaty, which bans military activity on Antarctica, was signed by the Soviet Union, the USA, and ten other countries in</text>
+		<answer>1959</answer>
+		<distractor>1999</distractor>
+	</question>
+	<question>
+		<text>Fire temples are places of worship in the religion of</text>
+		<answer>Zoroastrianism</answer>
+		<distractor>Shinto</distractor>
+	</question>
+	<question>
+		<text>Georgia, Uzbekistan, and Turkmenistan became members of the UN in</text>
+		<answer>1992</answer>
+		<distractor>2006</distractor>
+	</question>
+	<question>
+		<text>Guru Gobind Singh was a religious leader in</text>
+		<answer>Sikhism</answer>
+		<distractor>Hinduism</distractor>
+	</question>
+	<question>
+		<text>Politician Hermann Scheer received the Right Livelihood Award in 1999 for a lifetime of work dedicated to</text>
+		<answer>promoting solar energy</answer>
+		<distractor>ending the impunity of dictators</distractor>
+	</question>
+	<question>
+		<text>Germany signed the Armistice Treaty, ending World War I, on</text>
+		<answer>11th November, 1918</answer>
+		<distractor>25th December 1918</distractor>
+	</question>
+	<question>
+		<text>Frederick Sanger received the Nobel Prize twice in:</text>
+		<answer>Chemistry (1958) and Chemistry (1980)</answer>
+		<distractor>Chemistry (1958) and Peace (1980)</distractor>
+	</question>
+	<question>
+		<text>The ozone layer restricts</text>
+		<answer>ultraviolet radiation</answer>
+		<distractor>x-rays and gamma rays</distractor>
+	</question>
+	<question>
+		<text>Eugenics is the study of</text>
+		<answer>altering human beings by changing their genetic components</answer>
+		<distractor>people of European origin</distractor>
+	</question>
+	<question>
+		<text>Euclid was a Greek mathematician famous for work in</text>
+		<answer>geometry</answer>
+		<distractor>algebra</distractor>
+	</question>
+	<question>
+		<text>Ecology is a branch of science concerned with the study of</text>
+		<answer>the relation between organisms and their environment</answer>
+		<distractor>the relation between financial institutions and natural resources</distractor>
+	</question>
+	<question>
+		<text>The Internet began as a product of</text>
+		<answer>the US military's Advanced Research Project Agency</answer>
+		<distractor>the Electronic Frontier Foundation</distractor>
+	</question>
+	<question>
+		<text>A rocket travelling from Earth to the moon must reach escape velocity to overcome</text>
+		<answer>Earth's gravitational pull</answer>
+		<distractor>centripetal force due to Earth's rotation</distractor>
+	</question>
+	<question>
+		<text>For safety, the fuse wire used in household mains electricity supply must be made of metal having</text>
+		<answer>a low melting point</answer>
+		<distractor>high resistance</distractor>
+	</question>
+	<question>
+		<text>Hamid Karzai became president of Afghanistan in</text>
+		<answer>2002</answer>
+		<distractor>2007</distractor>
+	</question>
+	<question>
+		<text>The headquarters of the UN are in</text>
+		<answer>New York City, USA</answer>
+		<distractor>Paris, France</distractor>
+	</question>
+	<question>
+		<text>The International Peace Congress was a series of meetings of representatives from peace societies throughout the world held in various places between</text>
+		<answer>1848-53</answer>
+		<distractor>1948-53</distractor>
+	</question>
+	<question>
+		<text>For seeing objects on the surface of the water from a submarine, the instrument used is</text>
+		<answer>a periscope</answer>
+		<distractor>a spectroscope</distractor>
+	</question>
+	<question>
+		<text>G-15 is an economic grouping of</text>
+		<answer>third world nations</answer>
+		<distractor>first world nations</distractor>
+	</question>
+	<question>
+		<text>A fathometer is used to measure</text>
+		<answer>ocean depth</answer>
+		<distractor>rainfall</distractor>
+	</question>
+	<question>
+		<text>Iron is galvanized using</text>
+		<answer>zinc</answer>
+		<distractor>aluminium</distractor>
+	</question>
+	<question>
+		<text>Economic goods are</text>
+		<answer>limited in supply as compared to demand</answer>
+		<distractor>equal in supply as compared to demand</distractor>
+	</question>
+	<question>
+		<text>For purifying drinking water, alum is used</text>
+		<answer>for coagulation of mud particles</answer>
+		<distractor>to kill bacteria</distractor>
+	</question>
+	<question>
+		<text>Hockey was introduced in the Asian Games in</text>
+		<answer>1958 (Tokyo)</answer>
+		<distractor>1966 (Bangkok)</distractor>
+	</question>
+	<question>
+		<text>The Rubaiyat of Omar Khayyam is</text>
+		<answer>a collection of poetry</answer>
+		<distractor>a collection of philosophical anecdotes</distractor>
+	</question>
+	<question>
+		<text>Daniel Gabriel Fahrenheit, originator of precision thermometry, was born in</text>
+		<answer>1686</answer>
+		<distractor>1786</distractor>
+	</question>
+	<question>
+		<text>The First Crusade captured Jerusalem in</text>
+		<answer>1099</answer>
+		<distractor>1000</distractor>
+	</question>
+	<question>
+		<text>East Timor, which became the 191st member of the UN in 2002, is on the continent of</text>
+		<answer>Asia</answer>
+		<distractor>Africa</distractor>
+	</question>
+	<question>
+		<text>Excessive pituitary gland activity in childhood results in</text>
+		<answer>increased height</answer>
+		<distractor>reduced height</distractor>
+	</question>
+	<question>
+		<text>Fa-Hien was</text>
+		<answer>a Buddhist pilgrim from China</answer>
+		<distractor>a Chinese ruler</distractor>
+	</question>
+	<question>
+		<text>The world's busiest airport (by passenger traffic) is</text>
+		<answer>Hartsfield-Jackson Atlanta International Airport, USA</answer>
+		<distractor>Dubai International Airport, Dubai</distractor>
+	</question>
+	<question>
+		<text>The Nile flows into the</text>
+		<answer>Mediterranean Sea</answer>
+		<distractor>Red Sea</distractor>
+	</question>
+	<question>
+		<text>In American currency, 10 cents make</text>
+		<answer>a dime</answer>
+		<distractor>a nickel</distractor>
+	</question>
+	<question>
+		<text>Afrikaans was developed from</text>
+		<answer>Dutch</answer>
+		<distractor>Portuguese</distractor>
+	</question>
+	<question>
+		<text>'Graffiti' comes from the Italian for</text>
+		<answer>scratched drawing</answer>
+		<distractor>little writing</distractor>
+	</question>
+	<question>
+		<text>The songs 'Some Enchanted Evening' and 'There is Nothing Like a Dame' come from the musical</text>
+		<answer>South Pacific</answer>
+		<distractor>My Fair Lady</distractor>
+	</question>
+	<question>
+		<text>The first manned lunar landing mission in 1969 was called</text>
+		<answer>Apollo XI</answer>
+		<distractor>Enterprise I</distractor>
+	</question>
+	<question>
+		<text>The three astronauts on the first lunar landing mission were Neil Armstrong, Buzz Aldrin, and</text>
+		<answer>Michael Collins</answer>
+		<distractor>Yuri Gagarin</distractor>
+	</question>
+	<question>
+		<text>The last manned lunar landing happened in</text>
+		<answer>1972</answer>
+		<distractor>1984</distractor>
+	</question>
+	<question>
+		<text>'The Dark Destroyer' was the nickname for boxer</text>
+		<answer>Nigel Benn</answer>
+		<distractor>George Foreman</distractor>
+	</question>
+	<question>
+		<text>Singer Ritchie Valens died in 1959 in</text>
+		<answer>a plane crash that also killed singer Buddy Holly</answer>
+		<distractor>a car crash that also killed actor James Dean</distractor>
+	</question>
+	<question>
+		<text>The medical procedure in which anaesthetic is injected close to the spinal cord is known as</text>
+		<answer>an epidural</answer>
+		<distractor>a general anaesthetic</distractor>
+	</question>
+    <question>
+        <text>The oily, poisonous substance which occurs naturally in tobacco leaves is</text>
+        <answer>nicotine</answer>
+        <distractor>serotonin</distractor>
+    </question>
+    <question>
+        <text>'Wichita Lineman' was the first UK top-10 hit for singer</text>
+        <answer>Glenn Campbell</answer>
+        <distractor>Frank Sinatra</distractor>
+    </question>
+    <question>
+        <text>The balancing scales are the symbol for the Zodiac symbol</text>
+        <answer>Libra</answer>
+        <distractor>Capricorn</distractor>
+    </question>
+    <question>
+        <text>Writer Rudyard Kipling was born in</text>
+        <answer>India</answer>
+        <distractor>Sweden</distractor>
+    </question>
+    <question>
+        <text>Scientist Richard Dawkins was born in</text>
+        <answer>Kenya</answer>
+        <distractor>Pakistan</distractor>
+    </question>
+    <question>
+        <text>Henrik Ibsen is famous for</text>
+        <answer>writing plays</answer>
+        <distractor>campaigning for the abolition of slavery</distractor>
+    </question>
+    <question>
+        <text>'Mississippi Saxophone' is a nickname for</text>
+        <answer>the harmonica</answer>
+        <distractor>the bass clarinet</distractor>
+    </question>
+    <question>
+        <text>One and a half litres of champagne is known as</text>
+        <answer>a magnum</answer>
+        <distractor>a grog</distractor>
+    </question>
+    <question>
+        <text>The nucleus of an atom contains neutrons and</text>
+        <answer>protons</answer>
+        <distractor>electrons</distractor>
+    </question>
+    <question>
+        <text>Another name for the aurora borealis is</text>
+        <answer>the northern lights</answer>
+        <distractor>the Milky Way</distractor>
+    </question>
+    <question>
+        <text>Bambi is a</text>
+        <answer>deer</answer>
+        <distractor>squirrel</distractor>
+    </question>
+    <question>
+        <text>The maple leaf is a feature of the flag of</text>
+        <answer>Canada</answer>
+        <distractor>Latvia</distractor>
+    </question>
+    <question>
+        <text>'Love', 'deuce', 'match', and 'volley' are terms from</text>
+        <answer>Tennis</answer>
+        <distractor>Polo</distractor>
+    </question>
+    <question>
+        <text>In the Wizard of Oz, Dorothy's home is in</text>
+        <answer>Kansas</answer>
+        <distractor>Oklahoma</distractor>
+    </question>
+    <question>
+        <text>The 'Harry Potter' books were written by</text>
+        <answer>J.K. Rowling</answer>
+        <distractor>George R.R. Martin</distractor>
+    </question>
+    <question>
+        <text>The currency of Pakistan is</text>
+        <answer>Rupees</answer>
+        <distractor>Dollars</distractor>
+    </question>
+    <question>
+        <text>Winnie the Pooh's gloomy friend Eeyore is</text>
+        <answer>a donkey</answer>
+        <distractor>a tortoise</distractor>
+    </question>
+    <question>
+        <text>The standard unit of time in the metric system is</text>
+        <answer>the second</answer>
+        <distractor>the hour</distractor>
+    </question>
+    <question>
+        <text>Diamonds are made of pure</text>
+        <answer>Carbon</answer>
+        <distractor>Silicone</distractor>
+    </question>
+    <question>
+        <text>The stick used to play pool, billiards, and snooker, is</text>
+        <answer>a cue</answer>
+        <distractor>a rod</distractor>
+    </question>
+    <question>
+        <text>Insulin is produced in</text>
+        <answer>the pancreas</answer>
+        <distractor>the gall bladder</distractor>
+    </question>
+    <question>
+        <text>In standard playing cards, the king without a moustache is the King of</text>
+        <answer>Hearts</answer>
+        <distractor>Diamonds</distractor>
+    </question>
+    <question>
+        <text>Black History Month in the USA is in</text>
+        <answer>February</answer>
+        <distractor>March</distractor>
+    </question>
+    <question>
+        <text>The capital of Turkey is</text>
+        <answer>Ankara</answer>
+        <distractor>Istanbul</distractor>
+    </question>
+    <question>
+        <text>The 2014 Winter Olympics (Sochi) were held in</text>
+        <answer>Russia</answer>
+        <distractor>Finland</distractor>
+    </question>
+    <question>
+        <text>Superman's home planet is</text>
+        <answer>Krypton</answer>
+        <distractor>Metropol</distractor>
+    </question>
+    <question>
+        <text>Mars is the Roman god of</text>
+        <answer>war</answer>
+        <distractor>protection</distractor>
+    </question>
+    <question>
+        <text>Adam West, Michael Keaton, Val Kilmer, and George Clooney have all played the role of</text>
+        <answer>Batman</answer>
+        <distractor>Superman</distractor>
+    </question>
+    <question>
+        <text>Sting, Stewart Copeland, and Andy Summers were in the band</text>
+        <answer>The Police</answer>
+        <distractor>Dire Straits</distractor>
+    </question>
+    <question>
+        <text>The official language of Brazil is</text>
+        <answer>Portuguese</answer>
+        <distractor>Spanish</distractor>
+    </question>
+    <question>
+        <text>The character Donkey in 'Shrek' is voice acted by</text>
+        <answer>Eddie Murphy</answer>
+        <distractor>Chris Rock</distractor>
+    </question>
+    <question>
+        <text>The Dalai Lama is a revered personage for</text>
+        <answer>Tibetan Buddhists</answer>
+        <distractor>Nepalese Hindus</distractor>
+    </question>
+    <question>
+        <text>'The Scarlet Letter' was written by </text>
+        <answer>Nathaniel Hawthorne</answer>
+        <distractor>Samuel Clements</distractor>
+    </question>
+    <question>
+        <text>A haiku is made up of</text>
+        <answer>17 syllables</answer>
+        <distractor>21 syllables</distractor>
+    </question>
+    <question>
+        <text>In the US sitcom 'Friends', Matthew Perry played</text>
+        <answer>Chandler</answer>
+        <distractor>Joey</distractor>
+    </question>
+    <question>
+        <text>'The Prince' is the eponymous character from Shakespeare's</text>
+        <answer>Hamlet</answer>
+        <distractor>Macbeth</distractor>
+    </question>
+    <question>
+        <text>The poker hand containing three-of-a-kind and a pair is called</text>
+        <answer>a full house</answer>
+        <distractor>a flush</distractor>
+    </question>
+    <question>
+        <text>The US army radio DJ portrayed by Robin Williams in the film 'Good Morning Vietnam' was named</text>
+        <answer>Adrian Cronauer</answer>
+        <distractor>Howard Stern</distractor>
+    </question>
+    <question>
+        <text>Lord Baden-Powell founded</text>
+        <answer>the Boy Scouts and Girl Guides</answer>
+        <distractor>the British National Party</distractor>
+    </question>
+</quiz>

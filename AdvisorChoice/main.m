@@ -99,7 +99,7 @@ for t = starttrial:length(trials)
     %% save and break
     if trials(t).break
         %% Save dataon break trials
-        save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
+        save([cfg.path.results subject.dir subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
         %% break
         Screen('TextSize',Sc.window,18);
         DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
@@ -281,13 +281,13 @@ end
 questionnaire
 
 % save temporary final file
-save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
+save([cfg.path.results subject.dir subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
 
 % collect estimated observers accuracy
 trials(t).estim_obsacc = estimated_obsacc();
 
 %% save final file
-save([cfg.path.results subject.dir '/behaviour/' subject.fileName '_final'],'subject','cfg','trials');
+save([cfg.path.results subject.dir subject.fileName '_final'],'subject','cfg','trials');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks
