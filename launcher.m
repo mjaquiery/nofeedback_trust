@@ -10,8 +10,8 @@
 clear all;
 close all;
 clc;
-%experimentName = 'HaloEffect';
-experimentName = 'AdvisorChoice';
+experimentName = 'HaloEffect';
+%experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
 forceResolution = [1300 600];
 feedbackEnabled = 0; 
@@ -55,5 +55,5 @@ addpath(genpath([my_path 'core'])); % add core files
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-%screenTests
-main
+screenTests
+%main

@@ -1,4 +1,4 @@
-function [] = draw_scale_()
+function [] = draw_scale_(drawCode)
 % Usage:
 % draw_scale_
 %
@@ -10,6 +10,9 @@ function [] = draw_scale_()
 
 global cfg; % configuration object
 global Sc; % screen object
+
+if nargin < 1, drawCode = 1; end
+if drawCode == 0, return; end
 
 %% check for fields existence
 if ~isfield(cfg,'bar') || ~isfield(cfg.bar,'gaprect') || ~isfield(cfg.bar,'barrect')

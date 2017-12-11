@@ -34,12 +34,12 @@ end
 
 %% collect response
 while ~any(buttons) % wait for click
-    [x,y,buttons] = GetMouseWrapper;
+    [~, ~, buttons] = GetMouseWrapper;
 end
 
 while ~hasconfirmed
     while any(buttons) || ~haschanged   % wait for release and change of cj and confirmation
-        [resp_x, resp_y, buttons] = GetMouseWrapper;
+        [resp_x, ~, buttons] = GetMouseWrapper;
         
         if resp_x>=cfg.bar.barrect(1) && resp_x<Sc.center(1) % if mouse is on the left rect
             resp = find(resp_x < (cfg.bar.xshift+cfg.bar.cursorwidth.*.5),1) - cfg.bar.maxScale-1;

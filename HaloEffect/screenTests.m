@@ -88,7 +88,7 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %showAdvisorPolitics(1);
 
-
+doQuizTask(trials, t);
 
 KbWait();
 
@@ -100,7 +100,7 @@ KbWait();
 Screen('CloseAll');
 ListenChar(0);
 DisableKeysForKbCheck([]);
-ShowCursor()
+ShowCursor();
 Priority(0);
 toc
     

@@ -35,6 +35,10 @@ if isnan(subject.condition)
     cfg.condition = 1;
 end
 
+%% Task types
+cfg.taskType.dots = 1;
+cfg.taskType.quiz = 2;
+
 %% initialize variables
 % define stimulus related variables
 cfg.stim.durstim     = .160; % stimulus duration
@@ -89,7 +93,6 @@ cfg.trialset.null                   = 5; % number of null trials = number of obs
 cfg.block.trialset_count            = 1; % number of trial sets in each block
 cfg.block.questionnaire_frequency   = 1; % include questionnaires after each how many blocks?
 cfg.block.taskType                  = [1 1 1 1 2 2 1 1]; % the block at which advisor politicial info begins
-cfg.block.advisorPolitics.frequency = 5; % the number of trials between presentations of political info
 
 cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;
@@ -136,19 +139,10 @@ rng(cfg.resetrn);
 cfg.path.base       = my_path;
 cfg.path.results    = results_path;
 cfg.path.stims      = stims_path;
+cfg.path.slash      = osSlash;
 
 % bar and cursor settings
 define_scale 
 
 % text definitions and settings
 set_cfg_text
-
-%% Load quiz questions
-cfg.quiz = xml2struct(xmlread([cfg.path.stims osSlash 'generalKnowledgeQuestions.xml']));
-cfg.quiz = cfg.quiz.quiz.question;
-for i = 1:length(cfg.quiz)
-    cfg.quiz{i}.text = cfg.quiz{i}.text.Text;
-    cfg.quiz{i}.answer = cfg.quiz{i}.answer.Text;
-    cfg.quiz{i}.distractor = cfg.quiz{i}.distractor.Text;
-end
-cfg.quizOrder = randperm(length(cfg.quiz));

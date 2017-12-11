@@ -70,9 +70,11 @@ for t = 1:length(trials)
             end
         end
     end
-    % display advisors at appropriate points
-    if trials(t).block >= cfg.block.advisorPolitics.start && ~mod(t,cfg.block.advisorPolitics.frequency)
-        trials(t).advisorPolitics = true;
+    if isfield(cfg.block, 'advisorPolitics')
+        % display advisors at appropriate points
+        if trials(t).block >= cfg.block.advisorPolitics.start && ~mod(t,cfg.block.advisorPolitics.frequency)
+            trials(t).advisorPolitics = true;
+        end
     end
 end
 

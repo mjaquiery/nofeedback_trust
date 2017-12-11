@@ -1,4 +1,4 @@
-function [] = add_responseinstr()
+function [] = add_responseinstr(drawCode)
 % Usage:
 % add_responseinstr()
 % 
@@ -11,6 +11,9 @@ function [] = add_responseinstr()
 
 global cfg; % configuration object
 global Sc; % Screen object
+
+if nargin < 1, drawCode = 1; end
+if drawCode == 0, return; end
 
 %% check required fields
 if ~isfield(cfg,'instr') || ~isfield(cfg.instr,'instr')

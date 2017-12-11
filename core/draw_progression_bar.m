@@ -1,4 +1,4 @@
-function draw_progression_bar()
+function draw_progression_bar(drawCode)
 %% Draws the progression bar to help keep participants motivated
 %
 % usage: internal only
@@ -8,6 +8,9 @@ function draw_progression_bar()
 %
 global cfg; % configuration object
 global Sc; % Screen object
+
+if nargin < 1, drawCode = 1; end
+if drawCode == 0, return; end
 
 startbounds = Screen('TextBounds', Sc.window, cfg.display.progress.text.start);
 text_buffer = 10;
