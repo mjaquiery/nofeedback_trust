@@ -46,41 +46,49 @@ drawQuiz(Q, L, R);
 trials(t).time_starttrial = Screen('Flip', Sc.window);
 
 WaitSecs(cfg.stim.quiz.RSI1);
+ShowCursor();
 
 %% Get a first answer
-lastAns = NaN;
+lastResponse = NaN;
 while true
     % acquire response
-    [x, ~, buttons] = GetMouseWrapper;
-    [keydown, a.rt, keycode] = KbCheck;
+    [x, ~, buttons] = GetMouseWrapper();
+    [keydown, ~, keycode] = KbCheck();
     
     % clean response
-    
+    if any(buttons)
+        response = getQuizResponse(x);
+    else
+        response = lastResponse;
+    end
     
     % check response
-    if keydown && ~isnan(ans)
+    if keydown && ~isnan(response)
         key = KbName(keycode);
         if iscell(key), key = key{1}; end % if two buttons at the same time
         switch key
             case 'space'           
-                a.rt = GetSecs-onset_t;
+                rt1 = GetSecs-time;
                 break;
             case 'ESCAPE'
                 sca
         end
     end
     
-    if ans==lastAns && ~any(buttons)
-        % skip drawing if there's no progress to update
-        continue;
+    if response ~= lastResponse
+        % draw the screen
+        drawQuiz(Q, L, R);
+        draw_static([1 0 1 2 1]);
+        if ~isnan(response)
+            drawQuizMarkers(response, cfg.bar.color.cursor);
+        end
+        Screen('Flip', Sc.window);
+        lastResponse = response;
     end
-    
-    % draw the screen
-    drawQuiz(Q, L, R);
-    draw_static([1 0 1 2 1]);
-    Screen('Flip', Sc.window);
-        
 end
+
+response
+rt1
 
 %% Display advice
 
@@ -112,3 +120,69 @@ Screen('DrawText', Sc.window, L.text, ...
 Screen('DrawText', Sc.window, R.text, ...
     Sc.center(1) + cfg.display.quiz.aOffsetX - ceil(R.bounds(3)/2), ...
     cfg.display.quiz.aPosY);
+
+function response = getQuizResponse(mouse_x)
+%% Return the scale value designated by the current mouse position
+% Matt Jaquiery, 2017
+% 
+% usage: response = getQuizResponse(mouse_x)
+%
+% Inputs:
+% mouse_x: x-coordinate of the mouse
+% 
+% Outputs:
+% response: the response as capped by the scale limits
+global cfg; % configuration object
+global Sc; % screen object
+response = find(mouse_x < (cfg.bar.xshift+cfg.bar.cursorwidth.*.5),1) - cfg.bar.maxScale;
+
+if mouse_x < Sc.center(1) % if mouse is on the left rect
+        response = response-1;
+    if response == 0
+        response = -1;
+    end
+else
+    if response == 0
+        response = 1;
+    elseif isempty(response)
+        response = cfg.bar.maxScale;
+    end
+end
+
+function drawQuizMarkers(varargin)
+%% Draw the markers on top of the scale
+% Matt Jaquiery, 2017
+% 
+% usage: drawQuizMarkers(score1, colour1[, score2, colour2[, ...]])
+%
+% Inputs:
+% Score-colour pairs. Score is a scale score (see define_scale.m), and
+% colour is the colour to draw the marker.
+%
+global cfg; % configuration object
+global Sc; % screen object
+markers = [];
+colours = [];
+
+if nargin < 2, error('No marker defined.'); end
+if mod(nargin,2), error('Unbalanced marker definitions (perhaps a colour was omitted)'); end
+
+for i = 1:2:length(varargin)
+    score = varargin{i}
+    
+    box = [0 0 cfg.bar.cursorwidth cfg.bar.cursorheight];
+    switch score > 0
+        case 0 % Left
+            positions = linspace(cfg.bar.gaprect(1)-cfg.bar.cursorwidth.*.5, ...
+                cfg.bar.barrect(1)+cfg.bar.cursorwidth.*.5,cfg.bar.maxScale);
+        case 1 % Right
+            positions = linspace(cfg.bar.gaprect(3)+cfg.bar.cursorwidth.*.5, ...
+                cfg.bar.barrect(3)-cfg.bar.cursorwidth.*.5,cfg.bar.maxScale);
+    end
+    box = CenterRectOnPoint(box, positions(abs(score)), Sc.rect(4).*cfg.bar.positiony);
+    
+    markers = [markers box'];
+    colours = [colours varargin{i+1}];
+end
+
+Screen('FillRect', Sc.window, colours, markers);
