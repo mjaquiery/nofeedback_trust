@@ -1,4 +1,4 @@
- %% Launcher script
+  %% Launcher script
 % handles compatability across multiple installs on various machines.
 % by matt.jaquiery@psy.ox.ac.uk
 %

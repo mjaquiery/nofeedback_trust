@@ -55,7 +55,7 @@ drawQuiz(Q, L, R);
 trials(t).time_starttrial = Screen('Flip', Sc.window);
 
 WaitSecs(cfg.stim.quiz.RSI1);
-ShowCursor();
+ShowCursor('Arrow');
 
 %% Get a first answer
 lastResponse = NaN;
@@ -80,6 +80,7 @@ while true
                 trials(t).resp1_time = GetSecs-time;
                 trials(t).cj1 = abs(response);
                 trials(t).int1 = find([-1 1]==sign(response));
+                firstResponse = response;
                 break;
             case 'ESCAPE'
                 sca
@@ -113,13 +114,13 @@ if trials(t).block <= 1
     PsychPortAudio('Close');
     Screen('Close');
     trials(t).endTime = time;
-    return;  %% duck out early if no advice is to follow
+    return;  % duck out early if no advice is to follow
 end
 
 %% Display advice
 drawQuiz(Q, L, R);
 draw_static([1 0 1 2 1]);
-drawQuizMarkers(trials(t).cj1, cfg.bar.color.cj1)
+drawQuizMarkers(firstResponse, cfg.bar.color.cj1)
 Screen('Flip', Sc.window);
 
 if trials(t).block>1, PsychPortAudio('Close'); end
@@ -163,13 +164,17 @@ end
 load_observer_audio;
 WaitSecs(cfg.stim.quiz.RSI2);
 
+% masks for present_advice and prevent_delay
+mask1 = [1 0 1 2 0];
+mask2 = mask1;
+
 if ~isnan(trials(t).advisorId)
     present_advice;
 else
     present_delay;
 end
 
-ShowCursor();
+ShowCursor('Arrow');
 
 %% Get a second answer
 lastResponse = NaN;
@@ -205,9 +210,10 @@ while true
         drawQuiz(Q, L, R);
         draw_static([1 0 1 2 1]);
         if ~isnan(response)
-            drawQuizMarkers(trials(t).cj1, cfg.bar.color.cj1, response, cfg.bar.color.cursor);
+            drawQuizMarkers(firstResponse, cfg.bar.color.cj1, response, cfg.bar.color.cursor);
             Screen('Flip', Sc.window);
         else
+            drawQuizMarkers(firstResponse, cfg.bar.color.cj1);
             [~, trials(t).responsestart] = Screen('Flip', Sc.window);
         end
         lastResponse = response;
@@ -263,7 +269,7 @@ if nargin < 3, maxLineWidth = Sc.size(1); end
 
 txtbounds = Screen('TextBounds', Sc.window, text);
 if txtbounds(3) <= maxLineWidth
-    ['line "' text '" is short enough: ' int2str(txtbounds(3)) '/' int2str(maxLineWidth)]
+    ['line "' text '" is short enough: ' int2str(txtbounds(3)) '/' int2str(maxLineWidth)];
     % text fits already
     line.text = text;
     line.x = floor(centerOn(1) - txtbounds(3)/2);
@@ -279,14 +285,14 @@ lastIndex = 1;
 lines = {};
 for i = 1:length(words)
     str = char(join(words(lastIndex:i)));
-    ['trying ' str]
+    ['trying ' str];
     txtbounds = Screen('TextBounds', Sc.window, str);
     if txtbounds(3) > maxLineWidth
-        ['too long, splitting']
+        ['too long, splitting'];
         % this is too long, so save the previous line and start a new one
-        str = char(join(words(lastIndex:i-1)));
+        lastStr = char(join(words(lastIndex:i-1)));
         line.bounds = prevBounds;
-        line.text = str;
+        line.text = lastStr;
         line.x = floor(centerOn(1) - line.bounds(3)/2);
         lines{length(lines)+1} = line;
         lastIndex = i;
@@ -385,7 +391,8 @@ if mod(nargin,2), error('Unbalanced marker definitions (perhaps a colour was omi
 markers = zeros(4, length(varargin)/2);
 colours = zeros(3, length(varargin)/2);
 for i = 1:2:length(varargin)
-    score = varargin{i};
+    score = varargin{i}
+    if isnan(score), continue; end
     
     box = [0 0 cfg.bar.cursorwidth cfg.bar.cursorheight];
     switch score > 0

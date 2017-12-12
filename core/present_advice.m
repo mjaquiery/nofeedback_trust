@@ -1,5 +1,8 @@
+if ~exist('mask1'), mask1 = [1 0 1 1 0]; end
+if ~exist('mask2'), mask2 = [1 1 1 1 0]; end
+
 % draw static elements
-draw_static([1 0 1 1 0]);
+draw_static(mask1);
 
 drawAdvisor(trials(t).advisorId);
 
@@ -14,7 +17,7 @@ trials(t).onsetobsspeech = PsychPortAudio('Start', trials(t).whichspeech, 1,GetS
 [startTime, trials(t).offset_speech, xruns, ~] = PsychPortAudio('Stop', trials(t).whichspeech,1); %[startTime endPositionSecs xruns estStopTime] = PsychPortAudio('Stop', pahandle [, waitForEndOfPlayback=0] [, blockUntilStopped=1] [, repetitions] [, stopTime]);
 
 % draw static elements
-draw_static([1 1 1 1 0]);
+draw_static(mask2);
 
 % offset image
 [VBLts, trials(t).offsetobs, FTS, trials(t).tmissed_offset2] = Screen('Flip',Sc.window,trials(t).onsetobs + cfg.advisors.duration - cfg.frame);
