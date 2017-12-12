@@ -88,10 +88,11 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %showAdvisorPolitics(1);
 
-doQuizTask(trials, t);
+for t = 1:5
+    trials = doQuizTask(trials, t);
 
-KbWait();
-
+    KbWait();
+end
 % collect response
 % if(cfg.debug)   disp('Collecting first response...'); end
 % [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement

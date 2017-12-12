@@ -18,6 +18,7 @@ trial.block         = block; % block number
 trial.break         = false; % whether to include a break before the trial
 trial.instr         = false; % whether the trial is prepended with instructions
 trial.questionnaire = false; % whether the trial includes a questionnaire presentation
+trial.feedback      = false;
 
 %% experiment-specific properties
 trial.feedback          = false; % whether feedback is provided on the trial

@@ -15,8 +15,8 @@ experimentName = 'HaloEffect';
 %experimentName = 'PoliticalDifferences';
 forceResolution = [1300 600];
 feedbackEnabled = 0; 
-debugMode = 0;
-shortMode = 0;
+debugMode = 1;
+shortMode = 1;
 pathRoot = 'MattHome';
 
 %% set path   

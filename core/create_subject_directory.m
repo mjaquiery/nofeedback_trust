@@ -1,24 +1,28 @@
 % prompt subject info
-prompt = {'Subject Id:','Gender(m/f/o):','Age:',...
-    'Condition (default random):',...
-    'Experiment restarted (default no): '};
-answer = inputdlg(prompt);
+subject = struct();
+if ~debugMode
+    prompt = {'Subject Id:','Gender(m/f/o):','Age:',...
+        'Condition (default random):',...
+        'Experiment restarted (default no): '};
+    answer = inputdlg(prompt);
 
-subject.id          = answer{1};
-subject.gender      = answer{2};
-subject.age         = str2num(answer{3});
-subject.condition   = str2num(answer{4});
-subject.restarted   = str2num(answer{5});
-subject.date        = date;
-subject.start_time  = clock;
-subject.name        = num2str(subject.id);  
-subject.screen      = screenNumber;
+    subject.id          = answer{1};
+    subject.gender      = answer{2};
+    subject.age         = str2num(answer{3});
+    subject.condition   = str2num(answer{4});
+    subject.restarted   = str2num(answer{5});
+    subject.date        = date;
+    subject.start_time  = clock;
+    subject.name        = num2str(subject.id);  
+    subject.screen      = screenNumber;
+end
 
 % testing mode
-if isempty(subject.id) && isempty(subject.restarted)
+if ~isfield(subject, 'id') || (isempty(subject.id) && isempty(subject.restarted))
     warning('TESTING MODE');
     subject.male            = NaN;
     subject.age             = NaN;
+    subject.condition       = 1;
     subject.right_handed    = NaN;
     subject.screen          = screenNumber; % small size screen:1
     subject.name            = 'test';
