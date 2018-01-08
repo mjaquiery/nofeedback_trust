@@ -28,6 +28,7 @@ trial.step              = NaN; % see agreementf.m
 trial.advisorId         = NaN; % the advisor id
 trial.choice            = []; % choice of advisors presented to the judge
 trial.advisorPolitics   = false; % whether the trial shows political info about the advisor
+trial.advisorPoliticsQ  = NaN; % the SECS question for which advice is shown
 trial.taskType          = NaN; % for designs which use multiple tasks, note which kind this is
 
 %% answer variables

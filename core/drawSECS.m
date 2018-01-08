@@ -14,7 +14,7 @@ function t = drawSECS(qnum, pscore, ascore, advisorId)
 % t - screen flip time
 %
 % Draw the sliding scale and labels for the SECS questionnaire
-
+tic();
 if nargin < 4 && nargin > 2, error('No advisorId specified for advisor score'); end
 if nargin < 3, ascore = NaN; end
 if nargin < 2, pscore = NaN; end
@@ -37,6 +37,7 @@ for j = 1:length(cfg.SECS.labels)
     sb = Screen('TextBounds', Sc.window, cfg.SECS.labels{j});
     labelBounds(j) = floor(sb(3)); % we only care about the width here    
 end    
+
 % draw question text
 Screen('TextSize', Sc.window, cfg.SECS.qSize);
 Screen('DrawText', Sc.window, qtxt, Sc.center(1)- (Qbounds(3)/2), cfg.SECS.qy, 0);
@@ -48,6 +49,11 @@ if isnan(ascore)
     Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
     Screen('DrawText', Sc.window, cfg.SECS.prompt, Sc.center(1) - promptBounds(3)/2, ...
         cfg.SECS.by+cfg.instr.Q.position.labelOffsetY, 0);
+    % progress bar and instructions
+    draw_static([1 0 0 0 cfg.SECS.instruction.offsetY]);
+else
+    % progress bar only
+    draw_static([1 0 0 0 0]);
 end
 %add labels
 Screen('TextSize', Sc.window, cfg.instr.textSize.small);
@@ -66,7 +72,7 @@ if ~isnan(pscore)
     % add cursor position
     cursorrect = CenterRectOnPoint([0,0,cfg.SECS.cw,cfg.SECS.ch],...
         Sc.center(1) -((cfg.SECS.ns*cfg.SECS.cw/2)+cfg.SECS.cw) + (pscore * cfg.SECS.cw  + cfg.SECS.cw/2), cfg.SECS.by);
-    if ~isnan(ascore)      
+    if ~isnan(ascore)     
         oldBGColor = Screen('TextBackgroundColor', Sc.window);
         % add a label for the participant's marker
         points = getTriangle([cursorrect(1)+(cursorrect(3)-cursorrect(1))/2, cursorrect(2)-cfg.SECS.cw], 0, [cfg.SECS.cw, cfg.SECS.cw]);
@@ -127,4 +133,3 @@ end
 
 Screen('TextSize', Sc.window, oldTextSize);
 t = Screen('Flip', Sc.window);
-

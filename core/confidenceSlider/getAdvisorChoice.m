@@ -36,7 +36,7 @@ tmin = tnow + 0.25;
 drawPortraitChoiceDisplay(advisorTopId, advisorBottomId, selection);
 
 %% Show mouse pointer
-ShowCursor('Arrow');
+ShowCursorCenter('Arrow');
 
 %% collect response
 while ~(any(buttons) && ~selection==0 && tnow>tmin && validChoice)

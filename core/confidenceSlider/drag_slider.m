@@ -19,16 +19,17 @@ if nargin < 1
     cj1 = [];
 end
 
-%% Show mouse pointer
-ShowCursor('Arrow');
-
 %% initialize variables
 resp = 0; buttons=[]; haschanged=false; hasconfirmed=false;int=0;
 
 %% display cursor
 if isempty(cj1)
+    % Show mouse pointer
+    ShowCursorCenter('Arrow');
     ft = display_response_([haschanged,resp+int]);
 else
+    % Show mouse pointer
+    ShowCursor('Arrow');
     ft = display_response_([haschanged,resp+int],cj1);
 end
 

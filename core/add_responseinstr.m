@@ -1,7 +1,11 @@
 function [] = add_responseinstr(drawCode)
 % Usage:
-% add_responseinstr()
+% add_responseinstr(drawCode)
 % 
+% Inputs:
+% drawCode: 0=don't draw; any other value=y offset (defaults to
+% cfg.instr.instr.position.y)
+%
 % Required fields:
 % cfg.instr.instr.text refers to the response mode instructions 
 % at the bottom of the page.
@@ -12,7 +16,7 @@ function [] = add_responseinstr(drawCode)
 global cfg; % configuration object
 global Sc; % Screen object
 
-if nargin < 1, drawCode = 1; end
+if nargin < 1, drawCode = cfg.instr.instr.position.y; end
 if drawCode == 0, return; end
 
 %% check required fields
@@ -24,8 +28,8 @@ end
 oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.small);
 Screen('TextFont', Sc.window, 'Myriad Pro');
 DrawFormattedText(Sc.window, cfg.instr.instr.text{1}, 'center', ...
-    (Sc.rect(4)).*cfg.bar.positiony+cfg.instr.instr.position.y, 0);
+    (Sc.rect(4)).*cfg.bar.positiony+drawCode, 0);
 DrawFormattedText(Sc.window, cfg.instr.instr.text{2}, 'center', ...
-    (Sc.rect(4)).*cfg.bar.positiony+cfg.instr.instr.position.y+cfg.instr.instr.position.lineHeight, 0);
+    (Sc.rect(4)).*cfg.bar.positiony+drawCode+cfg.instr.instr.position.lineHeight, 0);
 Screen('TextSize', Sc.window, oldTextSize);
 

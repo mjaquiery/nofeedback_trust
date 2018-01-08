@@ -1,6 +1,6 @@
-function showAdvisorPolitics(advisorId)
+function [qnum] = showAdvisorPolitics(advisorId)
 %% Display one political opinion for an advisor
-% - by Matt Jaquiery
+% - Matt Jaquiery, 2017
 %
 % usage: showAdvisorPolitics(advisorId)
 %
@@ -21,41 +21,50 @@ end
 global cfg;
 global SECSscore;
 sigma = 1.94; % derived from human variance information from SECS paper
-qnum = NaN; % question number
-qname = '';
-ascore = NaN; % advisor score
-pscore = NaN; % participant score
 
-if ~isfield(cfg.advisor(advisorId), 'SECSscore') || ~length(cfg.advisor(advisorId).SECSscore)
+if ~isfield(cfg.advisor(advisorId), 'SECSscore') || isempty(cfg.advisor(advisorId).SECSscore)
     % If the advisor has no opinions, create the skeleton
     cfg.advisor(advisorId).SECSscore.names = fields(SECSscore);
     cfg.advisor(advisorId).SECSscore.values = NaN(1,length(cfg.advisor(advisorId).SECSscore.names));
 end
 
-if ~isempty(find(isnan(cfg.advisor(advisorId).SECSscore.values)))
+if ~isempty(find(isnan(cfg.advisor(advisorId).SECSscore.values), 1))
     % Empty option available; calculate that and fill it in
     nans = find(isnan(cfg.advisor(advisorId).SECSscore.values));
     % get a random unfilled field
     qnum = randi([1, length(nans)]);
-    qnum = nans(qnum)
-    qname = cfg.advisor(advisorId).SECSscore.names{qnum}
+    qnum = nans(qnum);
+    qname = cfg.advisor(advisorId).SECSscore.names{qnum};
     % find the participant's score for that field
     pscore = SECSscore.(qname).score;
-    if cfg.advisor(advisorId).adviceType == 1
-        % advisor answer is close to participant's
-        ascore = normrnd(pscore, sigma);
-    else
-        % advisor answer is half a scale removed from participant's
-        ascore = normrnd(abs(pscore - 5), sigma);
+    % handle reverse scored items correctly
+    if SECSscore.(qname).reverse_scored
+        pscore = abs(pscore - cfg.SECS.maxS);
+    end
+    switch cfg.advisor(advisorId).adviceType 
+        case 1
+            % advisor answer is close to participant's
+            % min and max here cap the score to the scale limits (prevents
+            % wrapping)
+            ascore = min([max([normrnd(pscore, sigma) cfg.SECS.minS]) cfg.SECS.maxS]);
+        case 3        
+            ascore = min([max([normrnd(pscore, sigma*10) cfg.SECS.minS]) cfg.SECS.maxS]);
+        otherwise
+            % advisor answer is half a scale removed from participant's
+            ascore = abs(min([max([normrnd(pscore, sigma) cfg.SECS.minS]) cfg.SECS.maxS]) - cfg.SECS.maxS);
     end
     %round(ascore/10); % round score to the nearest 10
-    cfg.advisor(advisorId).SECSscore.values(qnum) = ascore; 
+    cfg.advisor(advisorId).SECSscore.values(qnum) = round(ascore); 
 else
     % No empty option, so issue a warning and repeat a value at random
-    qnum = randi([1, length(cfg.advisor(advisorId).SECSscore.values)])
-    qname = cfg.advisor(advisorId).SECSscore.names{qnum}
+    qnum = randi([1, length(cfg.advisor(advisorId).SECSscore.values)]);
+    qname = cfg.advisor(advisorId).SECSscore.names{qnum};
     % find the scores for that field
     pscore = SECSscore.(qname).score;
+    % handle reverse scored items correctly
+    if SECSscore.(qname).reverse_scored
+        pscore = abs(pscore - cfg.SECS.maxS);
+    end
     ascore = cfg.advisor(advisorId).SECSscore.values(qnum);
 end
 

@@ -85,11 +85,21 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 %estimated_obsacc();
 
 global SECSscore;
-% [a, b, SECSscore] = SECS();
+[a, b, SECSscore] = SECS(true);
 
-showAdvisorPolitics(1);
-
-KbWait();
+while true
+    showAdvisorPolitics(randi(cfg.advisors.count.real));
+    KbWait();
+    [keydown, ~, key] = KbCheck();
+    if keydown
+        key = KbName(key);
+        if iscell(key), key = key{1}; end
+        switch key 
+            case 'ESCAPE'
+                break;
+        end
+    end
+end
 
 % collect response
 % if(cfg.debug)   disp('Collecting first response...'); end

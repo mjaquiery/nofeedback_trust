@@ -10,9 +10,9 @@
 clear all;
 close all;
 clc;
-experimentName = 'HaloEffect';
+%experimentName = 'HaloEffect';
 %experimentName = 'AdvisorChoice';
-%experimentName = 'PoliticalDifferences';
+experimentName = 'PoliticalDifferences';
 forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 1;
@@ -24,9 +24,9 @@ switch pathRoot
     case 'MattHome'  
         my_path = 'G:\Documents\University\Programming\nofeedback_trust_matt\'; % working directory
         if ~feedbackEnabled
-            results_path = 'G:\Documents\University\Oxford\Work\matlabResults\';
+            results_path = ['D:\Users\MJ\Filr\My Files\Results\' experimentName];
         else
-            results_path = 'G:\Documents\University\Oxford\Work\matlabResults\Feedback\';
+            results_path = ['D:\Users\MJ\Filr\My Files\Results\' experimentName '\Feedback\'];
         end
         stims_path    = [my_path 'stims'];
         osSlash = '\'; 
@@ -35,9 +35,9 @@ switch pathRoot
     case 'MattWork'
         my_path = 'C:\Users\mj221\Documents\Programming\MATLAB\nofeedback_trust\'; % working directory
         if ~feedbackEnabled
-            results_path = 'C:\Users\mj221\Filr\My Files\Results\AdvisorChoice';
+            results_path = ['C:\Users\mj221\Filr\My Files\Results\' experimentName];
         else  
-            results_path = 'C:\Users\mj221\Filr\My Files\Results\AdvisorChoice\';
+            results_path = ['C:\Users\mj221\Filr\My Files\Results\' experimentName '\Feedback\'];
         end
         stims_path    = [my_path 'stims']; 
         osSlash = '\';

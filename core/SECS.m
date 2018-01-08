@@ -1,12 +1,14 @@
-function [score, score_breakdown, answers] = SECS(showInstructions)
-%% Presentation of the Social + Economic Conseravtism Scale
-% - by Matt Jaquiery
+function [score, score_breakdown, answers] = SECS(showInstructions, showGuns)
+%% Presentation of the Social + Economic Conservatism Scale
+% Matt Jaquiery, 2017
 %
-% usage: [score, score_breakdown, answers] = SECS([showInstructions])
+% usage: [score, score_breakdown, answers] = SECS([showInstructions[, showGuns]])
 %
 % Inputs:
 % showInstructions: whether to show participant instructions for filling in
 % the SECS. Defaults to false.
+% showGuns: whether to include gun control questions in SECS. Defaults to
+% false.
 %
 % Outputs: 
 % score: the raw score obtained by the participant
@@ -39,9 +41,10 @@ function [score, score_breakdown, answers] = SECS(showInstructions)
 global cfg; % configuration object
 global Sc; % screen object
 
+if nargin < 2, showGuns = false; end
 if nargin < 1, showInstructions = 0; end
 
-defineSECS();
+defineSECS(showGuns);
 
 if showInstructions
     instructions('SECS');
@@ -52,7 +55,6 @@ answers = struct;
 Screen('Flip', Sc.window);
 oldTextSize = Screen('TextSize',Sc.window);
 Screen('TextFont', Sc.window, 'Myriad Pro');
-ShowCursor('Arrow');
 
 %% Show questionnaire
 for ii = 1: length(cfg.SECS.questions.text)
@@ -66,7 +68,9 @@ for ii = 1: length(cfg.SECS.questions.text)
     name = cfg.SECS.questions.name{cfg.SECS.question_order(ii)};
     haschanged = false;   % to avoid automatic responses
     onset_t = NaN;
-  
+    [~, y] = GetMouse();
+    ShowCursorCenter('Arrow', [Sc.center(1), y]);
+    
     %% detect response
     while true
         [x, ~, buttons] = GetMouseWrapper;

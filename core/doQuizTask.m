@@ -55,7 +55,7 @@ drawQuiz(Q, L, R);
 trials(t).time_starttrial = Screen('Flip', Sc.window);
 
 WaitSecs(cfg.stim.quiz.RSI1);
-ShowCursor('Arrow');
+ShowCursorCenter('Arrow');
 
 %% Get a first answer
 lastResponse = NaN;

@@ -14,10 +14,12 @@ global Sc; % Screen object
 
 % input parameter screen
 if nargin < 2, stage = 1; end
-if class(block)~='double'
-    inst = cfg.specialInstructions.(block);
-else
+if nargin < 1, error('No instruction set specified.'); end
+
+if isa(block,'double')
     inst = cfg.intro{block};
+else
+    inst = cfg.specialInstructions.(block);
 end
 % make and draw the stage instructions
 a = imread(inst{stage});

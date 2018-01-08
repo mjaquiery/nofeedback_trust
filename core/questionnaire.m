@@ -14,6 +14,7 @@ function questionnaire(advisorId)
 global cfg;
 global Sc;
 
+if nargin < 2, futureTense = 0; end
 if nargin < 1, advisorId = NaN; end
 
 %%
@@ -29,23 +30,23 @@ advisorCenter = [Sc.center(1) cfg.instr.Q.position.advisorY];
 Screen('Flip', Sc.window);
 oldTextSize = Screen('TextSize',Sc.window,cfg.instr.textSize.small);
 Screen('TextFont', Sc.window, 'Myriad Pro');
-ShowCursor('Arrow');
 id=0;
 question=[];
 if isnan(advisorId)
     for obs= 1 : cfg.advisors.count.real
         for q = 1: 4
-            id          = id+1;
-            question(id).id = id;
-            question(id).obs = obs;
-            question(id).quest = q;
+            id                  = id+1;
+            question(id).id     = id;
+            question(id).obs    = obs;
+            question(id).quest  = q;
         end
     end
 else
     for q = 1:4        
-        question(q).id = 1;
-        question(q).obs = advisorId;
-        question(q).quest = q;
+        id                  = id + 1;
+        question(q).id      = id;
+        question(q).obs     = advisorId;
+        question(q).quest   = q;
     end
 end
 question = question(randperm(length(question))); % randomize questions presentation
@@ -60,8 +61,9 @@ for ii = 1: length(question)
     question(ii).response_t = NaN;              % initialize response time variable
     question(ii).onset_t = NaN;
     
-    if cfg.currenttrial.block == 3
+    if ~cfg.advisor(advisorId).firstQuestionnaireDone
         questionList = cfg.instr.Q.q.pro.text;
+        cfg.advisor(advisorId).firstQuestionnaireDone = true;
     else
         questionList = cfg.instr.Q.q.retro.text;
     end
@@ -80,6 +82,9 @@ for ii = 1: length(question)
     Ibounds{1}  = Screen('TextBounds',Sc.window,inst{1});
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
   
+    % show cursor
+    ShowCursorCenter('Arrow');
+    
     while true
         [x, ~, buttons] = GetMouseWrapper;
         [keydown, question(ii).response_t, keycode] = KbCheck;
@@ -164,9 +169,14 @@ for ii = 1: length(question)
     end
     WaitSecs(0.5);
 end
+% sort questions in the original order
 [Y, I] = sort([question.id]);
-question(1:cfg.advisors.count.real*length(questionList)) = question(I); % sort questions in the original order
-cfg.currenttrial.qanswers = question;
+if isnan(advisorId)
+    question(1:cfg.advisors.count.real*length(questionList)) = question(I); 
+else
+    question(1:length(questionList)) = question(I);
+end
+cfg.currentTrial.qanswers = question;
 
 %% pause before next stimuli session
 Screen('TextSize',Sc.window,cfg.instr.textSize.medium);

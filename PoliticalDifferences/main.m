@@ -19,6 +19,7 @@ Sc = start_psychtb(subject.screen, forceResolution);
 
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global cfg;
+set_cfg_shared
 set_cfg_settings
 
 %% Read in audio files
@@ -80,7 +81,6 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %% Present the SECS questionnaire
 global SECSscore;
-[~, ~, SECSscore] = SECS();
 
 for t = starttrial:length(trials)
     disp(['text color: ' int2str(sum(Screen('TextColor',Sc.window)))]);
@@ -99,11 +99,13 @@ for t = starttrial:length(trials)
         end
         disp(['agree?: ' num2str(trials(t-1).agree)]);
         disp('------------------------------------------');
+    else
+        [~, ~, SECSscore] = SECS(true); % get political leaning responses
     end
     %% save and break
     if trials(t).break
         %% Save dataon break trials
-        save([cfg.path.results subject.dir subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't', 'SECSscore')
+        save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't', 'SECSscore')
         %% break
         Screen('TextSize',Sc.window,18);
         DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
@@ -130,7 +132,7 @@ for t = starttrial:length(trials)
     end
     %% questionnaire
     if trials(t).questionnaire
-        if isnan(trials(t).advisorId) % this trial is a null trial
+        if isnan(trials(t).advisorId) % this trial is a null trial so search for the appropriate questionnaire
            for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t-1
                if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
                    questionnaire(trials(n).advisorId);
@@ -140,18 +142,19 @@ for t = starttrial:length(trials)
         else
             questionnaire(trials(t).advisorId);
         end
+        trials(t) = cfg.currentTrial; % update the trial with the results
     end
     %% advisor political information
     if trials(t).advisorPolitics
         if isnan(trials(t-1).advisorId) % last trial was a null trial so search for a trial with an advisorId
            for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t+cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null)
                if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
-                   showAdvisorPolitics(trials(t).advisorId);
+                   trials(t).advisorPoliticsQ = showAdvisorPolitics(trials(t).advisorId);
                    break;
                end
            end
         else
-            showAdvisorPolitics(trials(t).advisorId);
+            trials(t).advisorPoliticsQ = showAdvisorPolitics(trials(t).advisorId);
         end
         WaitSecs(3);
     end
@@ -304,13 +307,13 @@ for t = starttrial:length(trials)
 end
 
 % save temporary final file
-save([cfg.path.results subject.dir subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't','SECSscore');
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't','SECSscore');
 
 % collect estimated observers accuracy
 trials(t).estim_obsacc = estimated_obsacc();
 
 %% save final file
-save([cfg.path.results subject.dir subject.fileName '_final'],'subject','cfg','trials','SECSscore');
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'],'subject','cfg','trials','SECSscore');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks
