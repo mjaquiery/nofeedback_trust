@@ -313,7 +313,11 @@ save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(
 trials(t).estim_obsacc = estimated_obsacc();
 
 %% save final file
-save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'],'subject','cfg','trials','SECSscore');
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'], 'subject', 'cfg', 'trials', 'SECSscore');
+% prepare data for R
+addpath([cfg.path.base experimentName osSlash 'analysis']);
+[cfg, subject, trials] = prepR(cfg, subject, trials);
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final_R'], 'subject', 'cfg', 'trials', 'SECSscore');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks

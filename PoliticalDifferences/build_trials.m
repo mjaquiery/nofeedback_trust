@@ -6,9 +6,10 @@ trialid = 0;
 for b = 1: cfg.practice.block_count
     block_trials0 = []; %clear vector
     for t = 1:cfg.practice.trial_count
-        trialid                                 = trialid+1;
+        trialid = trialid+1;
         block_trials0 = [block_trials0 getNewTrial(trialid, b)];
         block_trials0(end).feedback = true;
+        block_trials0(end).practice = true;
         if b > 1
             block_trials0(end).advisorId = cfg.advisors.count.real+1;
         end
