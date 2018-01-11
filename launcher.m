@@ -18,7 +18,7 @@ forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 1;
 shortMode = 1;
-pathRoot = 'MattHome';
+pathRoot = 'AlexLaptop';
 
 %% set path   
 switch pathRoot
