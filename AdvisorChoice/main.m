@@ -272,7 +272,7 @@ for t = starttrial:length(trials)
     
     %% feedback
     if trials(t).block<3
-        if ~trials(t).cor, Beeper; end
+        if ~trials(t).cor, playFeedback(); end
         %colors=[.8 .2 .2;.2 .8 .2];
         PsychPortAudio('Close');
     end

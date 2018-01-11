@@ -131,6 +131,9 @@ cfg.path.base               = my_path;
 cfg.path.results            = results_path;
 cfg.path.stims              = stims_path;
 
+%% Audio files
+cfg.audio.feedback.negative = [stims_path osSlash 'sounds' osSlash 'feedbackNegative.wav'];
+
 % bar and cursor settings
 define_scale
 

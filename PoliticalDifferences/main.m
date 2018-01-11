@@ -101,7 +101,6 @@ for t = starttrial:length(trials)
         disp(['agree?: ' num2str(trials(t-1).agree)]);
         disp('------------------------------------------');
     else
-        Beeper();
         [~, ~, SECSscore] = SECS(true); % get political leaning responses
     end
     %% save and break
@@ -302,7 +301,7 @@ for t = starttrial:length(trials)
     
     %% feedback
     if trials(t).block<3
-        if ~trials(t).cor, Beeper(); end
+        if ~trials(t).cor, playFeedback(); end
         %colors=[.8 .2 .2;.2 .8 .2];
         PsychPortAudio('Close');
     end

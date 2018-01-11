@@ -16,7 +16,7 @@ cfg.instr.chooseAdvisor.text    = {'Click on one of the advisors to hear their a
 
 cfg.instr.instr.text            = {'Left click with your mouse to make a decision.' ...
     'Press spacebar to confirm response.'};
-cfg.instr.instr.position.y          = 180;
+cfg.instr.instr.position.y          = 80;
 cfg.instr.instr.position.lineHeight = 20;
 
 cfg.instr.estimated_obsacc.text = {'Your overall baseline accuracy (before any advice) was 71%' ...
