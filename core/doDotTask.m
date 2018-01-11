@@ -153,7 +153,7 @@ cfg.currentTrial = trials(t);
 
 %% feedback
 if trials(t).feedback
-    if ~trials(t).cor, Beeper; end
+    if ~trials(t).cor, playFeedback(); end
     %colors=[.8 .2 .2;.2 .8 .2];
 end
 

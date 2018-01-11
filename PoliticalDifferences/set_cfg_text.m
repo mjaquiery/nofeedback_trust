@@ -43,7 +43,7 @@ cfg.instr.Q.q.pro.text          = {'How accurate do you think this person will b
             'How trustworthy will be the opinions of this person?'...
             'How much will you be influenced by the opinions of this person?'};
 cfg.instr.Q.a.text              = {'Extremely' 'Fairly' 'Not so much' 'Not at all'};
-cfg.instr.Q.position.instr.y        = Sc.size(2)*.9;
+cfg.instr.Q.position.instr.y        = 600*.9;
 cfg.instr.Q.position.instr.gap      = 30;
 cfg.instr.Q.position.labelOffsetY   = 40; % distance between questionnaire bar and labels
 cfg.instr.Q.position.advisorY       = Sc.size(2)*.05+cfg.display.portrait.height/2; % centre of the advisor portrait
