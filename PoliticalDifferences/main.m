@@ -48,7 +48,8 @@ Screen('TextColor',Sc.window,cfg.instr.textColor.default);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cfg.fps = Sc.fps;                                                               % refresh rate (Hz). IMPORTANT! Make sure this value equals the RR of the screen used AND the RR in the start_psychtb.m function
-cfg.frame = (1/cfg.fps);                                                     % average duration (ms) of a frame
+cfg.frame = (1/cfg.fps); % average duration (ms) of a frame
+if isinf(cfg.frame), cfg.frame = 1/59.9; end
 if ~isempty(subject.id)
     ListenChar(2);
     HideCursor();
@@ -149,12 +150,12 @@ for t = starttrial:length(trials)
         if isnan(trials(t-1).advisorId) % last trial was a null trial so search for a trial with an advisorId
            for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t+cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null)
                if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
-                   trials(t).advisorPoliticsQ = showAdvisorPolitics(trials(t).advisorId);
+                   trials(t).advisorPoliticsQ = showAdvisorPolitics(trials(n).advisorId);
                    break;
                end
            end
         else
-            trials(t).advisorPoliticsQ = showAdvisorPolitics(trials(t).advisorId);
+            trials(t).advisorPoliticsQ = showAdvisorPolitics(trials(t-1).advisorId);
         end
         WaitSecs(3);
     end
@@ -225,9 +226,9 @@ for t = starttrial:length(trials)
     cfg.currentTrial = trials(t);
         
     %% Advisor stuff
-    if trials(t).block>1
+    %if trials(t).block>1
         PsychPortAudio('Close');
-    end
+    %end
     
     %% Choice of advisor
     if ~isempty(trials(t).choice)
@@ -300,7 +301,7 @@ for t = starttrial:length(trials)
     
     %% feedback
     if trials(t).block<3
-        if ~trials(t).cor, Beeper; end
+        if ~trials(t).cor, playFeedback(); end
         %colors=[.8 .2 .2;.2 .8 .2];
         PsychPortAudio('Close');
     end
