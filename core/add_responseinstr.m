@@ -28,8 +28,8 @@ end
 oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.small);
 Screen('TextFont', Sc.window, 'Myriad Pro');
 DrawFormattedText(Sc.window, cfg.instr.instr.text{1}, 'center', ...
-    (Sc.rect(4)).*cfg.bar.positiony+drawCode, 0);
+    (Sc.rect(4)*cfg.bar.positiony)+drawCode, 0);
 DrawFormattedText(Sc.window, cfg.instr.instr.text{2}, 'center', ...
-    (Sc.rect(4)).*cfg.bar.positiony+drawCode+cfg.instr.instr.position.lineHeight, 0);
+    (Sc.rect(4)*cfg.bar.positiony)+drawCode+cfg.instr.instr.position.lineHeight, 0);
 Screen('TextSize', Sc.window, oldTextSize);
 

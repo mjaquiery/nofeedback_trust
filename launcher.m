@@ -13,11 +13,12 @@ clc;
 %experimentName = 'HaloEffect';
 %experimentName = 'AdvisorChoice';
 experimentName = 'PoliticalDifferences';
-forceResolution = [1300 600];
+forceResolution = [];
+%forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 1;
 shortMode = 1;
-pathRoot = 'MattHome';
+pathRoot = 'AlexLaptop';
 
 %% set path   
 switch pathRoot
@@ -42,6 +43,14 @@ switch pathRoot
         stims_path    = [my_path 'stims']; 
         osSlash = '\';
         screenNumber = 1;
+        
+    case 'AlexLaptop'
+        my_path = '/Users/Alex/Documents/MATLAB/Research Project/';
+        results_path = ['/Users/Alex/Documents/MATLAB/Research Project/Results/' experimentName];
+        stims_path = [my_path 'stims'];
+        osSlash = '/';
+        screenNumber = 0;
+        Screen('Preference', 'SkipSyncTests', 1);
 end
 
 warning('off','MATLAB:rmpath:DirNotFound')
@@ -55,5 +64,5 @@ addpath(genpath([my_path 'core'])); % add core files
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-screenTests
-%main
+%screenTests
+main

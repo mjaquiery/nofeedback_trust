@@ -37,8 +37,8 @@ end
 %%-- saving directory
 subject.dir = subject.name;
 % create directory if does not already exist
-if ~exist([results_path subject.dir], 'dir') 
-    mkdir([results_path subject.dir]);
+if ~exist([results_path osSlash subject.dir], 'dir') 
+    mkdir([results_path osSlash subject.dir]);
 end
 
 %-- Unique filename depending on computer clock (avoids overwriting)
