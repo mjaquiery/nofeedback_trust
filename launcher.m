@@ -46,7 +46,7 @@ switch pathRoot
         
     case 'AlexLaptop'
         my_path = '/Users/Alex/Documents/MATLAB/Project/';
-        results_path = ['/Users/Alex/Documents/MATLAB/Project/Results/' experimentName];
+        results_path = ['/Users/Alex/Documents/MATLAB/Results/' experimentName];
         stims_path = [my_path 'stims'];
         osSlash = '/';
         screenNumber = 0;

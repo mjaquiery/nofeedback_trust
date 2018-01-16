@@ -19,6 +19,7 @@ Sc = start_psychtb(subject.screen, forceResolution);
 
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global cfg;
+set_cfg_shared
 set_cfg_settings
 
 %% Read in audio files
