@@ -39,7 +39,7 @@ build_trials
 % in case experiment was restarted after crash
 if (subject.restarted)
     load([pathname filename]);
-    starttrial = t;
+    starttrial = cfg.currentTrialNumber;
     cfg.restarted = 1;
 else
     starttrial=1;
