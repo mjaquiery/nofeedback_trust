@@ -12,6 +12,10 @@ AssertOpenGL;
 %% Subjects' details and directory
 create_subject_directory
 
+if (subject.restarted)
+    [filename, pathname] = uigetfile('*.mat', 'Pick last saved file '); 
+    % loaded below to stop values being overwritten by defaults
+end
 tic
 %%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global Sc;
@@ -34,7 +38,6 @@ build_trials
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % in case experiment was restarted after crash
 if (subject.restarted)
-    [filename, pathname] = uigetfile('*.mat', 'Pick last saved file ');
     load([pathname filename]);
     starttrial = t;
     cfg.restarted = 1;

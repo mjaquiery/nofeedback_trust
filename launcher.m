@@ -16,8 +16,8 @@ experimentName = 'PoliticalDifferences';
 forceResolution = [];
 %forceResolution = [1300 600];
 feedbackEnabled = 0; 
-debugMode = 1;
-shortMode = 1;
+debugMode = 0;
+shortMode = 0;
 pathRoot = 'AlexLaptop';
 
 %% set path   
