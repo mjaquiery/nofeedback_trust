@@ -41,7 +41,7 @@ if ~isempty(find(isnan(cfg.advisor(advisorId).SECSscore.values), 1))
     if SECSscore.(qname).reverse_scored
         pscore = abs(pscore - cfg.SECS.maxS);
     end
-    switch cfg.advisor(advisorId).adviceType 
+    switch cfg.advisor(advisorId).politicsSimilarity 
         case 1
             % advisor answer is close to participant's
             % min and max here cap the score to the scale limits (prevents
@@ -51,7 +51,14 @@ if ~isempty(find(isnan(cfg.advisor(advisorId).SECSscore.values), 1))
             ascore = min([max([normrnd(pscore, sigma*10) cfg.SECS.minS]) cfg.SECS.maxS]);
         otherwise
             % advisor answer is half a scale removed from participant's
-            ascore = abs(min([max([normrnd(pscore, sigma) cfg.SECS.minS]) cfg.SECS.maxS]) - cfg.SECS.maxS);
+            ascore = normrnd(pscore, sigma);
+            if cfg.advisor(advisorId).politicsLeaning == 1
+                ascore = ascore - (cfg.SECS.maxS - cfg.SECS.minS)/2;
+            else
+                ascore = ascore + (cfg.SECS.maxS - cfg.SECS.minS)/2;
+            end
+            if ascore < cfg.SECS.minS, ascore = cfg.SECS.maxS + ascore; end
+            if ascore > cfg.SECS.maxS, ascore = ascore - cfg.SECS.maxS; end
     end
     %round(ascore/10); % round score to the nearest 10
     cfg.advisor(advisorId).SECSscore.values(qnum) = round(ascore); 

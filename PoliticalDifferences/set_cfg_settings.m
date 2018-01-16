@@ -55,11 +55,14 @@ voice = randperm(cfg.advisors.count.all);
 for i = 1:cfg.advisors.count.all
     cfg.advisor(i).id = i;
     cfg.advisor(i).adviceType = i; % skip baseline advisor
+    cfg.advisor(i).politicsSimilarity = i;
+    cfg.advisor(i).politicsLeaning = randi(2);
     cfg.advisor(i).pic = pic(i);
     cfg.advisor(i).voice = voice(i);
     cfg.advisor(i).name = getAdvisorName(cfg.advisor(i).voice);
     if i > cfg.advisors.count.real  
         cfg.advisor(i).adviceType = 0; % practice advisor is unbiased - always 70|30
+        cfg.advisor(i).politicsType = 0;
     end
 end
 % don't forget the 'no advice' and 'no choice' advisors
