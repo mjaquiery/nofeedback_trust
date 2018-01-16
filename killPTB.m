@@ -1,3 +1,4 @@
+PsychPortAudio('Close');
 Screen('CloseAll');
 ListenChar(0);
 DisableKeysForKbCheck([]);
