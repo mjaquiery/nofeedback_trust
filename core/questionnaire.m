@@ -14,7 +14,6 @@ function questionnaire(advisorId)
 global cfg;
 global Sc;
 
-if nargin < 2, futureTense = 0; end
 if nargin < 1, advisorId = NaN; end
 
 %%
@@ -61,9 +60,8 @@ for ii = 1: length(question)
     question(ii).response_t = NaN;              % initialize response time variable
     question(ii).onset_t = NaN;
     
-    if ~cfg.advisor(advisorId).firstQuestionnaireDone
+    if ~cfg.advisor(obs).firstQuestionnaireDone
         questionList = cfg.instr.Q.q.pro.text;
-        cfg.advisor(advisorId).firstQuestionnaireDone = true;
     else
         questionList = cfg.instr.Q.q.retro.text;
     end
@@ -172,9 +170,13 @@ end
 % sort questions in the original order
 [Y, I] = sort([question.id]);
 if isnan(advisorId)
-    question(1:cfg.advisors.count.real*length(questionList)) = question(I); 
+    question(1:cfg.advisors.count.real*length(questionList)) = question(I);
+    for i = 1:cfg.advisors.count.real
+        cfg.advisor(i).firstQuestionnaireDone = true;
+    end
 else
     question(1:length(questionList)) = question(I);
+    cfg.advisor(advisorId).firstQuestionnaireDone = true;
 end
 cfg.currentTrial.qanswers = question;
 

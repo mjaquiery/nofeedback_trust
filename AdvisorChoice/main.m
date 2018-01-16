@@ -11,6 +11,9 @@ AssertOpenGL;
 
 %% Subjects' details and directory
 create_subject_directory
+if subject.restarted
+    [filename, pathname] = uigetfile('*.mat', 'Pick last saved file ');
+end
 
 tic
 %%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,9 +37,8 @@ build_trials
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % in case experiment was restarted after crash
 if (subject.restarted)
-    [filename, pathname] = uigetfile('*.mat', 'Pick last saved file ');
     load([pathname filename]);
-    starttrial = t;
+    starttrial = cfg.currentTrialNumber;
     cfg.restarted = 1;
 else
     starttrial=1;
@@ -98,15 +100,17 @@ for t = starttrial:length(trials)
         disp('------------------------------------------');
     end
     %% save and break
-    if trials(t).break
-        %% Save dataon break trials
-        save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
-        %% break
-        Screen('TextSize',Sc.window,18);
-        DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
-        Screen('Flip', Sc.window);
-        collect_response(inf);
-        feedback_interblock
+    if trials(t).break || ~mod(t,20)
+        %% Save data on break trials and every 20th trial
+        save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(t)],'trials', 'cfg', 'subject')
+        if trials(t).break
+            %% break
+            Screen('TextSize',Sc.window,18);
+            DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
+            Screen('Flip', Sc.window);
+            collect_response(inf);
+            feedback_interblock
+        end
     end
     %% instructions
     if trials(t).instr
@@ -272,13 +276,16 @@ end
 questionnaire
 
 % save temporary final file
-save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(t)],'trials', 'cfg', 'subject');
 
 % collect estimated observers accuracy
 trials(t).estim_obsacc = estimated_obsacc();
 
 %% save final file
 save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'],'subject','cfg','trials');
+% prepare data for R
+[cfg, subject, trials] = prepR(cfg, subject, trials);
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final_R'], 'subject', 'cfg', 'trials');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks
