@@ -8,7 +8,6 @@
 %% PTB compatibility
 % check for Opengl compatibility, abort otherwise
 AssertOpenGL;        
-
           
 %% Subjects' details and directory
 create_subject_directory
@@ -21,6 +20,7 @@ Screen('Preference','SuppressAllWarnings', 1);
 
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global cfg;
+set_cfg_shared
 set_cfg_settings
 
 %% Read in audio files
@@ -83,6 +83,8 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 %getAdvisorChoice(NaN, 2);
 
 %estimated_obsacc();
+
+playFeedback();
 
 global SECSscore;
 [a, b, SECSscore] = SECS(true);

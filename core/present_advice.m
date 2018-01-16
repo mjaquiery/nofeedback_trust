@@ -16,6 +16,8 @@ trials(t).onsetobsspeech = PsychPortAudio('Start', trials(t).whichspeech, 1,GetS
 % with precise durations
 [startTime, trials(t).offset_speech, xruns, ~] = PsychPortAudio('Stop', trials(t).whichspeech,1); %[startTime endPositionSecs xruns estStopTime] = PsychPortAudio('Stop', pahandle [, waitForEndOfPlayback=0] [, blockUntilStopped=1] [, repetitions] [, stopTime]);
 
+PsychPortAudio('Close');
+
 % draw static elements
 draw_static(mask2);
 

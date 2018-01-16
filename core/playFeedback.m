@@ -30,7 +30,6 @@ if length(audio) < type || isempty(audio(type).wav)
     audio(type).freq = freq;
     fprintf('Loaded file %s', pth);
 end
-audio(type)
 % load the wav data
 wavedata = audio(type).wav;
 freq = audio(type).freq;

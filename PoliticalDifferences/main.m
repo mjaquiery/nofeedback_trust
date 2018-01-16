@@ -20,7 +20,6 @@ tic
 %%%%%%%%%%%%%%%%%%%%%%%  start PTB   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global Sc;
 Sc = start_psychtb(subject.screen, forceResolution);
-
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global cfg;
 set_cfg_shared
@@ -227,12 +226,7 @@ for t = starttrial:length(trials)
     
     % update trial description for debugging
     cfg.currentTrial = trials(t);
-        
-    %% Advisor stuff
-    %if trials(t).block>1
-        PsychPortAudio('Close');
-    %end
-    
+            
     %% Choice of advisor
     if ~isempty(trials(t).choice)
         % get the judge's choice
@@ -259,17 +253,13 @@ for t = starttrial:length(trials)
         trials(t).step   = NaN;
     end
     
-    %% load the observer
-    if trials(t).block > 1
-        load_observer_audio;
-    end
-    
     % update trial description for debugging
     cfg.currentTrial = trials(t);
         
     %% Advice and final decision
     if trials(t).block > 1 
         if ~isnan(trials(t).advisorId)
+            load_observer_audio;
             present_advice;
             
             % prompt new confidence judgment
@@ -300,13 +290,11 @@ for t = starttrial:length(trials)
     
     %--close audio/screen buffers
     Screen('Close');
-    resetPPA;
     
     %% feedback
     if trials(t).block<3
         if ~trials(t).cor, playFeedback(); end
         %colors=[.8 .2 .2;.2 .8 .2];
-        PsychPortAudio('Close');
     end
 end
 

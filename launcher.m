@@ -11,14 +11,14 @@ clear all;
 close all;
 clc;
 %experimentName = 'HaloEffect';
-%experimentName = 'AdvisorChoice';
-experimentName = 'PoliticalDifferences';
-forceResolution = [];
-%forceResolution = [1300 600];
+experimentName = 'AdvisorChoice';
+%experimentName = 'PoliticalDifferences';
+%forceResolution = [];
+forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 0;
 shortMode = 0;
-pathRoot = 'AlexLaptop';
+pathRoot = 'MattWork';
 
 %% set path   
 switch pathRoot
