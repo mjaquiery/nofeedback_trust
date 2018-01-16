@@ -10,6 +10,7 @@ for b = 1: cfg.practice.block_count
         block_trials0 = [block_trials0 getNewTrial(trialid, b)];
         block_trials0(end).taskType = cfg.block.taskType(b);
         block_trials0(end).feedback = true;
+        block_trials0(end).practice = true;
         if b > 1
             block_trials0(end).advisorId = cfg.advisors.count.real+1;
         end
