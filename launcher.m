@@ -18,7 +18,7 @@ forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 0;
 shortMode = 0;
-pathRoot = 'MattWork';
+pathRoot = 'MattLaptop';
 
 %% set path   
 switch pathRoot
@@ -43,6 +43,17 @@ switch pathRoot
         stims_path    = [my_path 'stims']; 
         osSlash = '\';
         screenNumber = 1;
+        
+    case 'MattLaptop'
+        my_path = 'C:\Users\micro\Documents\MATLAB\nofeedback_trust\'; % working directory
+        if ~feedbackEnabled
+            results_path = ['C:\Users\micro\Documents\Results\' experimentName];
+        else  
+            results_path = ['C:\Users\micro\Documents\Results\' experimentName '\Feedback\'];
+        end
+        stims_path    = [my_path 'stims']; 
+        osSlash = '\';
+        screenNumber = 0;
         
     case 'AlexLaptop'
         my_path = '/Users/Alex/Documents/MATLAB/Project/';
