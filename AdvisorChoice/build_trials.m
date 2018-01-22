@@ -11,8 +11,12 @@ for b = 1: cfg.practice.block_count
         block_trials0(end).feedback = true;
         block_trials0(end).practice = true;
         if b > 1
-            block_trials0(end).advisorId = getRandomAdvisor(cfg, 2);
-            block_trials0(end).choice = [0 block_trials0(end).advisorId];
+            if cfg.practice.allowChoice
+                block_trials0(end).choice = [cfg.advisors.count.real+1:cfg.advisors.count.all];
+            else
+                block_trials0(end).advisorId = getRandomAdvisor(2);
+                block_trials0(end).choice = [0 block_trials0(end).advisorId];
+            end
             block_trials0(end).choice = block_trials0(end).choice(randperm(2));
         end
     end

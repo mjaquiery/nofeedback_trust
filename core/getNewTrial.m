@@ -33,18 +33,27 @@ trial.advisorPoliticsQ  = NaN; % the SECS question for which advice is shown
 trial.taskType          = NaN; % for designs which use multiple tasks, note which kind this is
 
 %% answer variables
-trial.cor               = NaN; % whether the trial was correct (summarises .cor1 and .cor2)
-trial.qanswers          = []; % answers to questionnaires
 trial.cj1               = []; % confidence judgement 1
-trial.cor1               = NaN; % whether trial was correct
+trial.cj2               = NaN;
+trial.cor               = NaN; % whether the trial was correct (summarises .cor1 and .cor2)
+trial.cor1              = NaN; % whether trial 1 was correct
+trial.cor2              = NaN;
 trial.choiceDecision    = NaN; % judge's choice of advisor (1=left or 2=right)
 trial.choiceTime        = NaN; % time the judge's choice of advisor was made
 trial.estim_obsacc      = []; % estimated accuracy of the advisor
-trial.resp2_time        = NaN;
-trial.cj2               = NaN;
-trial.cor2              = NaN;
+trial.int1              = NaN; % interval (which side) the 1st judgement was
 trial.int2              = NaN;
-trial.responded2        = NaN;
-trial.rt2               = NaN;
-trial.resp_advice_rt    = NaN;
 trial.offset_speech     = NaN;
+trial.offsetstim        = NaN; % (target) time the stimulus is removed
+trial.onsetstim         = NaN; % (target) time the stimulus is first presented
+trial.resp1_time        = NaN; % time of the first response
+trial.resp2_time        = NaN;
+trial.responded2        = NaN;
+trial.responsestart1    = NaN; % time responding is enabled
+trial.responsestart2    = NaN; % time the second response is enabled
+trial.rt1               = NaN; % response time 1 (=resp1_time - responsestart1)
+trial.rt2               = NaN;
+trial.time_starttrial   = NaN; % time the trial was started
+trial.tmissed_offset1   = NaN; % amount target offsetstim was missed by
+trial.tmissed_onset1    = NaN;
+trial.qanswers          = []; % answers to questionnaires

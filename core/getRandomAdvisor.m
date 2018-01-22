@@ -1,4 +1,4 @@
-function [advisorId] = getRandomAdvisor(cfg, advisorType)
+function [advisorId] = getRandomAdvisor(advisorType)
 %% Returns a random advisor
 % - by Matt Jaquiery
 %
@@ -15,6 +15,8 @@ function [advisorId] = getRandomAdvisor(cfg, advisorType)
 % Advisor presentation is carefully counterbalanced in the main experiment,
 % but this function enables practice blocks to quickly and dirtily build
 % their trial types.
+
+global cfg;
 
 % fix optional inputs
 if nargin < 2

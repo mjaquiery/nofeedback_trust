@@ -86,6 +86,7 @@ cfg.block.questionnaire_frequency   = 3; % include questionnaires after each how
 
 cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;
+cfg.practice.allowChoice            = 1;
 
 if cfg.shortMode==1
     cfg.block_count = 1; 

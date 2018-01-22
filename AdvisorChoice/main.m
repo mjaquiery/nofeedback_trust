@@ -172,7 +172,7 @@ for t = starttrial:length(trials)
     
     % after a SRI1 (.09)s delay the instructions appear and responding is enabled
     draw_static();
-    [V, trials(t).responsestart] = Screen('Flip',Sc.window,trials(t).offsetstim + cfg.stim.SRI1 - cfg.frame);
+    [V, trials(t).responsestart1] = Screen('Flip',Sc.window,trials(t).offsetstim + cfg.stim.SRI1 - cfg.frame);
     
     % collect 1st response
     [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement
@@ -186,7 +186,7 @@ for t = starttrial:length(trials)
     trials(t).cor = trials(t).cor1;
     
     % define RT1
-    trials(t).rt1 = trials(t).resp1_time - trials(t).offsetstim;
+    trials(t).rt1 = trials(t).resp1_time - trials(t).responsestart1;
     
     % update trial description for debugging
     cfg.currentTrial = trials(t);
@@ -235,6 +235,7 @@ for t = starttrial:length(trials)
         if ~isnan(trials(t).advisorId)
             load_observer_audio;
             present_advice;
+            trials(t).responsestart2 = GetSecs;
             
             % prompt new confidence judgment
             [trials(t).cj2, trials(t).resp2_time, trials(t).int2] = ...
@@ -249,7 +250,7 @@ for t = starttrial:length(trials)
             trials(t).cor = trials(t).cor2;
             
             % define RT2
-            trials(t).rt2 = trials(t).resp2_time - trials(t).resp_advice_rt;
+            trials(t).rt2 = trials(t).resp2_time - trials(t).responsestart2;
             
         else % null
             present_delay;

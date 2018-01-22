@@ -1,8 +1,15 @@
-function resp = estimated_obsacc()
+function resp = estimated_obsacc(advisorId)
 %% Ask participant for their assessement of the advisors' accuracy
 % - by Niccolo Pescetelli
+% updated: Matt Jaquiery, Jan 2018
 %
-% usage: resp = estimated_obsacc()
+% usage: resp = estimated_obsacc([advisorId])
+%
+% Inputs: 
+% advisorId: if provided, only query for the specified advisor
+%
+% Outputs:
+% resp: the response (0-100) provided by the participant 
 %
 % This function asks the subject to rate the estimated accuracy of
 % different advisors by inputing through keyboard. Advisors are presented
@@ -12,71 +19,51 @@ function resp = estimated_obsacc()
 global cfg; % configuration object
 global Sc; % Screen object
 
-Screen('TextSize', Sc.window, cfg.instr.textSize.small);
-help_string = '';
-
-resp = [];
-
-for o = 1:cfg.advisors.count.real
-    valid = false;
-    
-    drawEstimPrompts(o);
-    % flip screen
-    Screen('Flip',Sc.window);
-    
-    % avoid button press overlaps
-    WaitSecs(1);    
-    drawEstimPrompts(o, true);
-    Screen('Flip', Sc.window);
-    
-    % wait for button press
-    collect_response(inf);
-    oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
-    
-    while ~valid % continue prompting until valid value has entered
-        % ask for estimated accuracy
-        reply=Ask(Sc.window, [help_string cfg.instr.estimated_obsacc.text{5}], ...
-            cfg.instr.textColor.default, cfg.display.color.background, ...
-            'GetChar', 'center', 'center', cfg.instr.textSize.medium);
-        try
-            resp(o) = str2num(reply);
-            valid = true;
-
-            % check value is within range
-            if resp(o)>=0 && resp(o)<=100
-                valid = true;
-                help_string = '';
-            else
-                valid = false;
-                help_string = 'Value out of range! ';
-            end
-        catch
-            valid = false;
-            help_string = 'Invalid character! ';
-        end
-    end
-    
-    Screen('TextSize', Sc.window, oldTextSize);
-    
-end
-
-
-function drawEstimPrompts(advisorId, allowKeys)
-global cfg; % configuration object
-global Sc; % Screen object
-
-if nargin < 2, allowKeys = false; end
-% draw observer picture
-drawAdvisor(advisorId);
-
 oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
 
-% Draw instructions
-DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{2}, 'center', cfg.instr.estimated_obsacc.position.y(2))
-DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{1}, 'center', cfg.instr.estimated_obsacc.position.y(1))
-DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{3}, 'center', cfg.instr.estimated_obsacc.position.y(3))
-if allowKeys
-    DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{4}, 'center', cfg.instr.estimated_obsacc.position.y(4))
+if nargin < 1
+    resp = [];
+    for advisorId = 1:cfg.advisors.count.real
+        resp(advisorId) = getAdvisorAccuracyEstimate(advisorId);
+    end
+else
+    resp = getAdvisorAccuracyEstimate(advisorId);
 end
 
 Screen('TextSize', Sc.window, oldTextSize);
+
+function resp = getAdvisorAccuracyEstimate(advisorId)
+global cfg; % configuration object
+global Sc; % Screen object
+
+if nargin < 1, error('No advisorId specified'); end
+help_string = '';
+valid = false;
+
+bounds = Screen('TextBounds', Sc.window, [cfg.instr.estimated_obsacc.ask.text '   ']);
+bounds = CenterRectOnPoint(bounds, Sc.center(1), Sc.center(2));
+
+while true
+    % Draw instructions
+    drawAdvisor(advisorId);
+    DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{2}, 'center', cfg.instr.estimated_obsacc.position.y(2))
+    DrawFormattedText(Sc.window, cfg.instr.estimated_obsacc.text{1}, 'center', cfg.instr.estimated_obsacc.position.y(1))
+    if ~isempty(help_string)
+        DrawFormattedText(Sc.window, help_string, 'center', cfg.instr.estimated_obsacc.position.y(3))
+    end
+    
+    reply = GetEchoString(Sc.window,cfg.instr.estimated_obsacc.ask.text,bounds(1),cfg.instr.estimated_obsacc.ask.y);
+    Screen('Flip', Sc.window);
+    try
+        resp = str2num(reply);
+
+        % check value is within range
+        if resp>=0 && resp<=100
+            return
+        else
+            help_string = 'Value out of range! ';
+        end
+    catch
+        help_string = 'Invalid character! ';
+    end
+end

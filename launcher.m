@@ -18,7 +18,7 @@ forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 0;
 shortMode = 0;
-pathRoot = 'MattLaptop';
+pathRoot = 'MattWork';
 
 %% set path   
 switch pathRoot
@@ -62,7 +62,7 @@ switch pathRoot
         osSlash = '/';
         screenNumber = 0;
         Screen('Preference', 'SkipSyncTests', 1);
-end
+end 
 
 warning('off','MATLAB:rmpath:DirNotFound')
 rmpath(genpath(my_path)); % remove the current path so we can add selectively
@@ -75,5 +75,5 @@ addpath(genpath([my_path 'core'])); % add core files
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-%screenTests
-main
+screenTests
+%main
