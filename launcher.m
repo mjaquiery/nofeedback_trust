@@ -17,8 +17,8 @@ experimentName = 'AdvisorChoice';
 forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 0;
-shortMode = 0;
-pathRoot = 'MattWork';
+shortMode = 1;
+pathRoot = 'MattHome';
 
 %% set path   
 switch pathRoot
@@ -75,5 +75,6 @@ addpath(genpath([my_path 'core'])); % add core files
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
-screenTests
-%main
+
+%screenTests
+main
