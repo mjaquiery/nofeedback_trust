@@ -31,13 +31,15 @@ getMatlabData <- function (folder) {
   out <- list()
   files <- list.files(folder)
   mask <- regexpr('_final_R.mat$', files)>=0
-  for (i in seq(length(files))) {
-    if (mask[i]) {
-      filename <- paste(folder, files[[i]], sep='/')
-      print(paste('mat2R:', filename))
-      out[[length(out)+1]] <- c("filename" = files[[i]], mat2R(filename))
-      # break  # only accept one _final.mat file
-    }
+  if(length(mask)>0) {
+    for (i in seq(length(files))) {
+      if (mask[i]) {
+        filename <- paste(folder, files[[i]], sep='/')
+        print(paste('mat2R:', filename))
+        out[[length(out)+1]] <- c("filename" = files[[i]], mat2R(filename))
+        # break  # only accept one _final.mat file
+      }
+    } 
   }
   dirs = list.dirs(folder,recursive = FALSE)
   if (length(dirs) > 0) {
