@@ -75,3 +75,55 @@ for (p_num in seq(length(study))) {
   }
   processed_data[[p_num]] <- res
 }
+
+## 3) Was the agree-in-confidence advisor more influential? #######################################
+print('## 3) TEST Advisor influence #####################################################')
+#we calculate the influence of the agree-in-confidence and agree-in-uncertainty
+#advisors separately. We store the mean influence of each advisor for each
+#participant. For interest, we can calculate for each individual participant
+#whether the advisors are significantly different in their influence. For the
+#key analysis, of course, we are comparing the mean influence of each advisor
+#over all participants. Calculate the influence of each advisor
+advisor_influence <- data.frame("pId"=integer(),
+                                "aic_influence_mean"=double(),
+                                "aic_influence_sd"=double(),
+                                "aiu_influence_mean"=double(),
+                                "aiu_influence_sd"=double())
+advisor_influence_details <- vector('list', length(study))
+advisor_influence_test <- vector('list', length(study))
+for(p in seq(length(study))) {
+  p_data <- study[[p]]
+  trials <- p_data$trials[which(p_data$trials[,"practice"]==FALSE),] # exclude practice trials
+  adviceTypes <- c(1,2)
+  # advisors don't have $id tags so we have to use sequences to extract the key vars
+  advisorIds <- as.numeric(p_data$cfg$advisor[seq(1,length(p_data$cfg$advisor),6)])
+  advisorAdviceTypes <- as.numeric(p_data$cfg$advisor[seq(2,length(p_data$cfg$advisor),6)])
+  a_influence <- vector('list',2)
+  for(adviceType in adviceTypes) {
+    # find the advisorId for this adviceType
+    advisorId <- advisorIds[which(advisorAdviceTypes==adviceType)] # ID of the advisor
+    # find the influence on this advisor's trials
+    a_trials <- which(as.numeric(trials[,"advisorId"])==as.numeric(advisorId))
+    a_trial_ids <- as.numeric(trials[a_trials,"id"])
+    a_influence[[adviceType]] <- trial_influence[[p]][which(trial_influence[[p]][,"id"]%in%a_trial_ids),"influence"]
+  }
+  advisor_influence_details[[p]] <- a_influence
+  advisor_influence_test[[p]] <- t.test(a_influence[[1]],a_influence[[2]])
+  t_data <- data.frame('pId'=p,
+                       'aic_influence_mean'=mean(a_influence[[1]]),
+                       'aic_influence_sd'=sd(a_influence[[1]]),
+                       'aiu_influence_mean'=mean(a_influence[[2]]),
+                       'aiu_influence_sd'=sd(a_influence[[2]]))
+  advisor_influence <- rbind(advisor_influence, t_data)
+}
+
+influence_by_advisor <- t.test(advisor_influence$aic_influence_mean,
+                               advisor_influence$aiu_influence_mean, 
+                               paired = T)
+
+print('>>(influence_by_advisor) t-test of mean influence: agree-in-confidence versus agree-in-uncertainty')
+prettyPrint(influence_by_advisor)
+print('>>(influence_by_advisor_b) bayesian test of mean influence: aic versus aiu')
+influence_by_advisor_b <- ttestBF(advisor_influence$aic_influence_mean - advisor_influence$aiu_influence_mean)
+print(influence_by_advisor_b)
+print(paste0('Evidence strength in favour of AiC != AiU: BF=', round(exp(influence_by_advisor_b@bayesFactor$bf),3)))

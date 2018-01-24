@@ -79,10 +79,6 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 % duplicated)
 %text_on_screen_vars
 
-%% Present the SECS questionnaire
-global SECSscore;
-[~, ~, SECSscore] = SECS();
-
 for t = starttrial:length(trials)
     disp(['text color: ' int2str(sum(Screen('TextColor',Sc.window)))]);
     % update current trial number
@@ -134,27 +130,13 @@ for t = starttrial:length(trials)
         if isnan(trials(t).advisorId) % this trial is a null trial
            for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t-1
                if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
-                   questionnaire(trials(n).advisorId);
+                   trials(t).qanswers = questionnaire(trials(n).advisorId);
                    break;
                end
            end
         else
-            questionnaire(trials(t).advisorId);
+            trials(t).qanswers = questionnaire(trials(t).advisorId);
         end
-    end
-    %% advisor political information
-    if trials(t).advisorPolitics
-        if isnan(trials(t-1).advisorId) % last trial was a null trial so search for a trial with an advisorId
-           for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t+cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null)
-               if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
-                   showAdvisorPolitics(trials(t).advisorId);
-                   break;
-               end
-           end
-        else
-            showAdvisorPolitics(trials(t).advisorId);
-        end
-        WaitSecs(3);
     end
     %% start trial
         
@@ -162,13 +144,13 @@ for t = starttrial:length(trials)
 end
 
 % save temporary final file
-save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't','SECSscore');
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
 
 % collect estimated observers accuracy
 trials(t).estim_obsacc = estimated_obsacc();
 
 %% save final file
-save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'],'subject','cfg','trials','SECSscore');
+save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'],'subject','cfg','trials');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Thanks

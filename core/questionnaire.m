@@ -1,4 +1,4 @@
-function questionnaire(advisorId)
+function question = questionnaire(advisorId)
 %% questionnaire for trust rating and reliability
 % 
 % usage: questionnaire([advisorId])
@@ -178,7 +178,6 @@ else
     question(1:length(questionList)) = question(I);
     cfg.advisor(advisorId).firstQuestionnaireDone = true;
 end
-cfg.currentTrial.qanswers = question;
 
 %% pause before next stimuli session
 Screen('TextSize',Sc.window,cfg.instr.textSize.medium);

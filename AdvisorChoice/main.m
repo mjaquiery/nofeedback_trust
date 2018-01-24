@@ -122,7 +122,7 @@ for t = starttrial:length(trials)
     end
     %% questionnaire
     if trials(t).questionnaire
-        questionnaire
+        trials(t).qanswers = questionnaire();
     end
     
     %% start trial
