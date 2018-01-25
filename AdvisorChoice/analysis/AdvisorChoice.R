@@ -162,6 +162,8 @@ print('## 3) ANOVA investigating influence #####################################
 # since it will come in handy for looking at influence on subsets of trials
 # later. Below, we run an ANOVA using the influence data.
 
+# TODO: change this to match Niccolo's definiton of influence/sway
+
 print('Calculating influence on each trial')
 # Calculate the influence of the advisor on each trial
 trial_influence <- vector('list',length(study))
