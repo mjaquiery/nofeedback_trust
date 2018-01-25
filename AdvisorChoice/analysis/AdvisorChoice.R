@@ -11,18 +11,27 @@
 
 ## Citations 
 
-#Richard D. Morey and Jeffrey N. Rouder (2015). BayesFactor: Computation of
-#Bayes Factors for Common Designs. R package version 0.9.12-2.
+if(!require('BayesFactor')) {
+  #Richard D. Morey and Jeffrey N. Rouder (2015). BayesFactor: Computation of
+  #Bayes Factors for Common Designs. R package version 0.9.12-2. 
+  install.packages('BayesFactor')
+}
 library(BayesFactor)
 
 ## i) Get Data ####################################################################################
 print('Loading data')
 
 # Use the mat2R functions to get hold of some data and do some manipulations
-if(!exists("getMatlabData", mode="function")) source("mat2R.R")
+if(!exists("getMatlabData", mode="function")) {
+  oldwd <- getwd()
+  setwd(dirname(sys.frame(1)$ofile))
+  source("mat2R.R")
+  setwd(oldwd)
+} 
 
-acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
-#acPth <- "D:/Users/MJ/Filr/My Files/Results/AdvisorChoice"
+
+#acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
+acPth <- "D:/Users/MJ/Filr/My Files/Results/AdvisorChoice"
 
 raw_study <- getMatlabData(acPth)  # get some data from the path defined for convenience in mat2R
 
@@ -277,4 +286,20 @@ anova_output_70 <- aov(formula = influence ~ adviceType * choiceAllowed * agreem
 print('>>(anova_output_70) Looking at only trials where intial decision was correct and made with middle confidence:')
 print(summary(anova_output_70))
 
+## 4) Trust questionnaire answers #################################################################
+#   i. Trust for each advisor
 
+# We want to know if trust for each advisor changes over time. First we build a
+# table for each participant and each of the questionnaire answers.
+for(p in length(study)) {
+  trials <- study[[p]]$trials
+  qtrials <- trials[which(trials[,"questionnaire"]==1),]
+  for(t in dim(trials)[1]) {
+    q_data <- qtrials[t,"qanswers"]$qanswers
+    for(i in dim(q_data)[3]) {
+      # for each question
+      q <- q_data[,,i]
+      
+    }
+  }
+}
