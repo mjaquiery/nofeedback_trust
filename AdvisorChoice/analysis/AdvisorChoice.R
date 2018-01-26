@@ -30,8 +30,8 @@ if(!exists("getMatlabData", mode="function")) {
 } 
 
 
-#acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
-acPth <- "D:/Users/MJ/Filr/My Files/Results/AdvisorChoice"
+acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
+#acPth <- "D:/Users/MJ/Filr/My Files/Results/AdvisorChoice"
 
 raw_study <- getMatlabData(acPth)  # get some data from the path defined for convenience in mat2R
 
@@ -162,49 +162,81 @@ print('## 3) ANOVA investigating influence #####################################
 # since it will come in handy for looking at influence on subsets of trials
 # later. Below, we run an ANOVA using the influence data.
 
-# TODO: change this to match Niccolo's definiton of influence/sway
-
 print('Calculating influence on each trial')
 # Calculate the influence of the advisor on each trial
-trial_influence <- vector('list',length(study))
+trial_influence <- data.frame(pId=integer(),
+                              tId=integer(),
+                              block=integer(), 
+                              advisorId=integer(), 
+                              adviceType=integer(), #  1=Agree-in-confidence; 2=Agree-in-uncertainty
+                              choiceAllowed=integer(), #  F=forced; T=choice
+                              agree=integer(), #  F=disagree; T=agree
+                              initialAnswerRight=integer(), #  F=left; T=right
+                              initialConfidenceCategory=integer(), # whether initial answer was low/med/high confidence
+                              shift=integer(),  #  amount the confidence changes
+                              influence=integer()) #  amount the confidence changes in the direction of the advice
 for(p in seq(length(study))) {
-  p_data <- data.frame('id'=integer(), 'direction'=integer(), 'influence'=integer())
-  trials <- study[[p]]$trials
+  # skip practice trials
+  trials <- study[[p]]$trials[which(study[[p]]$trials[,"practice"]==FALSE),]
+  advisorIds <- as.numeric(study[[p]]$cfg$advisor[seq(1,length(study[[p]]$cfg$advisor),6)])
+  advisorAdviceTypes <- as.numeric(study[[p]]$cfg$advisor[seq(2,length(study[[p]]$cfg$advisor),6)])
   for(t in seq(dim(trials)[1])) {
-    # store the index of this trial in the master trial list
+    # store basic trial information 
     tid <- trials[t, "id"]
+    aT <- advisorAdviceTypes[as.numeric(trials[t,"advisorId"])]
+    cA <- lapply(trials[t,"choice"],mean)>1
+    t_data <- data.frame(pId=p,
+                         tId=tid,
+                         block=trials[t,"block"],
+                         advisorId=trials[t,"advisorId"],
+                         adviceType=aT,
+                         choiceAllowed=cA,
+                         agree=trials[t,"agree"],
+                         initialAnswerRight=trials[t,"cj1"]>0,
+                         initialConfidenceCategory=NA)
     if(is.nan(trials[[t,"advisorId"]])) {
       # trials without an advisor are entered as NA
-      p_data <- rbind(p_data, data.frame(id=tid,direction=NA,influence=NA))
-      next 
-    }
-    # calculate the influence of the advice
-    cj1 <- trials[[t,"cj1"]]+55 # rescale from [-55 55] to [0 110]
-    cj2 <- trials[[t,"cj2"]]+55
-    sway <- cj2 - cj1 # +ve values indicate increasingly right-oriented response
-    if((trials[[t,"agree"]] && trials[[t,"cj1"]]<0) ||
-       (!trials[[t,"agree"]] && trials[[t,"cj1"]]>=0)) {
-      # Advice was 'target is on the left' so we need to reverse the sway
-      sway = sway * -1
-      direction <- 1
+      t_data$shift <- NA
+      t_data$influence <- NA
     } else {
-      # record the advice direction for posterity
-      direction <- 2
+      # calculate the confidence change on this trial ('shift')
+      # shift = Cpost - Cpre
+      # C-values are *-1 if answer was 'left', so
+      # Cpre [1,55]
+      # Cpost [-55,-1]U[1,55]
+      cj1 <- trials[[t,"cj1"]]
+      cj2 <- trials[[t,"cj2"]]
+      if(trials[[t,"cj1"]]<0) {
+        # initial response is 'left'
+        cj1 <- cj1 * -1
+        cj2 <- cj2 * -1
+      } 
+      shift <- cj2 - cj1 # +ve values indicate shift towards more confidence in initial response
+      if((trials[[t,"agree"]])) {
+        # on agreement trials shift towards initial response inidicates following advice
+        influence <- shift
+      } else {
+        # on disagreement trials shift AWAY from initial response inidicates following advice
+        influence <- shift * -1
+      }
+      t_data$shift <- shift
+      t_data$influence <- influence
+      # for correct trials record the confidence 'step'
+      if(trials[[t,"cor1"]]) {
+        t_data$initialConfidenceCategory <- trials[t,"step"]
+      }
     }
-    # save this value
-    t_data <- data.frame('id'=tid, 'direction'=direction, 'influence'=sway)
-    p_data <- rbind(p_data, t_data)
+    trial_influence <- rbind(trial_influence, t_data)
   }
-  trial_influence[[p]] <- p_data
 }
 
 # 2x2x2 ANOVA investigating effects of advisor type
 # (agree-in-confidence/uncertainty), choice (un/forced), and agreement
 # (dis/agree) on influence. These are all within-subjects manipulations.
-
-# First prepare the data by setting a data frame with the relevant information
-# (the participant ID, the factors, and the mean influence for each of those
-# factor combination).
+print('Running ANOVAs')
+anova_output <- aov(formula = influence ~ adviceType * choiceAllowed * agree + Error(pId), data=trial_influence)
+print('>>(anova_output)')
+print(summary(anova_output))
 
 # The bias-sharing advisor and anti-bias advisors differ in their frequency with
 # which they agree with the participant as a  function of participant confidence
@@ -215,76 +247,8 @@ for(p in seq(length(study))) {
 # confidence balance out). This subset only includes trials on which the
 # participant was CORRECT since the step information is not recorded for
 # incorrect trials (where all advisors agree 30% of the time).
-anova_data <- data.frame(pId=integer(),
-                         advice=integer(),
-                         choice=integer(),
-                         agreement=integer(),
-                         influence=double(),
-                         n=integer())
-anova_data_70 <- anova_data
-advisorTypes <- c(1,2) # 1=aic, 2=aiu
-choiceTypes <- c(0,1) # 0=forced, 1=unforced
-agreementTypes <- c(0,1) # 0=disagree, 1=agree
-for(p in seq(length(study))) {
-  p_data <- study[[p]]
-  trials <- p_data$trials
-  trials <- trials[which(trials[,"practice"]==FALSE),]
-  # the _70 variables concern only trials where participant was correct with
-  # middle confidence
-  trials_70 <- trials[which(trials[,"step"]==0),] 
-  advisorIds <- as.numeric(p_data$cfg$advisor[seq(1,length(p_data$cfg$advisor),6)])
-  advisorAdviceTypes <- as.numeric(p_data$cfg$advisor[seq(2,length(p_data$cfg$advisor),6)])
-  # for each advisor type
-  for(aT in advisorTypes) {
-    trials_A <- trials[which(trials[,"advisorId"]==advisorIds[which(advisorAdviceTypes==aT)]),]
-    trials_70_A <- trials_70[which(trials_70[,"advisorId"]==advisorIds[which(advisorAdviceTypes==aT)]),]
-    # for each choice type
-    for(cT in choiceTypes) {
-      # using ...mean>1 here is a huge HACK. It works because the no choice is
-      # represented by 0. So the expected combinations (ignoring NaNs) are 1,0;
-      # 2,0; and 2,1 which average to .5, 1, and 1.5 respectively. Since we only
-      # care about the 2,1 case (a genuine choice between advisors), the hack
-      # works.
-      trials_C <- trials_A[which((as.numeric(lapply(trials_A[,"choice"],mean))>1)==cT),]
-      trials_70_C <- trials_70_A[which((as.numeric(lapply(trials_70_A[,"choice"],mean))>1)==cT),]
-      # for each agreement type
-      for(agT in agreementTypes) {
-        trials_G <- trials_C[which(trials_C[,"agree"]==agT),]
-        trials_70_G <- trials_70_C[which(trials_70_C[,"agree"]==agT),]
-        # calculate the influence and record the value
-        mean_influence <- 
-          mean(trial_influence[[p]][which(trial_influence[[p]][,"id"]%in%trials_G[,"id"]),"influence"])
-        if(length(trials_70_G)==dim(trials)[2]) {
-          # only one entry was found for this case, so mean is just the value
-          mean_influence_70 <- trial_influence[[p]][which(trial_influence[[p]][,"id"]==trials_70_G["id"]),"influence"]
-          dim(trials_70_G) <- c(1, dim(trials)[2])
-        } else {
-          mean_influence_70 <- 
-            mean(trial_influence[[p]][which(trial_influence[[p]][,"id"]%in%trials_70_G[,"id"]),"influence"])
-        }
-        r_data <- data.frame(pId=p, 
-                             adviceType=aT, 
-                             choiceAllowed=cT, 
-                             agreement=agT, 
-                             influence=mean_influence, 
-                             n=dim(trials_G)[1])
-        r_data_70 <- data.frame(pId=p,
-                                adviceType=aT,
-                                choiceAllowed=cT,
-                                agreement=agT,
-                                influence=mean_influence_70,
-                                n=dim(trials_70_G)[1])
-        anova_data <- rbind(anova_data, r_data)
-        anova_data_70 <- rbind(anova_data_70, r_data_70)
-      }
-    }
-  }
-}
-# now we can run the anova. Let's build the model:
-anova_output <- aov(formula = influence ~ adviceType * choiceAllowed * agreement + Error(pId), data=anova_data)
-print('>>(anova_output)')
-print(summary(anova_output))
-anova_output_70 <- aov(formula = influence ~ adviceType * choiceAllowed * agreement + Error(pId), data=anova_data_70)
+trial_influence_70 <- trial_influence[which(trial_influence$initialConfidenceCategory==0),]
+anova_output_70 <- aov(formula = influence ~ adviceType * choiceAllowed * agree + Error(pId), data=trial_influence_70)
 print('>>(anova_output_70) Looking at only trials where intial decision was correct and made with middle confidence:')
 print(summary(anova_output_70))
 
