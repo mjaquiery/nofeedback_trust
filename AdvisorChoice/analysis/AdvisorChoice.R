@@ -293,15 +293,55 @@ print(summary(anova_output_70))
 
 # We want to know if trust for each advisor changes over time. First we build a
 # table for each participant and each of the questionnaire answers.
-for(p in length(study)) {
+trust_table <- data.frame(pId=integer(),
+                          timepoint=integer(),
+                          trialNum=integer(),
+                          advisorId=integer(),
+                          advisorNth=integer(),
+                          answer=integer(),
+                          responseTime=double(),
+                          qNum=integer(),
+                          qNth=integer(),
+                          qText=character())
+for(p in seq(length(study))) {
   trials <- study[[p]]$trials
   qtrials <- trials[which(trials[,"questionnaire"]==1),]
-  for(t in dim(trials)[1]) {
-    q_data <- qtrials[t,"qanswers"]$qanswers
-    for(i in dim(q_data)[3]) {
-      # for each question
-      q <- q_data[,,i]
-      
+  if(is.null(dim(qtrials))) {
+    # 1 or 0 entries in qtrials (questionnaire only taken once)
+    if(length(qtrials)>0) {
+      q_data <- as.data.frame(t(as.data.frame(qtrials$qanswers)))
+      tId <- qtrials$id
+      q_text <- study[[p]]$cfg$instr$Q$q$pro$text[as.numeric(q_data[,"quest"])]
+      for(i in seq(dim(q_data)[1])) {
+        q_data_in <- data.frame(pId=p, timepoint=1, trialNum=qtrials$id, 
+                                advisorId=q_data$obs[[i]], advisorNth=1, 
+                                answer=q_data$ans[[i]], responseTime=q_data$response.t[[i]],
+                                qNum=q_data$quest[[i]], qNth=q_data$presentation.order[[i]], 
+                                qText=q_text[[i]])
+        trust_table <- rbind(trust_table, q_data_in)
+      }
+    }
+  } else {
+    for(t in seq(dim(qtrials)[1])) {
+      q_data <- as.data.frame(t(as.data.frame(qtrials[t,"qanswers"]$qanswers)))
+      tId <- as.numeric(qtrials[,"id"])
+      q_text <- study[[p]]$cfg$instr$Q$q$pro$text[as.numeric(q_data$quest)]
+      for(i in seq(dim(q_data)[1])) {
+        if(dim(trust_table)[1]==0)
+          atp <- 1
+        else
+          atp <- 1+floor(length(which(trust_table$advisorId==as.numeric(q_data$obs[[i]])))/4)
+        if(atp>1)
+          q_text <- study[[p]]$cfg$instr$Q$q$retro$text[as.numeric(q_data[,"quest"])]
+        else
+          q_text <- study[[p]]$cfg$instr$Q$q$pro$text[as.numeric(q_data[,"quest"])]
+        q_data_in <- data.frame(pId=p, timepoint=t, trialNum=tId[[t]], 
+                                advisorId=q_data$obs[[i]], advisorNth=atp, 
+                                answer=q_data$ans[[i]], responseTime=q_data$response.t[[i]],
+                                qNum=q_data$quest[[i]], qNth=q_data$presentation.order[[i]], 
+                                qText=q_text[[i]])
+        trust_table <- rbind(trust_table, q_data_in)
+      }
     }
   }
 }
