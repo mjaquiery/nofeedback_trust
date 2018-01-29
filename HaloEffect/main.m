@@ -128,8 +128,8 @@ for t = starttrial:length(trials)
     %% questionnaire
     if trials(t).questionnaire
         if isnan(trials(t).advisorId) % this trial is a null trial
-           for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t-1
-               if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
+           for n = t+1:length(trials)
+               if trials(n).block == trials(t).block && ~isnan(trials(n).advisorId)
                    trials(t).qanswers = questionnaire(trials(n).advisorId);
                    break;
                end

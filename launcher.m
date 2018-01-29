@@ -61,7 +61,7 @@ switch pathRoot
         stims_path = [my_path 'stims'];
         osSlash = '/';
         screenNumber = 0;
-        Screen('Preference', 'SkipSyncTests', 1);
+        Screen('Preference', 'SkipSyncTests', 1); 
 end 
 
 warning('off','MATLAB:rmpath:DirNotFound')

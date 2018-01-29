@@ -136,8 +136,8 @@ for t = starttrial:length(trials)
     %% questionnaire
     if trials(t).questionnaire
         if isnan(trials(t).advisorId) % this trial is a null trial so search for the appropriate questionnaire
-           for n = t-cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):t-1
-               if n>0 && trials(n).block == trials(t-1).block && ~isnan(trials(n).advisorId)
+           for n = t+cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null):length(trials)
+               if trials(n).block == trials(t).block && ~isnan(trials(n).advisorId)
                    questionnaire(trials(n).advisorId);
                    break;
                end
@@ -174,6 +174,7 @@ for t = starttrial:length(trials)
     end
     larger = 200 + trials(t).dotdifference;
     smaller = 200 - trials(t).dotdifference;
+    trials(t).wheredots(1:end) = 0; % set the dot array to blank (required because we allow loading)
     trials(t).wheredots(trials(t).wherelarger,randsample(400,larger)) = 1;
     trials(t).wheredots(abs(trials(t).wherelarger-3),randsample(400,smaller)) = 1;
     trials(t).wheredots = logical(trials(t).wheredots);

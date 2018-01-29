@@ -81,7 +81,7 @@ for ii = 1: length(question)
     Ibounds{2}  = Screen('TextBounds',Sc.window,inst{2});
   
     % show cursor
-    ShowCursorCenter('Arrow');
+    ShowCursorCenter('Arrow', [NaN brct(2)+(brct(4)-brct(2))/2]);
     
     while true
         [x, ~, buttons] = GetMouseWrapper;
@@ -191,4 +191,4 @@ WaitSecs(.5);
 
 Screen('TextSize', Sc.window, oldTextSize);
 HideCursor;
-clear tm cw ch bl ns maxS minS brct advisorCenter id question;
+clear tm cw ch bl ns maxS minS brct advisorCenter id;

@@ -1,8 +1,4 @@
-% landmarks on confidence scale
-%cfg.instr.xshift = [-250,-50,50,250];
-% now defined in define_scale.m
-
-%% Text prompts
+%% Text prompts shared between trials
 cfg.instr.prompt1.text          = {};
 cfg.instr.finaldecision.text    = {'What'' s your final decision?'};
 cfg.instr.interval.text         = {'LEFT' 'RIGHT'};
@@ -21,8 +17,7 @@ cfg.instr.instr.position.lineHeight = 20;
 
 cfg.instr.estimated_obsacc.text = {'Your overall baseline accuracy (before any advice) was 71%' ...
     'What do you think this person''s accuracy was?' ...
-    'In the next screen you will be prompted to enter a value' ...
-    'Press any button when you are ready' ...
+    '[help_string]'...
     'Enter a number between 0 and 100 and press Enter: '};
 cfg.instr.estimated_obsacc.position.y = [ ...% this works this way just because
     Sc.rect(4) * .1 ...
@@ -57,7 +52,9 @@ cfg.instr.textSize.large    = 32;
 % colour
 cfg.instr.textColor.default = [0 0 0]';
 
-% Instruction Intro Images
+%% Instruction Intro Images
+% Default instruction images are in ../instructions/Slide#.PNG
+% These are defined in groups which are displayed together.
 cfg.intro = {{} {} {} {}};
 slideCount = 16;
 slideGroups = [8 6 1 1]; % length of the slide groups
@@ -71,9 +68,5 @@ for i = 1:slideCount
        cfg.intro{j}{length(cfg.intro{j})+1} = [x int2str(i) '.PNG']; 
     end
 end
-
-%% special instructions can be defined in 
-% SECS instruction path
-cfg.specialInstructions.SECS = {[cfg.path.base 'instructions' osSlash 'SECS' osSlash 'Slide1.PNG']};
 
 clear x slideCount slideGroups j i;

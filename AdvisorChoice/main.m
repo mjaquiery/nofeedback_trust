@@ -138,6 +138,7 @@ for t = starttrial:length(trials)
     end
     larger = 200 + trials(t).dotdifference;
     smaller = 200 - trials(t).dotdifference;
+    trials(t).wheredots(1:end) = 0; % set the dot array to blank (required because we allow loading)
     trials(t).wheredots(trials(t).wherelarger,randsample(400,larger)) = 1;
     trials(t).wheredots(abs(trials(t).wherelarger-3),randsample(400,smaller)) = 1;
     trials(t).wheredots = logical(trials(t).wheredots);

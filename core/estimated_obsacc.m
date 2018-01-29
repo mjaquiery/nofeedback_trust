@@ -40,7 +40,7 @@ if nargin < 1, error('No advisorId specified'); end
 help_string = '';
 valid = false;
 
-bounds = Screen('TextBounds', Sc.window, [cfg.instr.estimated_obsacc.ask.text '   ']);
+bounds = Screen('TextBounds', Sc.window, [cfg.instr.estimated_obsacc.text{4} '   ']);
 bounds = CenterRectOnPoint(bounds, Sc.center(1), Sc.center(2));
 
 while true
@@ -52,7 +52,7 @@ while true
         DrawFormattedText(Sc.window, help_string, 'center', cfg.instr.estimated_obsacc.position.y(3))
     end
     
-    reply = GetEchoString(Sc.window,cfg.instr.estimated_obsacc.ask.text,bounds(1),cfg.instr.estimated_obsacc.ask.y);
+    reply = GetEchoString(Sc.window,cfg.instr.estimated_obsacc.text{4},bounds(1),cfg.instr.estimated_obsacc.position.y(4));
     Screen('Flip', Sc.window);
     try
         resp = str2num(reply);
