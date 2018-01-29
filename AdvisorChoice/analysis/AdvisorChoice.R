@@ -61,7 +61,7 @@ prettyPrint <- function(results) {
   print(paste0('t(',results$parameter,')=',round(results$statistic,2),
                ' [',round(attr(results$conf.int, "conf.level")*100),'%CI: ',
                round(results$conf.int[[1]],2), ', ', round(results$conf.int[[2]],2),'],',
-               ' p=',round(aic_test$p.value,3)))
+               ' p=',round(results$p.value,3)))
 }
 
 ## 0) Exclusions ##################################################################################
@@ -108,7 +108,6 @@ demographics <- data.frame('N'=length(study),
                            'males'=length(which(genders=='m')),
                            'females'=length(which(genders=='f')),
                            'other_gender'=length(which(genders!='m' && genders!='f')))
-print(str(demographics))
 
 ## 2) Is the agree-in-confidence advisor selected more often? ###################################### 
 print('## 2) TEST Preferential selection for agree-in-confidence advisor? ###############')
@@ -125,10 +124,12 @@ print('## 2) TEST Preferential selection for agree-in-confidence advisor? ######
 
 aic_advice_type <- 1 # AdviceType code for the agree-in-confidence advisor
 proportions <- list()
+proportions.70 <- list()
 for(p in seq(length(study))) {
   p_data <- study[[p]]
   trials <- p_data$trials[which(p_data$trials[,"practice"]==FALSE),] # exclude practice trials
   trials <- getTrialsByForcedState(trials, FALSE) # only want unforced (i.e. choice) trials
+  trials.70 <- trials[which(trials[,"step"]==0),]
   # the process for extracting IDs for advisors is slightly tortured: the
   # compression function seems to drop the identifiers so we have to go by entry
   # order. For reference, the columns are: id, adviceType, pic, voice, name,
@@ -139,10 +140,14 @@ for(p in seq(length(study))) {
   
   # Extract only the trials with this advisor
   aic_trials <- which(trials[,"advisorId"]==aic_advisor)
+  aic.trials.70 <- which(trials.70[,"advisorId"]==aic_advisor)
   aic_proportion <- length(aic_trials)/dim(trials)[1]
+  aic.proportion.70 <- length(aic.trials.70)/dim(trials.70)[1]
   proportions <- c(as.numeric(proportions), aic_proportion)
+  proportions.70 <- c(as.numeric(proportions.70), aic.proportion.70)
 }
 aic_selection <- data.frame('mean' = mean(proportions), 'sd' = sd(proportions), row.names = 'proportions')
+aic.selection.70 <- data.frame(mean=mean(proportions.70), sd=sd(proportions.70), row.names='proportions on mid-confidence trials')
 
 aic_test <- t.test(proportions, mu=0.5) # testing the proportions versus the null hypothesis of 0.5 (chance selection)
 print('>>(aic_test) choice proportion Agree-in-confidence vs. chance level (.5)')
@@ -151,6 +156,14 @@ print('>>(aic_test_b) bayesian examination of above (prior = mean of 0.5, sd as 
 aic_test_b <- ttestBF(proportions, mu = 0.5)
 print(aic_test_b)
 print(paste0('Evidence strength for preferential AiC picking: BF=', round(exp(aic_test_b@bayesFactor$bf),3)))
+
+aic.test.70 <- t.test(proportions.70, mu=0.5) # testing the proportions versus the null hypothesis of 0.5 (chance selection)
+print('>>(aic.test.70) As above, but for mid-confidence trials only')
+prettyPrint(aic.test.70)
+print('>>(aic.test.70.b) bayesian examination of above (prior = mean of 0.5, sd as empirically observed)')
+aic.test.70.b <- ttestBF(proportions.70, mu = 0.5)
+print(aic.test.70.b)
+print(paste0('Evidence strength for preferential AiC picking: BF=', round(exp(aic.test.70.b@bayesFactor$bf),3)))
 
 ## 3) ANOVA investigating influence ###############################################################
 print('## 3) ANOVA investigating influence ##############################################')
@@ -175,7 +188,8 @@ trial_influence <- data.frame(pId=integer(),
                               initialAnswerRight=integer(), #  F=left; T=right
                               initialConfidenceCategory=integer(), # whether initial answer was low/med/high confidence
                               shift=integer(),  #  amount the confidence changes
-                              influence=integer()) #  amount the confidence changes in the direction of the advice
+                              influence=integer(), #  amount the confidence changes in the direction of the advice
+                              starttime=double()) # how long the trial lasted
 for(p in seq(length(study))) {
   # skip practice trials
   trials <- study[[p]]$trials[which(study[[p]]$trials[,"practice"]==FALSE),]
@@ -194,7 +208,9 @@ for(p in seq(length(study))) {
                          choiceAllowed=cA,
                          agree=trials[t,"agree"],
                          initialAnswerRight=trials[t,"cj1"]>0,
-                         initialConfidenceCategory=NA)
+                         initialConfidenceCategory=NA,
+                         starttime=trials[t,"time.starttrial"])
+    
     if(is.nan(trials[[t,"advisorId"]])) {
       # trials without an advisor are entered as NA
       t_data$shift <- NA
@@ -311,6 +327,7 @@ for(p in seq(length(study))) {
   }
 }
 
+
 ## 5) Do participants simply prefer agreement? ####################################################
 
 # If so, we should see that participants preferentially pick agree-in-confidence
@@ -318,3 +335,40 @@ for(p in seq(length(study))) {
 # their initial confidence is low. We can t-test aic pick proportion in
 # high-confidence vs aic pick proportion in low-confidence.
 
+proportions.low <- list()
+proportions.high <- list()
+for(p in seq(length(study))) {
+  p_data <- study[[p]]
+  trials <- p_data$trials[which(p_data$trials[,"practice"]==FALSE),] # exclude practice trials
+  trials <- getTrialsByForcedState(trials, FALSE) # only want unforced (i.e. choice) trials
+  trials.low <- trials[which(trials[,"step"]==-1),]
+  trials.high <- trials[which(trials[,"step"]==1),]
+  # the process for extracting IDs for advisors is slightly tortured: the
+  # compression function seems to drop the identifiers so we have to go by entry
+  # order. For reference, the columns are: id, adviceType, pic, voice, name,
+  # questionnaireDone
+  advisorIds <- as.numeric(p_data$cfg$advisor[seq(1,length(p_data$cfg$advisor),6)])
+  advisorAdviceTypes <- as.numeric(p_data$cfg$advisor[seq(1,length(p_data$cfg$advisor),6)])
+  aic.advisor <- advisorIds[which(advisorAdviceTypes==aic_advice_type)] # ID of the agree-in-confidence advisor
+  
+  # Extract only the trials with this advisor
+  aic.trials.low <- which(trials.low[,"advisorId"]==aic.advisor)
+  aic.trials.high <- which(trials.high[,"advisorId"]==aic.advisor)
+  aic.proportion.low <- length(aic.trials.low)/dim(trials.low)[1]
+  aic.proportion.high <- length(aic.trials.high)/dim(trials.high)[1]
+  proportions.low <- c(as.numeric(proportions.low), aic.proportion.low)
+  proportions.high <- c(as.numeric(proportions.high), aic.proportion.high)
+}
+aic.selection <- data.frame(mean.low = mean(proportions.low),
+                            mean.high = mean(proportions.high), 
+                            sd.low = sd(proportions.low),
+                            sd.high = sd(proportions.high),
+                            row.names = 'proportions')
+
+aic.byConf.test <- t.test(proportions.low, y=proportions.high) # do selection proportions differ by initial confidence?
+print('>>(aic.byConf.test) choice proportion Agree-in-confidence in low vs. high inital confidence')
+prettyPrint(aic.byConf.test)
+print('>>(aic.byConf.test.b) bayesian examination of above (prior = mean of 0.5, sd as empirically observed)')
+aic.byConf.test.b <- ttestBF(proportions.low, y=proportions.high)
+print(aic.byConf.test.b)
+print(paste0('Evidence strength for differential AiC picking: BF=', round(exp(aic_test_b@bayesFactor$bf),3)))
