@@ -8,6 +8,7 @@
 # 3) ANOVA investigating influence
 # 4) Trust questionnaire answers
 #   i. Trust for each advisor
+# 5) Do participants simply prefer agreement?
 
 ## Citations 
 
@@ -309,3 +310,11 @@ for(p in seq(length(study))) {
     }
   }
 }
+
+## 5) Do participants simply prefer agreement? ####################################################
+
+# If so, we should see that participants preferentially pick agree-in-confidence
+# advisor when their initial confidence is high, and agreee-in-uncertainty when
+# their initial confidence is low. We can t-test aic pick proportion in
+# high-confidence vs aic pick proportion in low-confidence.
+
