@@ -77,7 +77,7 @@ while true
         if iscell(key), key = key{1}; end % if two buttons at the same time
         switch key
             case 'space'           
-                trials(t).resp1_time = GetSecs-time;
+                trials(t).time_response1 = GetSecs-time;
                 trials(t).cj1 = abs(response);
                 trials(t).int1 = find([-1 1]==sign(response));
                 firstResponse = response;
@@ -95,7 +95,7 @@ while true
             drawQuizMarkers(response, cfg.bar.color.cursor);
             Screen('Flip', Sc.window);
         else
-            [~, trials(t).responsestart] = Screen('Flip', Sc.window);
+            [~, trials(t).time_responseStart1] = Screen('Flip', Sc.window);
         end
         lastResponse = response;
     end
@@ -104,7 +104,6 @@ end
 % mark the answer
 trials(t).cor1 = trials(t).int1 == trials(t).wherelarger;
 trials(t).cor = trials(t).cor1;
-trials(t).rt1 = trials(t).resp1_time - trials(t).responsestart;
 
 HideCursor();
 
@@ -196,7 +195,7 @@ while true
         if iscell(key), key = key{1}; end % if two buttons at the same time
         switch key
             case 'space'           
-                trials(t).resp2_time = GetSecs-time;
+                trials(t).time_response2 = GetSecs-time;
                 trials(t).cj2 = abs(response);
                 trials(t).int2 = find([-1 1]==sign(response));
                 break;
@@ -214,7 +213,7 @@ while true
             Screen('Flip', Sc.window);
         else
             drawQuizMarkers(firstResponse, cfg.bar.color.cj1);
-            [~, trials(t).responsestart] = Screen('Flip', Sc.window);
+            [~, trials(t).time_responseStart1] = Screen('Flip', Sc.window);
         end
         lastResponse = response;
     end
@@ -223,7 +222,6 @@ end
 % mark the answer
 trials(t).cor2 = trials(t).int2 == trials(t).wherelarger;
 trials(t).cor = trials(t).cor2;
-trials(t).rt2 = trials(t).resp2_time - trials(t).responsestart;
 
 HideCursor();
 Screen('TextSize', Sc.window, oldTextSize);

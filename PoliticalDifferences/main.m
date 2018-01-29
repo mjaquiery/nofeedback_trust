@@ -107,7 +107,7 @@ for t = starttrial:length(trials)
     end
     %% save and break
     if trials(t).break
-        %% Save dataon break trials
+        %% Save data on break trials
         save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't', 'SECSscore')
         %% break
         Screen('TextSize',Sc.window,18);
@@ -209,21 +209,18 @@ for t = starttrial:length(trials)
     
     % after a SRI1 (.09)s delay the instructions appear and responding is enabled
     draw_static();
-    [V, trials(t).responsestart] = Screen('Flip',Sc.window,trials(t).offsetstim + cfg.stim.SRI1 - cfg.frame);
+    [V, trials(t).time_responseStart1] = Screen('Flip',Sc.window,trials(t).offsetstim + cfg.stim.SRI1 - cfg.frame);
     
     % collect 1st response
-    [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement
+    [trials(t).cj1, trials(t).time_response1, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement
     
     % define new timestamp
-    time = trials(t).resp1_time;
+    time = trials(t).time_response1;
     
     % define correct response
     %trials(t).cor = ((trials(t).int1>0)+1) == trials(t).wherelarger;
     trials(t).cor1 = trials(t).int1 == trials(t).wherelarger;
     trials(t).cor = trials(t).cor1;
-    
-    % define RT1
-    trials(t).rt1 = trials(t).resp1_time - trials(t).offsetstim;
     
     % update trial description for debugging
     cfg.currentTrial = trials(t);
@@ -264,19 +261,16 @@ for t = starttrial:length(trials)
             present_advice;
             
             % prompt new confidence judgment
-            [trials(t).cj2, trials(t).resp2_time, trials(t).int2] = ...
+            [trials(t).cj2, trials(t).time_response2, trials(t).int2] = ...
                 drag_slider(trials(t).cj1);
             
             % define new timestamp
-            time = trials(t).resp2_time;
+            time = trials(t).time_response2;
             
             % define correct response
             %trials(t).cor2 = ((trials(t).int2>0)+1) == trials(t).wherelarger;
             trials(t).cor2 = trials(t).int2 == trials(t).wherelarger;
             trials(t).cor = trials(t).cor2;
-            
-            % define RT2
-            trials(t).rt2 = trials(t).resp2_time - trials(t).resp_advice_rt;
             
         else % null
             present_delay;
@@ -297,7 +291,11 @@ for t = starttrial:length(trials)
         if ~trials(t).cor, playFeedback(); end
         %colors=[.8 .2 .2;.2 .8 .2];
     end
+    trials(t).endTime= time;
 end
+
+% collect final questionnaire
+trials(t).qanswers = questionnaire();
 
 % save temporary final file
 save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't','SECSscore');

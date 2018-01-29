@@ -6,6 +6,18 @@
 % experiment folder. The experiment folder MUST contain main.m which is
 % called by this script.
 
+%% Todo:
+% Didn't see a stimulus on first trial??
+% Frame the screenshot in the advisor selection instructions
+% Block 3 instructions: remove 'honest'
+% Add force trials and catch trials to practice block 2
+% Advisors should appear where they were clicked, not in the middle
+% Text appropriate to choice:
+    % "Click on the advisor to hear their advice"
+    % "Click on the silhouette to continue"
+% Make things look nice on the actual test computers
+% Reduce experimental trial count to somewhere in the 330-360 region
+
 %% clear workspace and create directories
 clear all;
 close all;
@@ -13,12 +25,12 @@ clc;
 %experimentName = 'HaloEffect';
 experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
-%forceResolution = [];
-forceResolution = [1300 600];
+forceResolution = [];
+%forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 0;
 shortMode = 1;
-pathRoot = 'MattHome';
+pathRoot = 'MattWork';
 
 %% set path   
 switch pathRoot

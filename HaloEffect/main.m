@@ -143,6 +143,9 @@ for t = starttrial:length(trials)
     runTrial();
 end
 
+% collect final questionnaire
+trials(t).qanswers = questionnaire();
+
 % save temporary final file
 save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't');
 

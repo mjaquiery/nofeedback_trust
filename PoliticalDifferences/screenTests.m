@@ -103,10 +103,6 @@ while true
     end
 end
 
-% collect response
-% if(cfg.debug)   disp('Collecting first response...'); end
-% [trials(t).cj1, trials(t).resp1_time, trials(t).int1] = drag_slider(); % responded is 1 or 0; cj1 is the first confidence judgement
-
 %% close PTB
 Screen('CloseAll');
 ListenChar(0);
