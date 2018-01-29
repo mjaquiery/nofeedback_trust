@@ -46,16 +46,17 @@ cfg.noAdvisorChoice.id = 0; cfg.noAdvisorChoice.name = getAdvisorName(0);
 % x = ac * (choice*(ac-1 + include_void_choice) + nochoice) + null
 % ac = cfg.advisors.count.real
 cfg.block_count                     = 12; % number of blocks
-cfg.trialset.choice                 = 5; % choice trials with each advisor on the left (1/2 of all choice trials in a trialset)
+cfg.trialset.choice                 = 4; % choice trials with each advisor on the left (1/2 of all choice trials in a trialset)
 cfg.trialset.include_void_choice    = 0; % include choices of an observer versus no feedback
-cfg.trialset.nochoice               = 10; % no-choice trials for each advisor
-cfg.trialset.null                   = 3; % number of null trials = number of observers x 2
+cfg.trialset.nochoice               = 8; % no-choice trials for each advisor
+cfg.trialset.null                   = 2; % number of null trials = number of observers x 2
 cfg.block.trialset_count            = 1; % number of trial sets in each block
 cfg.block.questionnaire_frequency   = 3; % include questionnaires after each how many blocks?
 
 cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;
-cfg.practice.allowChoice            = 1;
+cfg.practice.null                   = 1; % number of null trials in practice
+cfg.practice.choiceProportion       = .33;
 
 if cfg.shortMode 
     if cfg.debug

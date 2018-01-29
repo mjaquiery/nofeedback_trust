@@ -1,4 +1,4 @@
-  %% Launcher script
+%% Launcher script
 % handles compatability across multiple installs on various machines.
 % by matt.jaquiery@psy.ox.ac.uk
 %
@@ -10,11 +10,6 @@
 % Didn't see a stimulus on first trial??
 % Frame the screenshot in the advisor selection instructions
 % Block 3 instructions: remove 'honest'
-% Add force trials and catch trials to practice block 2
-% Advisors should appear where they were clicked, not in the middle
-% Text appropriate to choice:
-    % "Click on the advisor to hear their advice"
-    % "Click on the silhouette to continue"
 % Make things look nice on the actual test computers
 % Reduce experimental trial count to somewhere in the 330-360 region
 
@@ -25,12 +20,12 @@ clc;
 %experimentName = 'HaloEffect';
 experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
-forceResolution = [];
-%forceResolution = [1300 600];
+%forceResolution = [];
+forceResolution = [1300 600];
 feedbackEnabled = 0; 
 debugMode = 0;
 shortMode = 1;
-pathRoot = 'MattWork';
+pathRoot = 'MattHome';
 
 %% set path   
 switch pathRoot

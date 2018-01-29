@@ -98,8 +98,21 @@ if choice~=0 && ~((choice==-1 && obsT==0) || (choice==1 && obsB==0))
 end
 
 %% add some text instructions
-Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
-txt = cfg.instr.chooseAdvisor.text{1};
+oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
+if isnan(obsT) || isnan(obsB)
+    % choice of one
+    if sum([obsT obsB], 'omitnan') == 0
+        % silhouette for null trial
+        txt = cfg.instr.chooseAdvisor.null{1};
+    else
+        % forced to choose real advisor
+        txt = cfg.instr.chooseAdvisor.forced{1};
+    end
+else
+    % choice of two advisors
+    txt = cfg.instr.chooseAdvisor.choice{1};
+end
+
 textLength = Screen('TextBounds', Sc.window, txt, 0, 0);
 DrawFormattedText(Sc.window, txt,...
     Sc.center(1)-textLength(3)/2,...
@@ -107,3 +120,4 @@ DrawFormattedText(Sc.window, txt,...
 
 %% execute drawings
 Screen('Flip', Sc.window);
+Screen('TextSize', Sc.window, oldTextSize);

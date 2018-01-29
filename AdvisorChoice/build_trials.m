@@ -11,13 +11,21 @@ for b = 1: cfg.practice.block_count
         block_trials0(end).feedback = true;
         block_trials0(end).practice = true;
         if b > 1
-            if cfg.practice.allowChoice
+            if rand() < cfg.practice.choiceProportion
                 block_trials0(end).choice = [cfg.advisors.count.real+1:cfg.advisors.count.all];
             else
                 block_trials0(end).advisorId = getRandomAdvisor(2);
                 block_trials0(end).choice = [0 block_trials0(end).advisorId];
             end
             block_trials0(end).choice = block_trials0(end).choice(randperm(2));
+        end
+    end
+    if b > 1 % no null trials for first block
+        for t = 1:cfg.practice.null % null trials
+            trialid = trialid + 1;
+            block_trials0 = [block_trials0 getNewTrial(trialid, b)];
+            block_trials0(end).choice = [NaN 0]; % forced choice of null
+            block_trials0(end).choice = block_trials0(end).choice(randperm(2)); % randomise the force selection of no advisor top/bottom
         end
     end
     block_trials0   = block_trials0(randperm(length(block_trials0)));      % randomize trials within block
@@ -55,7 +63,7 @@ for b = b+1 : cfg.practice.block_count+cfg.block_count
         end
         for t = 1:cfg.trialset.null % null trials per trialset
             trialid = trialid + 1;
-            block_trials1(end+1) = getNewTrial(trialid, b);
+            block_trials1 = [block_trials1 getNewTrial(trialid, b)];
             block_trials1(end).choice = [NaN 0]; % forced choice of null
             block_trials1(end).choice = block_trials1(end).choice(randperm(2)); % randomise the force selection of no advisor top/bottom
         end

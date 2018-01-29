@@ -8,7 +8,9 @@ cfg.instr.wrongbutton.text      = {'Wrong button' 'Please press any key to conti
 cfg.instr.cjtext.text           = {'sure' 'guessing' 'guessing' 'sure'};
 cfg.instr.cjtext.position.offsetY = 40;
 
-cfg.instr.chooseAdvisor.text    = {'Click on one of the advisors to hear their advice'};
+cfg.instr.chooseAdvisor.choice  = {'Click on one of the advisors to hear their advice'};
+cfg.instr.chooseAdvisor.forced  = {'Click on the advisor to hear their advice'};
+cfg.instr.chooseAdvisor.null    = {'Click on the silhouette to continue'};
 
 cfg.instr.instr.text            = {'Left click with your mouse to make a decision.' ...
     'Press spacebar to confirm response.'};
