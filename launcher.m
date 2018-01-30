@@ -8,10 +8,7 @@
 
 %% Todo:
 % Didn't see a stimulus on first trial??
-% Frame the screenshot in the advisor selection instructions
-% Block 3 instructions: remove 'honest'
 % Make things look nice on the actual test computers
-% Reduce experimental trial count to somewhere in the 330-360 region
 
 %% clear workspace and create directories
 clear all;
