@@ -8,7 +8,6 @@
 
 %% Todo:
 % Didn't see a stimulus on first trial??
-% Make things look nice on the actual test computers
 
 %% clear workspace and create directories
 clear all;
@@ -17,12 +16,12 @@ clc;
 %experimentName = 'HaloEffect';
 experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
-forceResolution = [];
-%forceResolution = [1300 600];
+%forceResolution = [];
+forceResolution = [1600 1200];
 feedbackEnabled = 0; 
 debugMode = 1;
 shortMode = 1;
-pathRoot = 'MattLaptop';
+pathRoot = 'MattHome';
 
 %% set path   
 switch pathRoot

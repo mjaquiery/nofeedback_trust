@@ -21,6 +21,7 @@ Screen('Preference','SuppressAllWarnings', 1);
 
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global cfg;
+set_cfg_shared
 set_cfg_settings
 
 %% Read in audio files
@@ -78,7 +79,7 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %introduce_observers
 
-%questionnaire
+%questionnaire(1);
 
 %getAdvisorChoice(NaN, 2);
 

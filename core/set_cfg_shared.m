@@ -42,7 +42,7 @@ cfg.display.portrait.height = 325;
 cfg.display.portrait.nameTextOffset = 20;
 cfg.display.portrait.nameTextSize = 20;
 
-cfg.display.choice.offset = 0.25;
+cfg.display.choice.offset = 0.15;
 cfg.display.choice.frame.width = 2;
 cfg.display.choice.frame.gap = cfg.display.choice.frame.width + 2; % gap between the portrait and the frame
 cfg.display.choice.frame.color = [.8 .8 .8]';

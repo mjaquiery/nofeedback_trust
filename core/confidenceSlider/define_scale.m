@@ -16,7 +16,7 @@ cfg.bar.color.cursor        = [.8 .8 .8]'; % cursor colour
 cfg.bar.color.cj1           = [.99 .99 .0]'; % colour of the first confidence judgement indicator
 
 % Questionnaire bar
-cfg.bar.Q.y                 = Sc.size(2)*.8;
+cfg.bar.Q.y                 = Sc.size(2)*.6;
 
 % define the text offsets here since they depend on the bar details
 cfg.instr.xshift = [...
