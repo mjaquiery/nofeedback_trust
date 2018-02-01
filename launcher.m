@@ -17,12 +17,12 @@ clc;
 %experimentName = 'HaloEffect';
 experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
-%forceResolution = [];
-forceResolution = [1300 600];
+forceResolution = [];
+%forceResolution = [1300 600];
 feedbackEnabled = 0; 
-debugMode = 0;
+debugMode = 1;
 shortMode = 1;
-pathRoot = 'MattHome';
+pathRoot = 'MattLaptop';
 
 %% set path   
 switch pathRoot
@@ -58,6 +58,7 @@ switch pathRoot
         stims_path    = [my_path 'stims']; 
         osSlash = '\';
         screenNumber = 0;
+        Screen('Preference', 'SkipSyncTests', 1); 
         
     case 'AlexLaptop'
         my_path = '/Users/Alex/Documents/MATLAB/Project/';
