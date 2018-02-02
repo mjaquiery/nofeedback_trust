@@ -274,10 +274,12 @@ print(summary(anova_output_70))
 
 # We want to know if trust for each advisor changes over time. First we build a
 # table for each participant and each of the questionnaire answers.
+
+# TODO: this table will be more useful if the timepoints are are columns e.g. T1.Q1, T1.Q2..., T2.Q1, T2.Q2...
 trust_table <- data.frame(pId=integer(),
                           timepoint=integer(),
                           trialNum=integer(),
-                          advisorId=integer(),
+                          advisorType=integer(),
                           advisorNth=integer(),
                           answer=integer(),
                           responseTime=double(),
@@ -287,6 +289,7 @@ trust_table <- data.frame(pId=integer(),
 for(p in seq(length(study))) {
   trials <- study[[p]]$trials
   qtrials <- trials[which(trials[,"questionnaire"]==1),]
+  advisorAdviceTypes <- as.numeric(study[[p]]$cfg$advisor[seq(2,length(study[[p]]$cfg$advisor),6)])
   if(is.null(dim(qtrials))) {
     # 1 or 0 entries in qtrials (questionnaire only taken once)
     if(length(qtrials)>0) {
@@ -294,8 +297,9 @@ for(p in seq(length(study))) {
       tId <- qtrials$id
       q_text <- study[[p]]$cfg$instr$Q$q$pro$text[as.numeric(q_data[,"quest"])]
       for(i in seq(dim(q_data)[1])) {
+        aT <- advisorAdviceTypes[as.numeric(q_data$obs[[i]])]
         q_data_in <- data.frame(pId=p, timepoint=1, trialNum=qtrials$id, 
-                                advisorId=q_data$obs[[i]], advisorNth=1, 
+                                advisorType=aT, advisorNth=1, 
                                 answer=q_data$ans[[i]], responseTime=q_data$response.t[[i]],
                                 qNum=q_data$quest[[i]], qNth=q_data$presentation.order[[i]], 
                                 qText=q_text[[i]])
@@ -316,8 +320,9 @@ for(p in seq(length(study))) {
           q_text <- study[[p]]$cfg$instr$Q$q$retro$text[as.numeric(q_data[,"quest"])]
         else
           q_text <- study[[p]]$cfg$instr$Q$q$pro$text[as.numeric(q_data[,"quest"])]
+        aT <- advisorAdviceTypes[as.numeric(q_data$obs[[i]])]
         q_data_in <- data.frame(pId=p, timepoint=t, trialNum=tId[[t]], 
-                                advisorId=q_data$obs[[i]], advisorNth=atp, 
+                                advisorType=aT, advisorNth=atp, 
                                 answer=q_data$ans[[i]], responseTime=q_data$response.t[[i]],
                                 qNum=q_data$quest[[i]], qNth=q_data$presentation.order[[i]], 
                                 qText=q_text[[i]])
@@ -327,6 +332,20 @@ for(p in seq(length(study))) {
   }
 }
 
+# Questions:
+# 1) Advisor accuracy
+# 2) Advisor likeability
+# 3) Advisor trustworthiness
+# 4) Advisor influence
+
+# Were the advisors perceived differently to begin with?
+
+# Before we restructure the table we can do a quick anova looking for main
+# effect of advisor and interactions of timepoint and advisor
+print('>>(trust.test) ANOVA exploring trust questionnaire responses')
+trust.test <- aov(formula = answer ~ advisorType * timepoint * qNum + Error(pId),
+                   data = trust_table)
+summary(trust.test)
 
 ## 5) Do participants simply prefer agreement? ####################################################
 
