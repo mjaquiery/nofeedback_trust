@@ -21,6 +21,10 @@
 # experiments[subjectNum]$trials[,"fieldName"]
 # 
 
+if(!require("R.matlab"))
+  install.packages("R.matlab")
+library(R.matlab)
+
 # pth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoicetest/behaviour/2017-11-22T153220_999_final.mat"
 # pth <- "C:/Users/mj221/Filr/My Files/Results/PoliticalDifferences"
 pth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
@@ -52,7 +56,7 @@ getMatlabData <- function (folder) {
 }
 
 mat2R <- function (matpath) {
-  matdata <- R.matlab::readMat(matpath)
+  matdata <- readMat(matpath)
   dataout <- restructure(matdata)
   
   return(dataout)

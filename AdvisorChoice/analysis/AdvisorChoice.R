@@ -19,6 +19,10 @@ if(!require('BayesFactor')) {
 }
 library(BayesFactor)
 
+#(Called in mat2R)
+#Henrik Bengtsson (2016). R.matlab: Read and Write MAT Files and Call MATLAB from
+#Within R. R package version 3.6.0-9000. https://github.com/HenrikBengtsson/R.matlab
+
 ## i) Get Data ####################################################################################
 print('Loading data')
 
@@ -30,9 +34,8 @@ if(!exists("getMatlabData", mode="function")) {
   setwd(oldwd)
 } 
 
-
-acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
-#acPth <- "D:/Users/MJ/Filr/My Files/Results/AdvisorChoice"
+#acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
+acPth <- "D:/Users/MJ/Filr/My Files/Results/AdvisorChoice"
 
 raw_study <- getMatlabData(acPth)  # get some data from the path defined for convenience in mat2R
 
@@ -275,8 +278,7 @@ print(summary(anova_output_70))
 # We want to know if trust for each advisor changes over time. First we build a
 # table for each participant and each of the questionnaire answers.
 
-# TODO: this table will be more useful if the timepoints are are columns e.g. T1.Q1, T1.Q2..., T2.Q1, T2.Q2...
-trust_table <- data.frame(pId=integer(),
+trust.table <- data.frame(pId=integer(),
                           timepoint=integer(),
                           trialNum=integer(),
                           advisorType=integer(),
@@ -303,7 +305,7 @@ for(p in seq(length(study))) {
                                 answer=q_data$ans[[i]], responseTime=q_data$response.t[[i]],
                                 qNum=q_data$quest[[i]], qNth=q_data$presentation.order[[i]], 
                                 qText=q_text[[i]])
-        trust_table <- rbind(trust_table, q_data_in)
+        trust.table <- rbind(trust.table, q_data_in)
       }
     }
   } else {
@@ -312,10 +314,10 @@ for(p in seq(length(study))) {
       tId <- as.numeric(qtrials[,"id"])
       q_text <- study[[p]]$cfg$instr$Q$q$pro$text[as.numeric(q_data$quest)]
       for(i in seq(dim(q_data)[1])) {
-        if(dim(trust_table)[1]==0)
+        if(dim(trust.table)[1]==0)
           atp <- 1
         else
-          atp <- 1+floor(length(which(trust_table$advisorId==as.numeric(q_data$obs[[i]])))/4)
+          atp <- 1+floor(length(which(trust.table$advisorId==as.numeric(q_data$obs[[i]])))/4)
         if(atp>1)
           q_text <- study[[p]]$cfg$instr$Q$q$retro$text[as.numeric(q_data[,"quest"])]
         else
@@ -326,7 +328,7 @@ for(p in seq(length(study))) {
                                 answer=q_data$ans[[i]], responseTime=q_data$response.t[[i]],
                                 qNum=q_data$quest[[i]], qNth=q_data$presentation.order[[i]], 
                                 qText=q_text[[i]])
-        trust_table <- rbind(trust_table, q_data_in)
+        trust.table <- rbind(trust.table, q_data_in)
       }
     }
   }
@@ -338,14 +340,43 @@ for(p in seq(length(study))) {
 # 3) Advisor trustworthiness
 # 4) Advisor influence
 
-# Were the advisors perceived differently to begin with?
-
-# Before we restructure the table we can do a quick anova looking for main
-# effect of advisor and interactions of timepoint and advisor
+# We can get a quick overview from an anova looking for main effect of advisor
+# and interactions of timepoint and advisor
 print('>>(trust.test) ANOVA exploring trust questionnaire responses')
 trust.test <- aov(formula = answer ~ advisorType * timepoint * qNum + Error(pId),
-                   data = trust_table)
+                  data = trust.table)
 summary(trust.test)
+
+# Were the advisors perceived differently to begin with?
+trust.table.t1 <- trust.table[which(trust.table$timepoint==1),]
+trust.table.t1.byAdv <- data.frame(pId=integer(), AiC=double(), AiU=double())
+for(pId in seq(length(unique(trust.table.t1$pId)))) {
+  t <- trust.table.t1[which(trust.table.t1$pId==pId),]
+  AiC <- mean(t[which(t$advisorType==aic.advisor),"answer"])
+  AiU <- mean(t[which(t$advisorType!=aic.advisor),"answer"])
+  df <- data.frame(pId, AiC, AiU)
+  trust.table.t1.byAdv <- rbind(trust.table.t1.byAdv, df)
+}
+trust.test.t1 <- t.test(trust.table.t1.byAdv$AiC, trust.table.t1.byAdv$AiU)
+print('>>(trust.test.t1) Testing whether advisors are trusted differentially at the beginning of the experiment')
+prettyPrint(trust.test.t1)
+print('>>(trust.test.t1.b) bayesian examination of above currently not run (NaN values in test dataset)')
+#trust.test.t1.b <- ttestBF(trust.table.t1.byAdv$AiC, trust.table.t1.byAdv$AiU)
+#print(trust.test.t1.b)
+#print(paste0('Evidence strength for higher AiC trust: BF=', round(exp(trust.test.t1.b@bayesFactor$bf),3)))
+
+# Were they perceived differently at the end to the beginning?
+trust.table.last <- data.frame();
+for(i in seq(length(unique(trust.table$pId)))) {
+  pId <- unique(trust.table$pId)[i]
+  qs <- trust.table[which(trust.table$pId==pId),]
+  lastTimepoint <- max(unique(qs$timepoint))
+  #if(lastTimepoint<2) 
+  #  next # if there's only one timepoint then don't register the participant
+  trust.table.last <- rbind(trust.table.last, qs[which(qs$timepoint==lastTimepoint),])
+}
+
+
 
 ## 5) Do participants simply prefer agreement? ####################################################
 
