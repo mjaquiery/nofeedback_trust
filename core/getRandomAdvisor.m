@@ -19,7 +19,7 @@ function [advisorId] = getRandomAdvisor(advisorType)
 global cfg;
 
 % fix optional inputs
-if nargin < 2
+if nargin < 1
     advisorType = 0;
 end
 
@@ -35,4 +35,4 @@ switch advisorType
         high = cfg.advisors.count.real;
 end
     
-advisorId = floor(low+rand*(high+1-low));
+advisorId = low+floor(rand*(high+1-low));
