@@ -77,13 +77,18 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 %draw_static(Sc, cfg)
 %Screen('Flip',Sc.window);
 
+instructions(1);
+instructions(2);
+instructions(3);
+instructions(4);
+
 %introduce_observers
 
 %questionnaire(1);
 
 %getAdvisorChoice(NaN, 2);
 
-estimated_obsacc();
+%estimated_obsacc();
 
 %[a, b, c] = SECS
 

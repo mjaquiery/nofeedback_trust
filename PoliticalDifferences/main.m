@@ -192,10 +192,10 @@ for t = starttrial:length(trials)
     WaitSecs(cfg.stim.fixationFlicker.time.post);
     
     % draw stimulus rectangles
-    Screen('DrawLines',Sc.window,innerrect1out,3,255);
-    Screen('DrawLines',Sc.window,innerrect2out,3,255);
-    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(1,:))), 2, 255, center1, 2);
-    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(2,:))), 2, 255, center2, 2);
+    Screen('DrawLines',Sc.window,cfg.rect.innerrect1out,3,255);
+    Screen('DrawLines',Sc.window,cfg.rect.innerrect2out,3,255);
+    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(1,:))), 2, 255, cfg.rect.center1, 2);
+    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(2,:))), 2, 255, cfg.rect.center2, 2);
     draw_static([1 1 0 0 0])
     
     % Show stimulus on screen at next possible display refresh cycle,
