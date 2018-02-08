@@ -19,7 +19,7 @@ function [advisorId] = getRandomAdvisor(advisorType)
 global cfg;
 
 % fix optional inputs
-if nargin < 2
+if nargin < 1
     advisorType = 0;
 end
 

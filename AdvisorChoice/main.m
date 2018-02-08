@@ -42,6 +42,7 @@ if (subject.restarted)
     cfg.restarted = 1;
 else
     starttrial=1;
+    cfg.currentTrialNumber = starttrial;
 end
 
 Screen('Preference','SuppressAllWarnings', 1);
@@ -80,6 +81,9 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 % initialize text on screen ?? - now done ad hoc (was previously
 % duplicated)
 %text_on_screen_vars
+
+% run a single trial first so everything's precached.
+doDotTask(trials,1);
 
 for t = starttrial:length(trials)
     disp(['text color: ' int2str(sum(Screen('TextColor',Sc.window)))]);
@@ -156,10 +160,10 @@ for t = starttrial:length(trials)
     WaitSecs(cfg.stim.fixationFlicker.time.post);
     
     % draw stimulus rectangles
-    Screen('DrawLines',Sc.window,innerrect1out,3,255);
-    Screen('DrawLines',Sc.window,innerrect2out,3,255);
-    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(1,:))), 2, 255, center1, 2);
-    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(2,:))), 2, 255, center2, 2);
+    Screen('DrawLines',Sc.window,cfg.rect.innerrect1out,3,255);
+    Screen('DrawLines',Sc.window,cfg.rect.innerrect2out,3,255);
+    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(1,:))), 2, 255, cfg.rect.center1, 2);
+    Screen('DrawDots', Sc.window, cfg.xymatrix(:,squeeze(trials(t).wheredots(2,:))), 2, 255, cfg.rect.center2, 2);
     draw_static([1 1 0 0 0])
     
     % Show stimulus on screen at next possible display refresh cycle,
@@ -277,7 +281,7 @@ save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(
 
 % collect estimated observers accuracy
 trials(t).estim_obsacc = estimated_obsacc();
-
+subject.timeTaken = toc;
 %% save final file
 save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'],'subject','cfg','trials');
 % prepare data for R

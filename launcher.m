@@ -16,12 +16,12 @@ clc;
 %experimentName = 'HaloEffect';
 experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
-%forceResolution = [];
-forceResolution = [1600 1200];
+forceResolution = [];
+%forceResolution = [1600 1200];
 feedbackEnabled = 0; 
-debugMode = 1;
-shortMode = 1;
-pathRoot = 'MattHome';
+debugMode = 0;
+shortMode = 0;
+pathRoot = 'MattLaptop';
 
 %% set path   
 switch pathRoot
