@@ -35,4 +35,4 @@ switch advisorType
         high = cfg.advisors.count.real;
 end
     
-advisorId = floor(low+rand*(high+1-low));
+advisorId = low+floor(rand*(high+1-low));

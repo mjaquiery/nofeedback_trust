@@ -275,7 +275,7 @@ for t = starttrial:length(trials)
 end
 % collect last questionnaire
 trials(t).qanswers = questionnaire();
-
+subject.timeTaken = toc;
 % save temporary final file
 save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(t)],'trials', 'cfg', 'subject');
 
