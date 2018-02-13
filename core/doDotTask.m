@@ -18,7 +18,7 @@ global Sc; % screen object
 if t == 1 || cfg.restarted == 1 || trials(t-1).break == 1 
     time = GetSecs; 
 else
-    time = trials(t-1).endTime;
+    time = trials(t-1).time_endTrial;
 end
 
 % vectors are created that contain logical values to tell where
@@ -157,4 +157,4 @@ end
 Screen('Close');
 PsychPortAudio('Close');
 
-trials(t).endTime = time;
+trials(t).time_endTrial = time;

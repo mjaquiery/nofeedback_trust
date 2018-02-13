@@ -26,7 +26,7 @@ oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
 if t == 1 || cfg.restarted == 1 || trials(t-1).break == 1 
     time = GetSecs; 
 else
-    time = trials(t-1).endTime;
+    time = trials(t-1).time_endTrial;
 end
     
 trials(t).question = cfg.quiz{cfg.quizOrder(t)};
@@ -236,7 +236,7 @@ end
 PsychPortAudio('Close');
 Screen('Close');
 
-trials(t).endTime = time;
+trials(t).time_endTrial = time;
 
 
 function text = centerMultilineText(text, centerOn, maxLineWidth)

@@ -79,6 +79,11 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 % duplicated)
 %text_on_screen_vars
 
+% run a dummy trial to prevent delays between instructions and practice
+cfg.currentTrialNumber = 1;
+runTrial(trials, cfg.currentTrialNumber);
+% TODO: run a second dummy for the other trial type
+
 for t = starttrial:length(trials)
     disp(['text color: ' int2str(sum(Screen('TextColor',Sc.window)))]);
     % update current trial number
@@ -100,7 +105,7 @@ for t = starttrial:length(trials)
     %% save and break
     if trials(t).break
         %% Save dataon break trials
-        save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't', 'SECSscore')
+        save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
         %% break
         Screen('TextSize',Sc.window,cfg.instr.textSize.large);
         DrawFormattedText(Sc.window, 'Break. Press button to continue','center', 'center', [0 0 0]);
@@ -140,7 +145,7 @@ for t = starttrial:length(trials)
     end
     %% start trial
         
-    runTrial();
+    trials = runTrial(trials, t);
 end
 
 % collect final questionnaire

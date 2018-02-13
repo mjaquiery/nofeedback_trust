@@ -13,8 +13,8 @@
 clear all;
 close all;
 clc;
-%experimentName = 'HaloEffect';
-experimentName = 'AdvisorChoice';
+experimentName = 'HaloEffect';
+%experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
 forceResolution = [];
 %forceResolution = [1600 1200];

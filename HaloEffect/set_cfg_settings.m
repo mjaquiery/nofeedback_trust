@@ -58,9 +58,9 @@ cfg.noAdvisorChoice.id = 0; cfg.noAdvisorChoice.name = getAdvisorName(0);
 % ac = cfg.advisors.count.real
 cfg.block_count                     = 6; % number of blocks
 cfg.trialset.real                   = 60;
-cfg.trialset.null                   = 5; % number of null trials = number of observers x 2
+cfg.trialset.null                   = 2; % number of null trials = number of observers x 2
 cfg.block.trialset_count            = 1; % number of trial sets in each block
-cfg.block.questionnaire_frequency   = 1; % include questionnaires after each how many blocks?
+cfg.block.questionnaire_frequency   = 3; % include questionnaires after each how many blocks?
 cfg.block.taskType                  = [1 1 1 1 2 2 1 1]; % the block at which advisor politicial info begins
 
 cfg.practice.block_count            = 2;
