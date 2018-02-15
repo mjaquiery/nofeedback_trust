@@ -2,8 +2,25 @@ trials = [];
 trialid = 0;
 [block_trials0, block_trials1] =deal([]); %initialize as empty vectors
 
-% practice trials
-for b = 1: cfg.practice.block_count
+%% introduction
+for type = 1:2
+    if type == 1
+        tt = cfg.taskType.dots;
+    else
+        tt = cfg.taskType.quiz;
+    end
+    for t = 1:3
+        trials = [trials getNewTrial(t*type, 0)];
+        trials(end).instr = true;
+        trials(end).practice = true;
+        if t == 3
+            trials(end).advisorId = cfg.advisors.count.real+1;
+        end
+    end
+end
+
+%% practice trials
+for b = 1: cfg.practice.block_count+1
     block_trials0 = []; %clear vector
     for t = 1:cfg.practice.trial_count
         trialid = trialid+1;
@@ -19,17 +36,22 @@ for b = 1: cfg.practice.block_count
     trials          = cat(2,trials,block_trials0);                         % concatenate practice block
 end
 
-% experimental trials
+%% experimental trials
 for b = b+1 : cfg.practice.block_count+cfg.block_count
     block_trials1 = [];
     for ts = 1 : cfg.block.trialset_count % trialset
-        for t = 1:cfg.trialset.real+cfg.trialset.null
+        for a = 1:cfg.advisors.count.real
+            for t = 1:cfg.trialset.real
+                trialid = trialid + 1;
+                block_trials1 = [block_trials1 getNewTrial(trialid, b)];
+                block_trials1(end).taskType = cfg.block.taskType(b);
+                block_trials1(end).advisorId = a; % cycle through advisors by block
+            end
+        end
+        for t = 1:cfg.trailset.null
             trialid = trialid + 1;
             block_trials1 = [block_trials1 getNewTrial(trialid, b)];
             block_trials1(end).taskType = cfg.block.taskType(b);
-            if t > cfg.trialset.real
-                block_trials1(end).advisorId = getABBA(b); % cycle through advisors by block
-            end
         end
     end
     block_trials1    = block_trials1(randperm(length(block_trials1)));         % randomize trials within a block
@@ -57,10 +79,11 @@ clear wl
 
 %% Add extra information at each trial
 for t = 1:length(trials)
+    if trials(t).block == 0
+        continue
+    end
     %-- add breaks and instruction points
-    if t == 1
-        trials(t).instr         = true;
-    elseif trials(t-1).block ~= trials(t).block % first trial in a new block
+    if trials(t-1).block ~= trials(t).block % first trial in a new block
         trials(t).break = true;
         trials(t).feedback = true;
         if trials(t).block <= cfg.practice.block_count+1 % first trials in practice blocks
@@ -70,12 +93,6 @@ for t = 1:length(trials)
             if cfg.debug==0 % don't put questionnaires in the debgging routine
                 trials(t).questionnaire = true; 
             end
-        end
-    end
-    if isfield(cfg.block, 'advisorPolitics')
-        % display advisors at appropriate points
-        if trials(t).block >= cfg.block.advisorPolitics.start && ~mod(t,cfg.block.advisorPolitics.frequency)
-            trials(t).advisorPolitics = true;
         end
     end
 end

@@ -1,6 +1,5 @@
 %% STUDY 3 - agreement in confidence and uncertainty  #####################
-%% script by Niccolo Pescetelli %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% niccolo.pescetelli@psy.ox.ac.uk
+%% outline by Niccolo Pescetelli
 %% Extensions by Matt Jaquiery
 % matt.jaquiery@psy.ox.ac.uk
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -104,7 +103,7 @@ for t = starttrial:length(trials)
     end
     %% save and break
     if trials(t).break
-        %% Save dataon break trials
+        %% Save data on break trials
         save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_' num2str(round(t/20))],'trials', 'cfg', 't')
         %% break
         Screen('TextSize',Sc.window,cfg.instr.textSize.large);
@@ -118,16 +117,11 @@ for t = starttrial:length(trials)
         instructions(trials(t).block);
     end
     %% introduce observers
-    if trials(t).block>1 && trials(t-1).block<5 && trials(t).block ~= trials(t-1).block
-        if isnan(trials(t).advisorId) % first trial is a null trial
-           for n = t:cfg.block.trialset_count*(cfg.trialset.real+cfg.trialset.null)
-               if n>0 && trials(n).block == trials(t).block && ~isnan(trials(n).advisorId)
-                   introduce_observers(trials(n).advisorId);
-                   break;
-               end
-           end
+    if t > 1 && trials(t).block ~= trials(t-1).block
+        if trials(t).practice
+            introduce_observers(NaN,1);
         else
-            introduce_observers(trials(t).advisorId);
+            introduce_observers();
         end
     end
     %% questionnaire

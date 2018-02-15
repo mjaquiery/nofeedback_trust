@@ -57,7 +57,7 @@ cfg.noAdvisorChoice.id = 0; cfg.noAdvisorChoice.name = getAdvisorName(0);
 % x = ac * (choice*(ac-1 + include_void_choice) + nochoice) + null
 % ac = cfg.advisors.count.real
 cfg.block_count                     = 6; % number of blocks
-cfg.trialset.real                   = 60;
+cfg.trialset.real                   = 25; % real trials per observer
 cfg.trialset.null                   = 2; % number of null trials = number of observers x 2
 cfg.block.trialset_count            = 1; % number of trial sets in each block
 cfg.block.questionnaire_frequency   = 3; % include questionnaires after each how many blocks?

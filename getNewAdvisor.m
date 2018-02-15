@@ -13,3 +13,4 @@ advisor.pic = NaN; % portrait id
 advisor.voice = NaN; % voice id
 advisor.name = 'UNNAMED'; % name
 advisor.firstQuestionnaireDone = false; % whether the prospective questionnaire has been answered
+advisor.timeFirstIntroduced = NaN; % time the advisor was introduced

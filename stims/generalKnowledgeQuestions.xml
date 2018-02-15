@@ -500,4 +500,39 @@
         <answer>the Boy Scouts and Girl Guides</answer>
         <distractor>the British National Party</distractor>
     </question>
+  <question>
+    <text>What does a herpetologist study?</text>
+    <answer>reptiles and amphibians</answer>
+    <distractor>skin diseases</distractor>
+  </question>
+  <question>
+    <text>Kenneth Graham, a Bank of England bank clerk, wrote the children's classic</text>
+    <answer>'The Wind in the Willows'</answer>
+    <distractor>'Swallows and Amazons'</distractor>
+  </question>
+  <question>
+    <text>Honor Blackman starred in the James Bond film</text>
+    <answer>'Goldfinger'</answer>
+    <distractor>'Dr. No'</distractor>
+  </question>
+  <question>
+    <text>Thinking they were giants, Don Quixote attacked</text>
+    <answer>windmills</answer>
+    <distractor>totem poles</distractor>
+  </question>
+  <question>
+    <text>In cookery, florentine means served with </text>
+    <answer>spinach</answer>
+    <distractor>honey</distractor>
+  </question>
+  <question>
+    <text>The ship on which the young Charles Darwin served as naturalist was named</text>
+    <answer>'The Beagle'</answer>
+    <distractor>'The Hispaniola'</distractor>
+  </question>
+  <question>
+	<text>The orchestral suite 'The Planets' was composed by</text>
+	<answer>Gustav Holst</answer>
+	<distractor>George Frideric Handel</distractor>
+  </question>
 </quiz>
