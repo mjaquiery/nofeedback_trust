@@ -113,8 +113,12 @@ for t = starttrial:length(trials)
         feedback_interblock
     end
     %% instructions
-    if trials(t).instr
-        instructions(trials(t).block);
+    if trials(t).instr ~= false
+        if ischar(trials(t).instr)
+            instructions(trials(t).instr);
+        else
+            instructions(trials(t).block);
+        end
     end
     %% introduce observers
     if t > 1 && trials(t).block ~= trials(t-1).block
@@ -158,7 +162,7 @@ save([cfg.path.results osSlash subject.dir osSlash subject.fileName '_final'],'s
 %% Thanks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-insimdata = imread(cfg.intro{4}{1});
+insimdata = imread(cfg.thankYou);
 texins = Screen('MakeTexture', Sc.window, insimdata);
 Screen('DrawTexture', Sc.window, texins);
 Screen('Flip',Sc.window);

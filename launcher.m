@@ -21,7 +21,7 @@ forceResolution = [];
 feedbackEnabled = 0; 
 debugMode = 1;
 shortMode = 1;
-pathRoot = 'MattHome';
+pathRoot = 'MattWork';
 
 %% set path   
 switch pathRoot

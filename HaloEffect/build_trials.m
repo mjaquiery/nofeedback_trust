@@ -11,13 +11,16 @@ for type = 1:2
     end
     for t = 1:3
         trials = [trials getNewTrial(t*type, 0)];
-        trials(end).instr = true;
+        trials(end).instr = ['intro' t*type];
         trials(end).practice = true;
+        trials(end).feedback = true;
         if t == 3
             trials(end).advisorId = cfg.advisors.count.real+1;
         end
     end
 end
+
+trialid = length(trials);
 
 %% practice trials
 for b = 1: cfg.practice.block_count+1
@@ -48,7 +51,7 @@ for b = b+1 : cfg.practice.block_count+cfg.block_count
                 block_trials1(end).advisorId = a; % cycle through advisors by block
             end
         end
-        for t = 1:cfg.trailset.null
+        for t = 1:cfg.trialset.null
             trialid = trialid + 1;
             block_trials1 = [block_trials1 getNewTrial(trialid, b)];
             block_trials1(end).taskType = cfg.block.taskType(b);
@@ -86,8 +89,8 @@ for t = 1:length(trials)
     if trials(t-1).block ~= trials(t).block % first trial in a new block
         trials(t).break = true;
         trials(t).feedback = true;
-        if trials(t).block <= cfg.practice.block_count+1 % first trials in practice blocks
-            trials(t).instr = true;
+        if ismember(trials(t).block, cfg.instructionBlocks)
+            trials(t).instr = ['block' trials(t).block];
         end
         if ismember(trials(t).block,[3:cfg.block.questionnaire_frequency:cfg.block_count+cfg.practice.block_count]) % questionnaires every few blocks
             if cfg.debug==0 % don't put questionnaires in the debgging routine

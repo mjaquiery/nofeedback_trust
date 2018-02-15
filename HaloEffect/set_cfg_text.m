@@ -4,23 +4,33 @@ cfg.instr.estimated_obsacc.text = {'On the dot task, your overall accuracy (befo
     '[help_string]'...
     'Enter a number between 0 and 100 and press Enter: '};
 
-% Instruction Intro Images
-cfg.intro = {{} {} {} {}};
-slideCount = 16;
-slideGroups = [8 6 1 1]; % length of the slide groups
+% Instruction Images
 x = [cfg.path.base 'instructions' osSlash 'HaloEffect' osSlash 'Slide'];
-j = 0;
-for i = 1:slideCount
-    if j == 0 || i > sum(slideGroups(1:j))
-        j = j+1;
-        cfg.intro{j} = {[x int2str(i) '.PNG']};
-    else
-       cfg.intro{j}{length(cfg.intro{j})+1} = [x int2str(i) '.PNG']; 
-    end
-end
+cfg.thankYou = [x '22.PNG'];
 
-%% special instructions can be defined in 
-% SECS instruction path
-cfg.specialInstructions.SECS = {[cfg.path.base 'instructions' osSlash 'SECS' osSlash 'Slide1.PNG']};
+%% special instructions 
+cfg.specialInstructions.intro1 = {[x '1.PNG'] ...
+                                    [x '2.PNG'] ...
+                                    [x '3.PNG'] ...
+                                    [x '4.PNG'] ...
+                                    [x '5.PNG'] ...
+                                    [x '6.PNG'] ...
+                                    [x '7.PNG'] ...
+                                    [x '8.PNG'] ...
+                                    };
+cfg.specialInstructions.intro3 = {[x '9.PNG']};
+cfg.specialInstructions.intro4 = {[x '10.PNG']};
+cfg.specialInstructions.intro6 = {[x '11.PNG']};
 
-clear x slideCount slideGroups j i;
+cfg.specialInstructions.block1 = {[x '12.PNG'] [x '13.PNG']};
+cfg.specialInstructions.block2 = {[x '14.PNG'] ...
+                                    [x '15.PNG'] ...
+                                    [x '16.PNG'] ...
+                                    [x '17.PNG'] ...
+                                    [x '18.PNG'] ...
+                                    };
+cfg.specialInstructions.block3 = {[x '19.PNG']};
+cfg.specialInstructions.block5 = {[x '20.PNG']};
+cfg.specialInstructions.block7 = {[x '21.PNG']};
+
+cfg.instructionBlocks = [1 2 3 5 7];

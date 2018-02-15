@@ -23,7 +23,6 @@ else
 end
 % make and draw the stage instructions
 a = imread(inst{stage});
-stages = length(inst);
 h = Screen('MakeTexture', Sc.window, a);
 Screen('DrawTexture', Sc.window, h);
 Screen('Flip', Sc.window);
