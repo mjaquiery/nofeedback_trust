@@ -68,12 +68,10 @@ cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;
 
 if cfg.shortMode==1
-    cfg.block_count = 2;  
-    cfg.trialset.real = 3;
+    cfg.block_count = 6;  
+    cfg.trialset.real = 2;
     cfg.trialset.null = 1; 
     cfg.block.questionnaire_frequency = 4;
-    cfg.block.advisorPolitics.start     = 3; 
-    cfg.block.advisorPolitics.frequency = 2;
 
     cfg.practice.block_count = 2;
     cfg.practice.trial_count = 2;    
