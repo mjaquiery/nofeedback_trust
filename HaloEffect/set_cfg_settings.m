@@ -45,6 +45,7 @@ for i = 1:cfg.advisors.count.all
     cfg.advisor(i).name = getAdvisorName(cfg.advisor(i).voice);
     if i > cfg.advisors.count.real  
         cfg.advisor(i).adviceType = 0; % practice advisor is unbiased - always 70|30
+        cfg.advisor(i).timeFirstIntroduced = 0;
     end
 end
 % don't forget the 'no advice' and 'no choice' advisors

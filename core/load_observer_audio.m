@@ -1,4 +1,4 @@
-if ~isnan(trials(t).advisorId)
+if hasAdvice(trials(t))
     
     freq = cfg.speechFreq(cfg.advisor(trials(t).advisorId).voice,:,:);
     chan = cfg.speechChannels(cfg.advisor(trials(t).advisorId).voice,:,:);

@@ -107,12 +107,12 @@ trials(t).cor = trials(t).cor1;
 
 HideCursor();
 
-if trials(t).block <= 1 
+if trials(t).advisorId == 0 
     % tidy up
     Screen('TextSize', Sc.window, oldTextSize);
     PsychPortAudio('Close');
     Screen('Close');
-    trials(t).endTime = time;
+    trials(t).time_endTrial = time;
     return;  % duck out early if no advice is to follow
 end
 

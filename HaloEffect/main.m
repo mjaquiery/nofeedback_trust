@@ -70,10 +70,6 @@ load_advisor_portraits
 % Get timestamp for experiment start
 cfg.startexp = GetSecs;
 
-% initialize dotdifference
-trials(1).dotdifference = cfg.stim.initialDotDifference;
-trials(2).dotdifference = cfg.stim.initialDotDifference;
-
 % initialize text on screen ?? - now done ad hoc (was previously
 % duplicated)
 %text_on_screen_vars
@@ -95,7 +91,7 @@ for t = starttrial:length(trials)
         disp(['1st confidence: ' num2str(trials(t-1).cj1)])
         disp(['2nd confidence: ' num2str(trials(t-1).cj2)])
         disp(['Advisor: ' num2str(trials(t-1).advisorId)]);
-        if ~isnan(trials(t-1).advisorId)
+        if hasAdvice(trials(t-1))
             disp(['advice type: ' num2str(cfg.advisor(trials(t-1).advisorId).adviceType)]);
         end
         disp(['agree?: ' num2str(trials(t-1).agree)]);
@@ -144,6 +140,7 @@ for t = starttrial:length(trials)
     %% start trial
         
     trials = runTrial(trials, t);
+    WaitSecs(0.25);
 end
 
 % collect final questionnaire

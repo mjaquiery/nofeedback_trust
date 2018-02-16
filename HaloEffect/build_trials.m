@@ -10,20 +10,23 @@ for type = 1:2
         tt = cfg.taskType.quiz;
     end
     for t = 1:3
-        trials = [trials getNewTrial(t*type, 0)];
-        trials(end).instr = ['intro' t*type];
+        trialid = trialid + 1;
+        trials = [trials getNewTrial(trialid, 0)];
+        if t ~= 2
+            trials(end).instr = ['intro' int2str(trialid)];
+        end
         trials(end).practice = true;
         trials(end).feedback = true;
+        trials(end).taskType = type;
+        trials(end).advisorId = 0;
         if t == 3
             trials(end).advisorId = cfg.advisors.count.real+1;
         end
     end
 end
 
-trialid = length(trials);
-
 %% practice trials
-for b = 1: cfg.practice.block_count+1
+for b = 1: cfg.practice.block_count
     block_trials0 = []; %clear vector
     for t = 1:cfg.practice.trial_count
         trialid = trialid+1;
@@ -33,6 +36,8 @@ for b = 1: cfg.practice.block_count+1
         block_trials0(end).practice = true;
         if b > 1
             block_trials0(end).advisorId = cfg.advisors.count.real+1;
+        else
+            block_trials0(end).advisorId = 0;
         end
     end
     block_trials0   = block_trials0(randperm(length(block_trials0)));      % randomize trials within block
@@ -88,9 +93,8 @@ for t = 1:length(trials)
     %-- add breaks and instruction points
     if trials(t-1).block ~= trials(t).block % first trial in a new block
         trials(t).break = true;
-        trials(t).feedback = true;
         if ismember(trials(t).block, cfg.instructionBlocks)
-            trials(t).instr = ['block' trials(t).block];
+            trials(t).instr = ['block' int2str(trials(t).block)];
         end
         if ismember(trials(t).block,[3:cfg.block.questionnaire_frequency:cfg.block_count+cfg.practice.block_count]) % questionnaires every few blocks
             if cfg.debug==0 % don't put questionnaires in the debgging routine

@@ -34,6 +34,10 @@ function [agree, step] = agreementf(rawx,type,distribution,funct)
 x =abs(rawx);
 b = quantile(distribution,[.3 .7]); % boundaries (30% and 70% of the mass)
 
+% fallback values 
+agree = .7;
+step = 0;
+
 switch funct
     case 'sigmoid'
         % define sigmoid function parameters
@@ -117,14 +121,12 @@ switch funct
                     step   = 1;
                 end
             case 0 % baseline type
+                pagree = .7;
                 if x > b(1) && x <= b(2)
-                    pagree = .7;
                     step   = 0;
                 elseif x <= b(1)
-                    pagree = .7;
                     step   = -1;
                 elseif x > b(2)
-                    pagree = .7;
                     step   = 1;
                 end
         end        

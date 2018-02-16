@@ -23,8 +23,13 @@ end
 
 % vectors are created that contain logical values to tell where
 % dots have to be set in the squares (randomized)
-if t > 2
-    trials(t).dotdifference = staircase([trials(t-2).cor trials(t-1).cor],[trials(t-2).dotdifference trials(t-1).dotdifference]);
+if length(cfg.taskManager.dotTask.lastTwoTrials) > 2
+    trials(t).dotdifference = staircase([cfg.taskManager.dotTask.lastTwoTrials(2).cor ...
+                                            cfg.taskManager.dotTask.lastTwoTrials(1).cor], ...
+                                        [cfg.taskManger.dotTask.lastTwoTrials(2).dotdifference ...
+                                            cfg.taskManager.dotTask.lastTwoTrials(1).dotdifference]);
+else
+    trials(t).dotdifference = cfg.stim.initialDotDifference;
 end
 larger = 200 + trials(t).dotdifference;
 smaller = 200 - trials(t).dotdifference;
@@ -95,7 +100,7 @@ end
 %% define advisor behaviour
 % NOTE: advisor behaviour depends on initial judgements, not
 % post-advice judgements
-if ~isnan(trials(t).advisorId)
+if hasAdvice(trials(t))
     % advisors are always 80% accurate
     if rand <= .8
         trials(t).obsacc = 1;
@@ -110,38 +115,31 @@ else % null
     trials(t).step   = NaN;
 end
 
-%% load the observer
-if trials(t).block > 1
-    load_observer_audio;
-end
-
 % update trial description for debugging
 cfg.currentTrial = trials(t);
 
 %% Advice and final decision
-if trials(t).block > 1 
-    if ~isnan(trials(t).advisorId)
-        present_advice;
+if hasAdvice(trials(t))
+    load_observer_audio;
+    present_advice;
 
-        trials(t).responsetime2 = GetSecs;
-        % prompt new confidence judgment
-        [trials(t).cj2, trials(t).time_response2, trials(t).int2] = ...
-            drag_slider(trials(t).cj1);
+    trials(t).responsetime2 = GetSecs;
+    % prompt new confidence judgment
+    [trials(t).cj2, trials(t).time_response2, trials(t).int2] = ...
+        drag_slider(trials(t).cj1);
 
-        % define new timestamp
-        time = trials(t).time_response2;
+    % define new timestamp
+    time = trials(t).time_response2;
 
-        % define correct response
-        %trials(t).cor2 = ((trials(t).int2>0)+1) == trials(t).wherelarger;
-        trials(t).cor2 = trials(t).int2 == trials(t).wherelarger;
-        trials(t).cor = trials(t).cor2;
-
-    else % null
-        present_delay;
-        time                        = GetSecs;
-    end
-else % 1st practice block
+    % define correct response
+    %trials(t).cor2 = ((trials(t).int2>0)+1) == trials(t).wherelarger;
+    trials(t).cor2 = trials(t).int2 == trials(t).wherelarger;
+    trials(t).cor = trials(t).cor2;
+else
     time                        = GetSecs;
+    if isnan(trials(t).advisorId) % null
+        present_delay;
+    end
 end
 
 % update trial description for debugging
@@ -158,3 +156,13 @@ Screen('Close');
 PsychPortAudio('Close');
 
 trials(t).time_endTrial = time;
+
+% update task manager
+switch length(cfg.taskManager.dotTask.lastTwoTrials)
+    case 0
+        cfg.taskManager.dotTask.lastTwoTrials = t;
+    case 1
+        cfg.taskManager.dotTask.lastTwoTrials = [t cfg.taskManager.dotTask.lastTwoTrials];
+    case 2
+        cfg.taskManager.dotTask.lastTwoTrials = [t cfg.taskManager.dotTask.lastTwoTrials(1)];
+end

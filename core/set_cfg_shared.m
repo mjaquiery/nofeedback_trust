@@ -63,9 +63,13 @@ rng(cfg.resetrn);
 cfg.path.base               = my_path;
 cfg.path.results            = results_path;
 cfg.path.stims              = stims_path;
+cfg.path.slash              = osSlash;
 
 %% Audio files
 cfg.audio.feedback.negative = [stims_path osSlash 'sounds' osSlash 'feedbackNegative.wav'];
+
+%% Task managers
+cfg.taskManager.dotTask.lastTwoTrials = [];
 
 % bar and cursor settings
 define_scale

@@ -21,14 +21,19 @@ cfg.expositionTime = [];
 cfg.expositionTime=[];
 oldTextSize = Screen('TextSize', Sc.window, cfg.instr.textSize.medium);
 bounds = Screen('TextBounds',Sc.window,cfg.instr.intro.text{1});
+% all advisor mode
 if isnan(advisorId)
     if practiceObservers
         observers = cfg.advisors.count.real+1:cfg.advisors.count.all;
     else
         observers = randperm(cfg.advisors.count.real);
+        onset_pic = []; 
+        offset_pic = []; 
+        onset_speech = []; 
+        offset_speech = [];
     end
     for obs = observers
-        if ~isnan(cfg.advisor(obs).timeIntroduced) && ~forceReintroduction
+        if ~isnan(cfg.advisor(obs).timeFirstIntroduced) && ~forceReintroduction
             continue
         end
         drawAdvisor(obs);
@@ -47,9 +52,13 @@ if isnan(advisorId)
         cfg.expositionTime(obs) = offset_pic(obs) - ti;
         % remember they were introduced
         if isnan(cfg.advisor(obs).timeFirstIntroduced)
-            cfg.advisor(obs).timeIntroduced = GetSecs();
+            cfg.advisor(obs).timeFirstIntroduced = GetSecs();
         end
     end
+    if ~practiceObservers
+        cfg.obsIntro_times = [onset_pic; offset_pic; onset_speech; offset_speech];
+    end
+% introduce only one advisor
 else
     if isnan(cfg.advisor(advisorId).timeIntroduced) || forceReintroduction
         drawAdvisor(advisorId);
@@ -66,13 +75,13 @@ else
         [resp offset_pic(advisorId) kcode] = collect_response(inf);
         Screen('Flip',Sc.window);
         cfg.expositionTime(advisorId) = offset_pic(advisorId) - ti;
+        % remember they were introduced
         if isnan(cfg.advisor(advisorId).timeFirstIntroduced)
             cfg.advisor(advisorId).timeFirstIntroduced = GetSecs();
         end
     end
 end
 
-cfg.obsIntro_times = [onset_pic; offset_pic; onset_speech; offset_speech];
 clear startTime xruns resp kcode ti speech imagedata texture bounds pressKey
 
 Screen('TextSize', Sc.window, oldTextSize);
