@@ -54,7 +54,6 @@ drawQuiz(Q, L, R);
 
 trials(t).time_starttrial = Screen('Flip', Sc.window);
 
-WaitSecs(cfg.stim.quiz.RSI1);
 ShowCursorCenter('Arrow');
 
 %% Get a first answer
@@ -300,13 +299,16 @@ for i = 1:length(words)
 end
 
 % add the last line
+str = char(join(words(lastIndex:end)));
+txtbounds = Screen('TextBounds', Sc.window, str);
 line.bounds = txtbounds;
 line.text = str;
 line.x = floor(centerOn(1) - line.bounds(3)/2);
 lines{length(lines)+1} = line;
 
 % now sort out the line heights
-ys = 0:lines{1}.bounds(4):lines{1}.bounds(4)*length(lines);
+lineHeight = 1.5;
+ys = 0 : lines{1}.bounds(4)*lineHeight : lines{1}.bounds(4)*lineHeight*length(lines);
 for i = 1:length(lines)
     lines{i}.y = ys(i) + centerOn(2) - median(ys);
 end

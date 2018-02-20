@@ -31,14 +31,9 @@
 		<distractor>Ku-Klux-Klan</distractor>
 	</question>
 	<question>
-		<text>Epsom, England, is a place associated with</text>
-		<answer>horse racing</answer>
-		<distractor>snooker</distractor>
-	</question>
-	<question>
-		<text>The first human heart transplant operation, conducted by Dr. Christiaan Barnard on Louis Washkansky, took place in</text>
-		<answer>1967</answer>
-		<distractor>1922</distractor>
+		<text>Singer Ritchie Valens died in 1959 in</text>
+		<answer>a plane crash that also killed singer Buddy Holly</answer>
+		<distractor>a car crash that also killed actor James Dean</distractor>
 	</question>
 	<question>
 		<text>Galileo was an Italian astronomer who developed the telescope and discovered</text>
@@ -49,6 +44,16 @@
 		<text>The writ of Habeas Corpus, which protects against unlawful detention or imprisonment in many legal systems, originated in</text>
 		<answer>the 17th century</answer>
 		<distractor>the 18th century</distractor>
+	</question>
+	<question>
+		<text>Epsom, England, is a place associated with</text>
+		<answer>horse racing</answer>
+		<distractor>snooker</distractor>
+	</question>
+	<question>
+		<text>The first human heart transplant operation, conducted by Dr. Christiaan Barnard on Louis Washkansky, took place in</text>
+		<answer>1967</answer>
+		<distractor>1922</distractor>
 	</question>
 	<question>
 		<text>Professional golfer Vijay Singh is from</text>
@@ -294,11 +299,6 @@
 		<text>'The Dark Destroyer' was the nickname for boxer</text>
 		<answer>Nigel Benn</answer>
 		<distractor>George Foreman</distractor>
-	</question>
-	<question>
-		<text>Singer Ritchie Valens died in 1959 in</text>
-		<answer>a plane crash that also killed singer Buddy Holly</answer>
-		<distractor>a car crash that also killed actor James Dean</distractor>
 	</question>
 	<question>
 		<text>The medical procedure in which anaesthetic is injected close to the spinal cord is known as</text>

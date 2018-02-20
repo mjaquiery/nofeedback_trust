@@ -140,7 +140,7 @@ for t = starttrial:length(trials)
     %% start trial
         
     trials = runTrial(trials, t);
-    WaitSecs(0.25);
+    WaitSecs(0.3);
 end
 
 % collect final questionnaire

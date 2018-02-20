@@ -18,8 +18,10 @@ for i = 1:length(cfg.quiz)
     cfg.quiz{i}.distractor = cfg.quiz{i}.distractor.Text;
 end
 
+
+
 % Shuffle the questions
-cfg.quizOrder = randperm(length(cfg.quiz));
+cfg.quizOrder = [1 2 3 3+randperm(length(cfg.quiz)-3)];
 
 %% Display settings
 cfg.display.quiz.qPosY = Sc.size(2) * .2;

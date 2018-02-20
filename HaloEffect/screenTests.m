@@ -89,7 +89,7 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %showAdvisorPolitics(1);
 
-for t = 1:25
+for t = 1:5
     trials = doQuizTask(trials, t);
 end
 
