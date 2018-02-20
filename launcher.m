@@ -21,7 +21,7 @@ forceResolution = [1600 1200];
 feedbackEnabled = 0;  
 debugMode = 1; 
 shortMode = 1;
-pathRoot = 'MattWork';
+pathRoot = 'MattLaptop';
 
 %% set path   
 switch pathRoot
@@ -80,5 +80,5 @@ stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
 
-%screenTests
-main
+screenTests
+%main

@@ -20,6 +20,7 @@ Sc = start_psychtb(subject.screen, forceResolution);
 Screen('Preference','SuppressAllWarnings', 1);
 
 %% Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+set_cfg_shared
 set_cfg_settings
 
 %% Read in audio files
@@ -88,7 +89,7 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %showAdvisorPolitics(1);
 
-for t = 1:5
+for t = 1:25
     trials = doQuizTask(trials, t);
 end
 

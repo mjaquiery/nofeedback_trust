@@ -176,53 +176,54 @@ end
 ShowCursor('Arrow');
 
 %% Get a second answer
-lastResponse = NaN;
-while true
-    % acquire response
-    [x, ~, buttons] = GetMouseWrapper();
-    [keydown, ~, keycode] = KbCheck();
-    
-    % clean response
-    if any(buttons)
-        response = getQuizResponse(x);
-    else
-        response = lastResponse;
-    end
-    
-    % check response
-    if keydown && ~isnan(response)
-        key = KbName(keycode);
-        if iscell(key), key = key{1}; end % if two buttons at the same time
-        switch key
-            case 'space'           
-                trials(t).time_response2 = GetSecs-time;
-                trials(t).cj2 = abs(response);
-                trials(t).int2 = find([-1 1]==sign(response));
-                break;
-            case 'ESCAPE'
-                sca
-        end
-    end
-    
-    if response ~= lastResponse
-        % draw the screen
-        drawQuiz(Q, L, R);
-        draw_static([1 0 1 2 1]);
-        if ~isnan(response)
-            drawQuizMarkers(firstResponse, cfg.bar.color.cj1, response, cfg.bar.color.cursor);
-            Screen('Flip', Sc.window);
+if hasAdvice(trials(t))
+    lastResponse = NaN;
+    while true
+        % acquire response
+        [x, ~, buttons] = GetMouseWrapper();
+        [keydown, ~, keycode] = KbCheck();
+
+        % clean response
+        if any(buttons)
+            response = getQuizResponse(x);
         else
-            drawQuizMarkers(firstResponse, cfg.bar.color.cj1);
-            [~, trials(t).time_responseStart1] = Screen('Flip', Sc.window);
+            response = lastResponse;
         end
-        lastResponse = response;
+
+        % check response
+        if keydown && ~isnan(response)
+            key = KbName(keycode);
+            if iscell(key), key = key{1}; end % if two buttons at the same time
+            switch key
+                case 'space'           
+                    trials(t).time_response2 = GetSecs-time;
+                    trials(t).cj2 = abs(response);
+                    trials(t).int2 = find([-1 1]==sign(response));
+                    break;
+                case 'ESCAPE'
+                    sca
+            end
+        end
+
+        if response ~= lastResponse
+            % draw the screen
+            drawQuiz(Q, L, R);
+            draw_static([1 0 1 2 1]);
+            if ~isnan(response)
+                drawQuizMarkers(firstResponse, cfg.bar.color.cj1, response, cfg.bar.color.cursor);
+                Screen('Flip', Sc.window);
+            else
+                drawQuizMarkers(firstResponse, cfg.bar.color.cj1);
+                [~, trials(t).time_responseStart1] = Screen('Flip', Sc.window);
+            end
+            lastResponse = response;
+        end
     end
+
+    % mark the answer
+    trials(t).cor2 = trials(t).int2 == trials(t).wherelarger;
+    trials(t).cor = trials(t).cor2;
 end
-
-% mark the answer
-trials(t).cor2 = trials(t).int2 == trials(t).wherelarger;
-trials(t).cor = trials(t).cor2;
-
 HideCursor();
 Screen('TextSize', Sc.window, oldTextSize);
 
