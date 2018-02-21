@@ -17,11 +17,11 @@ experimentName = 'HaloEffect';
 %experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
 %forceResolution = []; 
-forceResolution = [1600 1200];
+forceResolution = [1600 1200]; 
 feedbackEnabled = 0;  
 debugMode = 1; 
-shortMode = 1;
-pathRoot = 'MattHome';
+shortMode = 1; 
+pathRoot = 'MattHome';    
 
 %% set path   
 switch pathRoot
@@ -80,5 +80,5 @@ stim_folder = [osSlash 'sounds' osSlash 'Voice'];
           
 cd(my_path)
 
-screenTests
-%main
+%screenTests
+main

@@ -89,11 +89,24 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %showAdvisorPolitics(1);
 
-for t = 1:5
-    trials = doQuizTask(trials, t);
+% for t = 1:5
+%     trials(t).taskType = cfg.taskType.quiz;
+%     trials = doQuizTask(trials, t);
+% end
+% 
+% quizFeedback(trials,1,5);
+
+defineQuiz();
+for t = 1:106
+    if t > length(trials)
+        trials = [trials trials(t-1)];
+    end
+    trials(t).taskType = cfg.taskType.quiz;
+    trials(t).question = cfg.quiz{cfg.quizOrder(t)};
+    trials(t).cor = rand() < .7;
 end
 
-KbWait();
+quizFeedback(trials);
 
 %% close PTB
 Screen('CloseAll');
