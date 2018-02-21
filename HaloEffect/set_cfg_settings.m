@@ -63,6 +63,7 @@ cfg.trialset.null                   = 2; % number of null trials = number of obs
 cfg.block.trialset_count            = 1; % number of trial sets in each block
 cfg.block.questionnaire_frequency   = 3; % include questionnaires after each how many blocks?
 cfg.block.taskType                  = [1 1 1 1 2 2 1 1]; % the block at which advisor politicial info begins
+cfg.block.overrideAdviceType        = [NaN NaN NaN NaN NaN NaN 0 0];
 
 cfg.practice.block_count            = 2;
 cfg.practice.trial_count            = 25;

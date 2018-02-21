@@ -209,8 +209,13 @@ for t = starttrial:length(trials)
             clear toi
             toi = [trials(1:t).cor1] == 1 & ... % use last 2 blocks for reference dsitribution
                 ([trials(1:t).block] == trials(t).block-1 | [trials(1:t).block] == trials(t).block-2); 
+            if ~isNaN(trials(t).overrideAdviceType)
+                adviceType = trials(t).overrideAdviceType;
+            else
+                adviceType = cfg.advisor(trials(t).advisorId).adviceType;
+            end
             [trials(t).agree, trials(t).step] = ...
-                agreementf(trials(t).cj1,cfg.advisor(trials(t).advisorId).adviceType,abs([trials(toi).cj1]),'stepwise');
+                agreementf(trials(t).cj1,adviceType,abs([trials(toi).cj1]),'stepwise');
         else
             trials(t).agree = rand < .3; % flat agreement on incorrect trials
             trials(t).step  = NaN;

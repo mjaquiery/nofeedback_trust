@@ -54,6 +54,7 @@ for b = b+1 : cfg.practice.block_count+cfg.block_count
                 block_trials1 = [block_trials1 getNewTrial(trialid, b)];
                 block_trials1(end).taskType = cfg.block.taskType(b);
                 block_trials1(end).advisorId = a; % cycle through advisors by block
+                block_trials1(end).overrideAdviceType = cfg.block.overrideAdviceType(b);
             end
         end
         for t = 1:cfg.trialset.null

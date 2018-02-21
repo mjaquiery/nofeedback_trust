@@ -100,14 +100,29 @@ end
 %% define advisor behaviour
 % NOTE: advisor behaviour depends on initial judgements, not
 % post-advice judgements
-if hasAdvice(trials(t))
-    % advisors are always 80% accurate
-    if rand <= .8
-        trials(t).obsacc = 1;
-        trials(t).agree = trials(t).cor1;
+if ~isnan(trials(t).advisorId)
+    % advisors are 60/70/80 or 80/70/60 agreement in correct (based on
+    % confidence) and 30% agreement when participant is incorrect
+    if trials(t).cor1 == 1
+        toi = [trials(1:t).cor1] == 1 & ... % use last 2 blocks for reference dsitribution
+            ([trials(1:t).block] == trials(t).block-1 | [trials(1:t).block] == trials(t).block-2); 
+        if ~isNaN(trials(t).overrideAdviceType)
+            adviceType = trials(t).overrideAdviceType;
+        else
+            adviceType = cfg.advisor(trials(t).advisorId).adviceType;
+        end
+        [trials(t).agree, trials(t).step] = ...
+            agreementf(trials(t).cj1,adviceType,abs([trials(toi).cj1]),'stepwise');
+        clear toi
     else
-        trials(t).obsacc = 0;
-        trials(t).agree = ~trials(t).cor1;
+        trials(t).agree = rand < .3; % flat agreement on incorrect trials
+        trials(t).step  = NaN;
+    end
+    % define observer's accuracy
+    if trials(t).agree == 1
+        trials(t).obsacc = trials(t).cor;
+    else
+        trials(t).obsacc = 1 - trials(t).cor;
     end
 else % null
     trials(t).agree  = NaN;
