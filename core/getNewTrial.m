@@ -31,7 +31,7 @@ trial.choice            = []; % choice of advisors presented to the judge
 trial.advisorPolitics   = false; % whether the trial shows political info about the advisor
 trial.advisorPoliticsQ  = NaN; % the SECS question for which advice is shown
 trial.taskType          = NaN; % for designs which use multiple tasks, note which kind this is
-trail.overrideAdviceType = NaN; % advice type to use instead of advisor's for this trial
+trial.overrideAdviceType = NaN; % advice type to use instead of advisor's for this trial
 
 %% answer variables
 trial.cj1               = []; % confidence judgement 1
