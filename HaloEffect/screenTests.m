@@ -68,9 +68,9 @@ trials(1).dotdifference = cfg.stim.initialDotDifference;
 trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %% Begin testing elements
-    cfg.currentTrialNumber = starttrial;
-    cfg.currentTrial = trials(starttrial);
-    t = 1;   
+cfg.currentTrialNumber = starttrial;
+cfg.currentTrial = trials(starttrial);
+t = 1;   
 
 % add all static elements
 %draw_static(Sc, cfg)
@@ -89,24 +89,27 @@ trials(2).dotdifference = cfg.stim.initialDotDifference;
 
 %showAdvisorPolitics(1);
 
-% for t = 1:5
+for t = 1:2
+    trials(t).advisorId = 3;
 %     trials(t).taskType = cfg.taskType.quiz;
 %     trials = doQuizTask(trials, t);
-% end
-% 
-% quizFeedback(trials,1,5);
-
-defineQuiz();
-for t = 1:106
-    if t > length(trials)
-        trials = [trials trials(t-1)];
-    end
-    trials(t).taskType = cfg.taskType.quiz;
-    trials(t).question = cfg.quiz{cfg.quizOrder(t)};
-    trials(t).cor = rand() < .7;
+    trials(t).taskType = cfg.taskType.dots;
+    trials = doDotTask(trials, t);
 end
 
-quizFeedback(trials);
+%quizFeedback(trials,1,5);
+
+% defineQuiz();
+% for t = 1:106
+%     if t > length(trials)
+%         trials = [trials trials(t-1)];
+%     end
+%     trials(t).taskType = cfg.taskType.quiz;
+%     trials(t).question = cfg.quiz{cfg.quizOrder(t)};
+%     trials(t).cor = rand() < .7;
+% end
+
+% quizFeedback(trials);
 
 %% close PTB
 Screen('CloseAll');

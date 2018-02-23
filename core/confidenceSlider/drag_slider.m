@@ -1,8 +1,9 @@
-function [cj,resp_t,interval,hasconfirmed] = drag_slider(cj1)
+function [cj,resp_t,interval,hasconfirmed] = drag_slider(cj1, trial)
 % Usage:
-% [cj resp_t interval hasconfirmed] = drag_slider([cj1])
+% [cj resp_t interval hasconfirmed] = drag_slider([cj1, [trial]])
 % Inputs:
 % cj1: first confidence judgement. If present cj1 is shown in shaded color
+% trial: if included, data from trial can be used to draw an advice overlay
 %
 % Outputs:
 % cj: current value of the slider position
@@ -15,12 +16,11 @@ function [cj,resp_t,interval,hasconfirmed] = drag_slider(cj1)
 global cfg; % configuration object
 global Sc; % Screen object
 
-if nargin < 1
-    cj1 = [];
-end
+if nargin < 2, trial = []; end
+if nargin < 1, cj1 = []; end
 
 %% initialize variables
-resp = 0; buttons=[]; haschanged=false; hasconfirmed=false;int=0;
+resp = 0; buttons=[]; haschanged=false; hasconfirmed=false; int=0;
 
 %% display cursor
 if isempty(cj1)
@@ -30,7 +30,11 @@ if isempty(cj1)
 else
     % Show mouse pointer
     ShowCursor('Arrow');
-    ft = display_response_([haschanged,resp+int],cj1);
+    if isempty(trial)
+        ft = display_response_([haschanged,resp],cj1);
+    else
+        ft = display_response_([haschanged, resp], cj1, trial);
+    end
 end
 
 %% collect response
@@ -58,7 +62,11 @@ while ~hasconfirmed
         if isempty(cj1)
             ft = display_response_([haschanged,resp]);
         else
-            ft = display_response_([haschanged,resp],cj1);
+            if isempty(trial)
+                ft = display_response_([haschanged,resp],cj1);
+            else
+                ft = display_response_([haschanged, resp], cj1, trial);
+            end
         end
     end
     

@@ -68,8 +68,16 @@ cfg.path.slash              = osSlash;
 %% Audio files
 cfg.audio.feedback.negative = [stims_path osSlash 'sounds' osSlash 'feedbackNegative.wav'];
 
+%% Advice format flags
+% these are currently only implemented for the quiz task
+cfg.adviceFormat.none = 0;
+cfg.adviceFormat.voice = 1;
+cfg.adviceFormat.speechBubble = 2;
+cfg.adviceFormat.arrow = 4; % not yet implemented
+
 %% Task managers
 cfg.taskManager.dotTask.lastTwoTrials = [];
+cfg.taskManager.quiz.trialNumber = 0;
 
 % bar and cursor settings
 define_scale

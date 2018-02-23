@@ -93,7 +93,9 @@ for t = 1:length(trials)
     end
     %-- add breaks and instruction points
     if trials(t-1).block ~= trials(t).block % first trial in a new block
-        trials(t).break = true;
+        if trials(t).block ~= 1 % no break after the intro; it's unnecessary
+            trials(t).break = true;
+        end
         if ismember(trials(t).block, cfg.instructionBlocks)
             trials(t).instr = ['block' int2str(trials(t).block)];
         end

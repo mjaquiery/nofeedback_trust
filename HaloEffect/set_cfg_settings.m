@@ -12,6 +12,9 @@ end
 cfg.taskType.dots = 1;
 cfg.taskType.quiz = 2;
 
+cfg.quizOptions.adviceFormat = cfg.adviceFormat.speechBubble; 
+cfg.dotTask.adviceFormat = cfg.adviceFormat.speechBubble;
+
 %% initialize variables
 % define stimulus related variables
 cfg.stim.durstim     = .160; % stimulus duration

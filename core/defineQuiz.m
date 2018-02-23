@@ -9,6 +9,11 @@ function defineQuiz()
 global cfg; % configuration object
 global Sc; % screen object
 
+%% Predefined settings (don't override)
+if ~isfield(cfg, 'quizOptions') || ~ isfield(cfg.quizOptions, 'adviceFormat')
+    cfg.quizOptions.adviceFormat = cfg.adviceFormat.voice;
+end
+
 %% Load quiz questions
 cfg.quiz = xml2struct(xmlread([cfg.path.stims cfg.path.slash 'generalKnowledgeQuestions.xml']));
 cfg.quiz = cfg.quiz.quiz.question;
@@ -25,6 +30,7 @@ cfg.quizOrder = [1 2 3 3+randperm(length(cfg.quiz)-3)];
 cfg.display.quiz.qPosY = Sc.size(2) * .2;
 cfg.display.quiz.aPosY = Sc.size(2) * .35;
 cfg.display.quiz.aOffsetX = Sc.size(1) * .25;
+cfg.display.quiz.adviceBubbleColor = [0 0 0];
 cfg.display.quiz.feedback.textSize = 18;
 cfg.display.quiz.feedback.lineSpacing = 1.2;
 cfg.display.quiz.feedback.questionsPerPage = 53;

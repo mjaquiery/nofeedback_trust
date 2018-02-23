@@ -6,9 +6,6 @@
 % experiment folder. The experiment folder MUST contain main.m which is
 % called by this script.
 
-%% Todo:
-% Didn't see a stimulus on first trial??
-
 %% clear workspace and create directories
 clear all;
 close all;
@@ -76,9 +73,8 @@ addpath(genpath([my_path experimentName])); % add experiment folder
 addpath(genpath([my_path 'core'])); % add core files
 
 % set some path extensions depending on the OS's slash direction
-stim_folder = [osSlash 'sounds' osSlash 'Voice'];
-          
+stim_folder = [osSlash 'sounds' osSlash 'Voice'];          
 cd(my_path)
 
-screenTests
-%main
+%screenTests
+main

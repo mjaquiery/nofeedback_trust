@@ -13,6 +13,14 @@ function [trials] = doDotTask(trials, t)
 global cfg; % configuration object
 global Sc; % screen object
 
+%% At some point move this stuff to a 'defineDotTask' function
+if ~isfield(cfg, 'dotTask') || ~isfield(cfg.dotTask, 'adviceFormat')
+    cfg.dotTask.adviceFormat = cfg.adviceFormat.voice;
+end
+if ~isfield(cfg.display, 'dotTask') || ~isfield(cfg.display.dotTask, 'adviceBubbleColor')
+    cfg.display.dotTask.adviceBubbleColor = [0 0 0];
+end
+
 % define time: if first trial of block getTime; if normal trial, time =
 % end of previous trial
 if t == 1 || cfg.restarted == 1 || trials(t-1).break == 1 
@@ -100,13 +108,13 @@ end
 %% define advisor behaviour
 % NOTE: advisor behaviour depends on initial judgements, not
 % post-advice judgements
-if ~isnan(trials(t).advisorId)
+if hasAdvice(trials(t))
     % advisors are 60/70/80 or 80/70/60 agreement in correct (based on
     % confidence) and 30% agreement when participant is incorrect
     if trials(t).cor1 == 1
         toi = [trials(1:t).cor1] == 1 & ... % use last 2 blocks for reference dsitribution
             ([trials(1:t).block] == trials(t).block-1 | [trials(1:t).block] == trials(t).block-2); 
-        if ~isNaN(trials(t).overrideAdviceType)
+        if ~isnan(trials(t).overrideAdviceType)
             adviceType = trials(t).overrideAdviceType;
         else
             adviceType = cfg.advisor(trials(t).advisorId).adviceType;
@@ -135,14 +143,19 @@ cfg.currentTrial = trials(t);
 
 %% Advice and final decision
 if hasAdvice(trials(t))
-    load_observer_audio;
-    present_advice;
-
-    trials(t).responsetime2 = GetSecs;
+    if bitand(cfg.dotTask.adviceFormat, cfg.adviceFormat.voice)
+        load_observer_audio;
+        present_advice;
+    end
+    trials(t).time_responseStart2 = GetSecs;
     % prompt new confidence judgment
-    [trials(t).cj2, trials(t).time_response2, trials(t).int2] = ...
-        drag_slider(trials(t).cj1);
-
+    if bitand(cfg.dotTask.adviceFormat, cfg.adviceFormat.speechBubble)
+        [trials(t).cj2, trials(t).time_response2, trials(t).int2] = ...
+            drag_slider(trials(t).cj1, trials(t));
+    else
+        [trials(t).cj2, trials(t).time_response2, trials(t).int2] = ...
+            drag_slider(trials(t).cj1, trials(t));
+    end
     % define new timestamp
     time = trials(t).time_response2;
 

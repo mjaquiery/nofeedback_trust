@@ -28,8 +28,9 @@ if t == 1 || cfg.restarted == 1 || trials(t-1).break == 1
 else
     time = trials(t-1).time_endTrial;
 end
-    
-trials(t).question = cfg.quiz{cfg.quizOrder(t)};
+   
+cfg.taskManager.quiz.trialNumber = cfg.taskManager.quiz.trialNumber + 1;
+trials(t).question = cfg.quiz{cfg.quizOrder(cfg.taskManager.quiz.trialNumber)};
 if trials(t).wherelarger == 1
     % correct answer on the left
     L.text = trials(t).question.answer;
@@ -107,7 +108,7 @@ trials(t).cor = trials(t).cor1;
 
 HideCursor();
 
-if trials(t).advisorId == 0 
+if trials(t).advisorId == 0 || cfg.quizOptions.adviceFormat == cfg.adviceFormat.none
     % tidy up
     Screen('TextSize', Sc.window, oldTextSize);
     PsychPortAudio('Close');
@@ -141,7 +142,7 @@ if ~isnan(trials(t).advisorId)
     if trials(t).cor1 == 1
         toi = [trials(1:t).cor1] == 1 & ... % use last 2 blocks for reference dsitribution
             ([trials(1:t).block] == trials(t).block-1 | [trials(1:t).block] == trials(t).block-2); 
-        if ~isNaN(trials(t).overrideAdviceType)
+        if ~isnan(trials(t).overrideAdviceType)
             adviceType = trials(t).overrideAdviceType;
         else
             adviceType = cfg.advisor(trials(t).advisorId).adviceType;
@@ -165,24 +166,26 @@ else % null
     trials(t).step   = NaN;
 end
 
-load_observer_audio;
-WaitSecs(cfg.stim.quiz.RSI2);
-
 % masks for present_advice and prevent_delay
 mask1 = [1 0 1 2 0];
 mask2 = mask1;
-
-if ~isnan(trials(t).advisorId)
-    present_advice;
-else
+if bitand(cfg.quizOptions.adviceFormat, cfg.adviceFormat.voice)
+    load_observer_audio;
+    WaitSecs(cfg.stim.quiz.RSI2);
+    % advice presentation
+    if ~isnan(trials(t).advisorId)
+        present_advice;
+    end
+end
+if isnan(trials(t).advisorId)
     present_delay;
 end
-
 ShowCursor('Arrow');
 
 %% Get a second answer
 if hasAdvice(trials(t))
     lastResponse = NaN;
+    trials(t).time_responseStart2 = GetSecs();
     while true
         % acquire response
         [x, ~, buttons] = GetMouseWrapper();
@@ -213,13 +216,16 @@ if hasAdvice(trials(t))
         if response ~= lastResponse
             % draw the screen
             drawQuiz(Q, L, R);
+            if bitand(cfg.quizOptions.adviceFormat, cfg.adviceFormat.speechBubble)
+                drawQuizAdviceOverlay(trials(t));
+            end
             draw_static([1 0 1 2 1]);
             if ~isnan(response)
                 drawQuizMarkers(firstResponse, cfg.bar.color.cj1, response, cfg.bar.color.cursor);
                 Screen('Flip', Sc.window);
             else
                 drawQuizMarkers(firstResponse, cfg.bar.color.cj1);
-                [~, trials(t).time_responseStart1] = Screen('Flip', Sc.window);
+                Screen('Flip', Sc.window);
             end
             lastResponse = response;
         end
@@ -269,6 +275,28 @@ for i = 1:3
     end
 end
 
+function drawQuizAdviceOverlay(trial)
+%% Draw an overlay of a speech bubble with the advisor's portrait
+% Matt Jaquiery, Feb 2018
+% 
+% usage: drawQuizAdviceOverlay(trial)
+%
+% Inputs:
+% trial: current trial object
+global cfg;
+global Sc;
+% fetch the option endorsed by the advisor
+if trial.obsacc == 1
+    adviceString = trial.question.answer;
+else
+    adviceString = trial.question.distractor;
+end
+
+adviceString = ['I think the answer is ' adviceString '.'];
+x = Sc.center(1);
+y = 300;
+args = struct('offset', [x y], 'bubbleFrameColor', cfg.display.quiz.adviceBubbleColor);
+drawAdvisorBubble(trial.advisorId, adviceString, args);
 
 function response = getQuizResponse(mouse_x)
 %% Return the scale value designated by the current mouse position
