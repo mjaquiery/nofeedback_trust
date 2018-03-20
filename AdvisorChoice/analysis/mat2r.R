@@ -27,38 +27,26 @@ library(R.matlab)
 
 # pth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoicetest/behaviour/2017-11-22T153220_999_final.mat"
 # pth <- "C:/Users/mj221/Filr/My Files/Results/PoliticalDifferences"
-pth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
+pth <- "G:/Documents/University/Google Drive/Results/AdvisorChoice"
 
 # crawl a directory and return a list of participants' MATLAB data
 getMatlabData <- function (folder) {
   print(paste('getMatlabData:', folder))
+  files <- list.files(folder, pattern = '*_final_R.mat$', full.names = T, recursive = T)
   out <- list()
-  files <- list.files(folder)
-  mask <- regexpr('_final_R.mat$', files)>=0
-  if(length(mask)>0) {
-    for (i in seq(length(files))) {
-      if (mask[i]) {
-        filename <- paste(folder, files[[i]], sep='/')
-        print(paste('mat2R:', filename))
-        out[[length(out)+1]] <- c("filename" = files[[i]], mat2R(filename))
-        # break  # only accept one _final.mat file
-      }
-    } 
-  }
-  dirs = list.dirs(folder,recursive = FALSE)
-  if (length(dirs) > 0) {
-    for (i in seq(length(dirs))) {
-      out <- c(out, getMatlabData(dirs[[i]]))
-    }
-  }
+  for (i in seq(length(files))) {
+    filename <- files[[i]]
+    print(paste('mat2R:', filename))
+    out[[i]] <- mat2R(filename)
+  } 
   
+  out <- frameMess(out)
   return(out)
 }
 
 mat2R <- function (matpath) {
   matdata <- readMat(matpath)
   dataout <- restructure(matdata)
-  
   return(dataout)
 }
 
@@ -122,6 +110,95 @@ numerify <- function(df, nanBecomes = NaN) {
   rownames(nf) <- rownames(df)
   return(nf)
 }
+
+# Current study format is matlab data sorted into multiple lists.
+# A neater approach is to exchange lists for data frames, and specifically
+# having a data frame for trials, advisors, and participants. 
+# IDs tie things together, and participantId is of particular relevance for 
+# fetching values across tables.
+frameMess <- function(raw_study) {
+  for(p in 1:length(raw_study)) {
+    # participant data
+    pId <- ifelse(length(raw_study[[p]]$subject$id)!=1, p, raw_study[[p]]$subject$id)
+    name <- ifelse(length(raw_study[[p]]$subject$name)!=1, NA, raw_study[[p]]$subject$name)
+    gender <- ifelse(length(raw_study[[p]]$subject$gender)!=1, NA, raw_study[[p]]$subject$gender)
+    age <- ifelse(length(raw_study[[p]]$subject$age)!=1, NA, raw_study[[p]]$subject$age)
+    restarted <- ifelse(length(raw_study[[p]]$subject$restarted)!=1, NA, raw_study[[p]]$subject$restarted)
+    date <- ifelse(length(raw_study[[p]]$subject$date)!=1, NA, raw_study[[p]]$subject$date)
+    start.time.year <- ifelse(length(raw_study[[p]]$subject$start.time)==0, NA, raw_study[[p]]$subject$start.time[[1]])
+    start.time.month <- ifelse(length(raw_study[[p]]$subject$start.time)==0, NA, raw_study[[p]]$subject$start.time[[2]])
+    start.time.day <- ifelse(length(raw_study[[p]]$subject$start.time)==0, NA, raw_study[[p]]$subject$start.time[[3]])
+    start.time.hour <- ifelse(length(raw_study[[p]]$subject$start.time)==0, NA, raw_study[[p]]$subject$start.time[[4]])
+    start.time.minute <- ifelse(length(raw_study[[p]]$subject$start.time)==0, NA, raw_study[[p]]$subject$start.time[[5]])
+    start.time.second <- ifelse(length(raw_study[[p]]$subject$start.time)==0, NA, raw_study[[p]]$subject$start.time[[6]])
+    screen <- ifelse(length(raw_study[[p]]$subject$screen)!=1, NA, raw_study[[p]]$subject$screen)
+    computer <- ifelse(length(raw_study[[p]]$cfg$computer)!=1, NA, raw_study[[p]]$cfg$computer)
+    os <- ifelse(length(raw_study[[p]]$cfg$os)!=1, NA, raw_study[[p]]$cfg$os)
+    participant <- data.frame(participantId = p, nominalParticipantId = pId, name, gender, age, restarted, date, 
+                              start.time.year, start.time.month, start.time.day, 
+                              start.time.hour, start.time.minute, start.time.second, 
+                              screen, computer, os, 
+                              debug = raw_study[[p]]$cfg$debug,  # should never be true
+                              short.mode = raw_study[[p]]$cfg$shortMode,  # should never be true
+                              stimulus.response.interval = raw_study[[p]]$cfg$stim$SRI1, # time between stimulus and response enabling
+                              response.stimulus.interval.1 = raw_study[[p]]$cfg$stim$RSI1, # time between response and advice choice
+                              response.stimulus.interval.2 = raw_study[[p]]$cfg$stim$RSI2, # time between advice and second response
+                              initial.dot.difference = raw_study[[p]]$cfg$stim$initialDotDifference,
+                              fixation.pre.flicker.time = raw_study[[p]]$cfg$stim$fixationFlicker$time$pre, # fixation initial offset
+                              fixation.flicker.time = raw_study[[p]]$cfg$stim$fixationFlicker$time$duration, # fixation flicker onset
+                              fixation.post.flicker.time = raw_study[[p]]$cfg$stim$fixationFlicker$time$post, # fixation temporary offset
+                              rng.code = raw_study[[p]]$cfg$resetrn)
+    if(exists('participants.all'))
+      participants.all <- rbind(participants.all, participant)
+    else
+      participants.all <- participant
+    # advisor data
+    advisor <- raw_study[[p]]$cfg$advisor
+    for(a in seq(1,length(advisor),6)) {
+      advisor.df <- data.frame(participantId = p,
+                               id = advisor[[a]],
+                               advice.type = advisor[[a+1]],
+                               portrait = advisor[[a+2]],
+                               voice = advisor[[a+3]],
+                               name = advisor[[a+4]])
+      if(exists('advisors.all'))
+        advisors.all <- rbind(advisors.all, advisor.df)
+      else
+        advisors.all <- advisor.df
+    }
+    # trials
+    trials <- as.data.frame(raw_study[[p]]$trials)
+    # subset for testing!
+    #trials <- trials[,1:10]
+    trials <- cbind(data.frame(participantId=p), trials)
+    if(exists('trials.all')) {
+      #print(names(trials.all))
+      #print(names(trials))
+      trials.all <- rbind(trials.all, trials)
+    }
+    else 
+      trials.all <- trials
+    # questionnaires
+    qtrials <- trials[trials$questionnaire==1,]
+    for(q in 1:dim(qtrials)[1]) {
+      qs <- qtrials[q,"qanswers"][[1]]
+      # split the questionnaire list into 8 questions with 9 fields apiece
+      dim(qs) <- c(9,8)
+      qs <- as.data.frame(t(qs))
+      names(qs) <- c('questionId', 'advisorId', 'questionNumber', 'answer', 'initialPosition',
+                     'presentationOrder', 'hasChanged', 'responseTime', 'onsetTime')
+      qs$participantId <- p
+      qs$timePoint <- q
+      qs <- qs[,order(c(10,11,2,1,3:9))]
+      if(exists('questionnaires.all'))
+        questionnaires.all <- rbind(questionnaires.all, qs)
+      else
+        questionnaires.all <- qs
+    }
+  }
+  out <- list(participants=participants.all, advisors=advisors.all, trials=trials.all, questionnaires=questionnaires.all)
+}
+
 
 # # Make stuff into numeric if possible
 # typecastData <- function(datum) {
