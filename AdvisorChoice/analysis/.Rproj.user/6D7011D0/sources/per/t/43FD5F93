@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1521658047627.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "43FD5F93",
+    "lastKnownWriteTime" : 8385539105766925413,
+    "last_content_update" : 1521658047627,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "442A3FCC",
+        "caption" : "participants.picks",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=participants.picks&cache_key=442A3FCC",
+        "displayedObservations" : 288,
+        "environment" : "",
+        "object" : "participants.picks",
+        "preview" : 0,
+        "totalObservations" : 288,
+        "variables" : 3
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

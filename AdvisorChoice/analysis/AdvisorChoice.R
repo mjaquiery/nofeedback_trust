@@ -10,27 +10,45 @@
 # 4) Trust questionnaire answers
 #   i. Trust for each advisor
 # 5) Do participants simply prefer agreement?
+# --NON-Preregistered stuff--
+# 6) Descriptives
 
 ## Citations 
 
 # Bayes stuff
 if(!require('BayesFactor')) {
   install.packages('BayesFactor')
+  library(BayesFactor)
 }
-library(BayesFactor)
 citation("BayesFactor")
 # effect sizes for anova
 if(!require('DescTools')) {
   install.packages('DescTools')
+  library(DescTools)
 }
-library(DescTools)
 citation("DescTools")
 # effect sizes for t.tests
 if(!require('lsr')) {
   install.packages('lsr')
+  library(lsr)
 }
-library(lsr)
 citation("lsr")
+if(!require('tidyverse')) {
+  install.packages('tidyverse')
+  library(tidyverse)
+}
+source('splitViolin.R')
+citation('tidyverse')
+if(!require('modelr')) {
+  install.packages('modelr')
+  library(modelr)
+}
+citation('modelr')
+if(!require('reshape2')) {
+  install.packages('reshape2')
+  library(reshape2)
+}
+citation('reshape2')
 
 #(Called in mat2R)
 #Henrik Bengtsson (2016). R.matlab: Read and Write MAT Files and Call MATLAB from
@@ -42,11 +60,7 @@ print('Loading data')
 
 # Use the mat2R functions to get hold of some data and do some manipulations
 if(!exists("getMatlabData", mode="function")) {
-  #oldwd <- getwd()
-  #setwd(dirname(sys.frame(1)$ofile))
-  #source("mat2R.R")
-  #setwd(oldwd)
-  source('G:/Documents/University/Programming/nofeedback_trust_matt/AdvisorChoice/analysis/mat2r.R')
+  source("mat2R.R")
 } 
 
 #acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
@@ -58,6 +72,9 @@ participants <- raw_study$participants
 advisors <- raw_study$advisors
 trials <- raw_study$trials
 questionnaires <- raw_study$questionnaires
+
+# the raw study data is quite large, so drop it
+rm('raw_study')
 
 ## ii) Some functions #############################################################################
 print('Defining functions')
@@ -330,7 +347,9 @@ for(t in 1:dim(trials)[1]) {
 # (agree-in-confidence/uncertainty), choice (un/forced), and agreement
 # (dis/agree) on influence. These are all within-subjects manipulations.
 print('Running ANOVAs')
-anova.output <- aov(formula = influence ~ adviceType * hasChoice * agree + Error(participantId), data=trials)
+anova.output <- aov(formula = influence ~ adviceType * hasChoice * agree 
+                    + Error(participantId / (adviceType * hasChoice * agree)), 
+                    data=trials)
 print('>>(anova.output)')
 print(summary(anova.output))
 EtaSq(anova.output, type = 1)
@@ -351,7 +370,8 @@ marginal.means('influence', c('adviceType', 'hasChoice', 'agree'), trials[!is.na
 # confidence balance out). This subset only includes trials on which the
 # participant was CORRECT since the step information is not recorded for
 # incorrect trials (where all advisors agree 30% of the time).
-anova.output.70 <- aov(formula = influence ~ adviceType * hasChoice * agree + Error(participantId), 
+anova.output.70 <- aov(formula = influence ~ adviceType * hasChoice * agree 
+                       + Error(participantId / (adviceType * hasChoice * agree)),  
                        data=trials[trials$step==confidenceTypes$medium,])
 print('>>(anova.output.70) Looking at only trials where intial decision was correct and made with middle confidence:')
 print(summary(anova.output.70))
@@ -364,7 +384,45 @@ EtaSq(anova.output.70, type = 1)
 print('Marginal means')
 marginal.means('influence', c('adviceType', 'hasChoice', 'agree'), trials[!is.nan(trials$advisorId) & trials$step==confidenceTypes$medium,])
 
+# It's more interpretable for colleagues to use the more common analysis wherein we compare means of 
+# the participants in the various conditions, as opposed to comparing all trials with participant as
+# a random effect. So let's calculate those means.
+for(p in 1:dim(participants)[1]) {
+  set <- trials[which(trials$participantId==participants$participantId[p] & !is.nan(trials$advisorId)),]
+  participants$aic.influence[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiC)])
+  participants$aiu.influence[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiU)])
+  participants$forced.influence[p] <- mean(set$influence[which(!set$hasChoice)])
+  participants$choice.influence[p] <- mean(set$influence[which(set$hasChoice)])
+  participants$aic.influence.forced[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiC
+                                                                & !set$hasChoice)])
+  participants$aiu.influence.forced[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiU
+                                                                & !set$hasChoice)])
+  participants$aic.influence.choice[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiU
+                                                                & set$hasChoice)])
+  participants$aiu.influence.choice[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiU
+                                                                & set$hasChoice)])
+}
+participants.influence <- melt(participants, id.vars = 'participantId', measure.vars = c('aic.influence.forced',
+                                                                                         'aiu.influence.forced',
+                                                                                         'aic.influence.choice',
+                                                                                         'aiu.influence.choice'))
+participants.influence$hasChoice <- participants.influence$variable %in% c('aic.influence.choice',
+                                                                           'aiu.influence.choice')
+participants.influence$AiC <- participants.influence$variable %in% c('aic.influence.forced',
+                                                                     'aic.influence.choice')
+participants.influence$AiC <- factor(participants.influence$AiC)
+participants.influence$forced <- factor(participants.influence$forced)
+
+print('ANOVA by-participants (not pre-registered)')
+anova.output.byParticipants <- aov(formula = value ~ hasChoice * AiC + Error(participantId / (hasChoice * AiC)), 
+                                   data=participants.influence)
+print('>>(anova.output.byParticipants)')
+print(summary(anova.output.byParticipants))
+EtaSq(anova.output, type = 1)
+
+
 ## 4) Trust questionnaire answers #################################################################
+print('## 4) Trust questionnaire answers ################################################')
 #   i. Trust for each advisor
 
 # We want to know if trust for each advisor changes over time. 
@@ -377,6 +435,7 @@ marginal.means('influence', c('adviceType', 'hasChoice', 'agree'), trials[!is.na
 
 questionnaires$answer <- as.numeric(questionnaires$answer)
 questionnaires$questionId <- as.numeric(questionnaires$questionId)
+questionnaires$questionNumber <- as.numeric(questionnaires$questionNumber)
 # Look up advisorType and put it in the table for ease of reference
 questionnaires$adviceType <- vector(length=dim(questionnaires)[1])
 for(q in 1:dim(questionnaires)[1]) {
@@ -387,7 +446,7 @@ for(q in 1:dim(questionnaires)[1]) {
 # We can get a quick overview from an anova looking for main effect of advisor
 # and interactions of timepoint and advisor
 print('>>(trust.test) ANOVA exploring trust questionnaire responses')
-trust.test <- aov(formula = answer ~ adviceType * timePoint * questionId + Error(participantId),
+trust.test <- aov(formula = answer ~ adviceType * timePoint * questionNumber + Error(participantId),
                   data = questionnaires)
 summary(trust.test)
 EtaSq(trust.test, type = 1)
@@ -397,7 +456,7 @@ EtaSq(trust.test, type = 1)
 #                         data = questionnaires)
 # print(trust.test.b)
 print('Marginal means')
-marginal.means('answer', c('adviceType', 'timePoint', 'questionId'), questionnaires)
+marginal.means('answer', c('adviceType', 'timePoint', 'questionNumber'), questionnaires)
 
 # Were the advisors perceived differently to begin with?
 trust.test.t1 <- t.test(questionnaires[questionnaires$timePoint==1 & questionnaires$adviceType==adviceTypes$AiC,"answer"],
@@ -435,6 +494,7 @@ print(paste0('Evidence strength for higher AiC trust: BF=', round(exp(trust.test
 # Exploratory: influence shows as significantly different between advisors, so check questionnaire answers on influence
 
 ## 5) Do participants simply prefer agreement? ####################################################
+print('## 5) Do participants simply prefer agreement? ###################################')
 
 # If so, we should see that participants preferentially pick agree-in-confidence
 # advisor when their initial confidence is high, and agreee-in-uncertainty when
@@ -468,3 +528,469 @@ aic.byConf.test.b <- ttestBF(participants$aic.pick.proportion.low.confidence,
                              paired = T)
 print(aic.byConf.test.b)
 print(paste0('Evidence strength for differential AiC picking: BF=', round(exp(aic.byConf.test.b@bayesFactor$bf),3)))
+
+
+# --NON-Preregistered stuff----------------------------------------------------------------------------------
+print('--NON Preregistered stuff-----------------------------------------------------------------------------')
+
+
+## 6) Descriptives
+print('## 6) Descriptives ###############################################################')
+
+figPath = 'G:/Documents/University/Google Drive/Project Documents/AdvisorChoice/figures/'
+
+# Calculate some participant-level properties
+# -final decision proportion correct
+# -advisor mean influence
+trials$cor2 <- as.numeric(trials$cor2)
+participants$proportionCorrectFinal <- vector(length=dim(participants)[1])
+participants$influence.mean <- participants$proportionCorrect
+participants$influence.aic <- participants$proportionCorrect
+participants$influence.aiu <- participants$proportionCorrect
+for(p in 1:dim(participants)[1]) {
+  set <- trials[which(trials$participantId==participants$participantId[p]),]
+  participants$proportionCorrectFinal[p] <- length(which(set$cor2==1)) / length(which(!is.nan(set$cor2)))
+  participants$influence.mean[p] <- sum(set$influence[which(!is.na(set$influence))]) / length(which(!is.na(set$influence)))
+  participants$influence.aic[p] <- sum(set$influence[which(!is.na(set$influence) & set$advisorId==adviceTypes$AiC)]) / 
+    length(which(!is.na(set$influence) & set$advisorId==adviceTypes$AiC))
+  participants$influence.aiu[p] <- sum(set$influence[which(!is.na(set$influence) & set$advisorId==adviceTypes$AiU)]) / 
+    length(which(!is.na(set$influence) & set$advisorId==adviceTypes$AiU))
+}
+
+# Participant accuracy
+# reformat the data so we have a nice comparison before vs after
+participants.accuracy <- melt(participants[,c("participantId", "proportionCorrect", "proportionCorrectFinal")],
+                              id.vars = 'participantId')
+levels(participants.accuracy$variable) <- c('initial', 'final')
+graph.accuracy <- ggplot(participants.accuracy, aes(variable, value)) +
+  # draw the density violin
+  geom_violin(colour = NA, fill = "#DDDDDD", alpha = .5) +
+  # reference line for staircasing value
+  geom_hline(yintercept = 0.71, linetype = 'dashed', size = 1) +
+  # link participant observations with a line
+  geom_line(aes(group = participantId), alpha = .2) +
+  # 95% bootstrapped confidence interval error bars
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  # mean diamonds
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  # individual data points
+  geom_point(alpha = .2, shape = 16) +
+  # rescale y axis and remove padding
+  scale_y_continuous(limits = c(0.65, 0.75), expand = c(0,0)) + 
+  # Nice x labels
+  scale_x_discrete(labels=c('Initial decision', 'Final decision')) +
+  # clean background
+  theme_light() +
+  # remove vertical gridlines
+  theme(panel.grid.major.x = element_blank()) +
+  # labels
+  labs(title = "Decision accuracy details",
+       subtitle = paste(strwrap(paste("Accuracy of participants' initial and final decisions.",
+                                      "Points connected by faint lines indicate mean values for a single participant.",
+                                      "Diamonds mark the mean of all participant means, with error bars indicating",
+                                      "bootstrapped 95% confidence intervals.",
+                                      "Shaded areas indicate density.",
+                                      "Dashed line represents staircase target; chance performance is 0.5.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = NULL,
+       y = "Proportion correct") 
+graph.accuracy
+ggsave(paste0(figPath, "decision accuracy detail.png"), plot = graph.accuracy)
+
+graph.accuracy <- ggplot(participants.accuracy, aes(variable, value)) +
+  # geom_jitter(position=position_jitter(width=.1, height=0), alpha = .2) +
+  geom_violin(colour = NA, fill = "#DDDDDD", alpha = .5) +
+  geom_hline(yintercept = 0.71, linetype = 'dashed', size = 1) +
+  # geom_line(aes(group = participantId), alpha = .2) +
+  # geom_point(colour = "black", shape = 16) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  geom_point(alpha = .2, shape = 16) +
+  scale_y_continuous(limits = c(0.5, 1), expand = c(0,0)) + 
+  scale_x_discrete(labels=c('Initial decision', 'Final decision')) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Decision accuracy details",
+       subtitle = paste(strwrap(paste("Accuracy of participants' initial and final decisions.",
+                                      "Points indicate mean values for a single participant.",
+                                      "Diamonds mark the mean of all participant means, with error bars indicating",
+                                      "bootstrapped 95% confidence intervals.",
+                                      "Shaded areas indicate density.",
+                                      "Dashed line represents staircase target; chance performance is 0.5.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = NULL,
+       y = "Proportion correct") 
+graph.accuracy
+ggsave(paste0(figPath, "decision accuracy.png"), plot = graph.accuracy)
+
+# histograms of advisor influence by participant
+graph.influence.byParticipant <- ggplot(trials[which(is.finite(trials$influence)),], aes(x=influence)) +
+  geom_histogram(bins = 30, alpha = .75, aes(color = "Both", fill = "Both")) +
+  geom_histogram(bins = 30, 
+                 data = trials[which(trials$advisorId==adviceTypes$AiC),], 
+                 alpha = 0.3, 
+                 aes(color = "Agree in Confidence",
+                     fill = "Agree in Confidence")) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing = unit(0.75, "lines"), # pad the panels slightly
+        legend.position = c(0.91, 0.07)) +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_x_continuous(expand = c(0,0)) +                        
+  scale_fill_manual(name = 'Advisor', values = c('red', 'blue')) +
+  scale_color_manual(name = 'Advisor', values = c('red', 'blue')) +
+  geom_vline(xintercept = 0, linetype="dashed", color = "black") +
+  facet_wrap(~participantId) +
+  labs(title = "Advisor influence by participant",
+       subtitle = paste(strwrap(paste("Influence of the advisors on the participants' responses.",
+                                      "Each graph shows the influence distribution for a single participant.",
+                                      "The blue histogram shows the distribution of influence for both advisors combined,",
+                                      "while the red histogram shows the distribution of the influence for the agree-in-confidence",
+                                      "advisor alone.",
+                                      "The blue areas uncovered by red shading indicate the frequency of responses for the",
+                                      "agree-in-uncertainty advisor.",
+                                      "The dashed line marks 0 influence: the participant's intial answer was unchanged by advice.",
+                                      sep = " "), 
+                                width=140), collapse = "\n"),
+       x = "Influence (binned)",
+       y = "Trial count") 
+graph.influence.byParticipant
+ggsave(paste0(figPath, "influence by participant.png"), 
+       plot = graph.influence.byParticipant, 
+       width = 9.05, height = 5.98)
+
+# Relationship between initial confidence and influence
+equation <- lm(abs(cj1) ~ influence, trials[which(is.finite(trials$influence)),])
+equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
+graph.influence.byConfidence <- ggplot(trials[which(is.finite(trials$influence)),], aes(x=abs(cj1), y=influence)) +
+  geom_point(alpha = 0.1) +
+  scale_y_continuous(expand = c(0,0)) + 
+  scale_x_continuous(expand = c(0,0)) + 
+  geom_smooth(method='lm', formula = y~x, level = .99, linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equation.text, x = 50, y = -15) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
+  labs(title = "Advice influence by confidence",
+       subtitle = paste(strwrap(paste("Effect of initial decision confidence on the influence of advice.",
+                                      "Points indicate data from a single trial. Points are semi-transparent, so darker",
+                                      "points indicate multiple observations.",
+                                      "Dashed line shows the best-fit regression line with shaded 99% confidence intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Initial decision confidence",
+       y = "Influence of advice") 
+graph.influence.byConfidence
+ggsave(paste0(figPath, "influence by confidence.png"), plot = graph.influence.byConfidence)
+
+# which advisor did they pick?
+# This matches pre-registered analysis 1: differential pick rates
+graph.pickRate <- ggplot(participants, aes(x = "", y = aic.pick.proportion)) +
+  geom_hline(linetype = "dashed", color = "black", yintercept = .5) +
+  geom_point(alpha = 0.5) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  scale_x_discrete(expand = c(0,0)) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Advisor preference",
+       subtitle = paste(strwrap(paste("Proportion of the time each participant picked the agree-in-confidence advisor.",
+                                      "Points indicate data from a single participant, while the diamond indicates the",
+                                      "mean proportion across all participants.", 
+                                      "Error bars give 95% bootstrapped confidence intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = NULL,
+       y = "Proportion of the time the agree-in-confidence advisor is chosen") 
+graph.pickRate
+ggsave(paste0(figPath, "basic pick rate.png"), plot = graph.pickRate)
+
+# There were many experimental blocks. We can look at pick proportion as a function of block across participants
+trials$block <- as.numeric(trials$block)
+participants.picks <- data.frame(participantId=integer(),
+                                 block=integer(),
+                                 aic.pick.proportion=double())
+for(p in 1:dim(participants)[1]) {
+  set <- trials[which(trials$participantId==participants$participantId[p]
+                & !is.nan(trials$advisorId)
+                & trials$hasChoice),]
+  for(b in 1:length(unique(set$block))) {
+    block <- unique(set$block)[[b]]
+    aic.pick.proportion <- length(which(set$block==block & set$advisorId==adviceTypes$AiC)) /
+      length(which(set$block == block))
+    participants.picks <- rbind(participants.picks, data.frame(participantId=participants$participantId[p],
+                                                               block,
+                                                               aic.pick.proportion))
+  }
+}
+participants.picks$block <- factor(participants.picks$block)
+participants.picks$participantId <- factor(participants.picks$participantId)
+
+graph.pickRate.byBlock <- ggplot(participants.picks, aes(x = block, y = aic.pick.proportion)) +
+  geom_violin(color = NA, fill='#EEEEEE') +
+  geom_hline(linetype = "dashed", color = "black", yintercept = .5) +
+  geom_point(alpha = 0.5) +
+  geom_line(aes(group = participantId, color = participantId), alpha = 0.3, size=0.3) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  scale_y_continuous(limits = c(0.000,1.000)) +
+  scale_x_discrete(label = unique(participants.picks$block)) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  scale_color_manual(name="Participant", values = c('#A81B21','#EE1C25','#F47252','#007236',
+                                                      '#45BB7E','#4E191F','#6F3D24','#CE9222',
+                                                      '#FEDC01','#FEF783','#7C0A6A','#BD569F',
+                                                      '#DB485B','#EAA39D','#FCD4CC','#054189',
+                                                      '#005BAA','#669AD4','#F37020','#FBA51A',
+                                                      '#252122','#59585D','#7F8386','#D0D4D7')) +
+  labs(title = "Advisor preference over time",
+       subtitle = paste(strwrap(paste("Proportion of the time each participant picked the agree-in-confidence advisor",
+                                      "for each block.",
+                                      "Points indicate data from a single participant, with darker points indicating superimposed",
+                                      "observations from separate participants. Each participant has a different coloured line",
+                                      "connecting their observations.",
+                                      "The diamonds indicate the mean proportion across all participants.", 
+                                      "Error bars give 95% bootstrapped confidence intervals.",
+                                      "\n\nThe messiness of this graph indicates the absence of an clear pattern in advisor selection.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block",
+       y = "Proportion of the time the agree-in-confidence advisor is chosen") 
+graph.pickRate.byBlock
+ggsave(paste0(figPath, "pick rate by block.png"), plot = graph.pickRate.byBlock)
+
+# What if we calculate deviance from .5 (i.e. having a preference, agnostic to which way)?
+# Absolute:
+participants.picks$deviance <- abs(.5 - participants.picks$aic.pick.proportion)
+for(p in 1:dim(participants)[1]) {
+  participants$deviance[p] <- mean(
+    participants.picks$deviance[which(participants.picks$participantId==participants$participantId[p])])
+  participants$deviance.sd[p] <- sd(
+    participants.picks$deviance[which(participants.picks$participantId==participants$participantId[p])])
+}
+  
+graph.pickRate.deviance <- ggplot(participants, aes(x = "", y = deviance)) +
+  geom_point(alpha = 0.5) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  scale_y_continuous(limits = c(0,0.5)) +
+  scale_x_discrete(expand = c(0,0)) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Choice deviance",
+       subtitle = paste(strwrap(paste("Bias for one advisor over the other, irrespective of which advisor is preferred.",
+                                      "Points indicate data from a single participant, while the diamond indicates the",
+                                      "mean proportion across all participants.", 
+                                      "Error bars give 95% bootstrapped confidence intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = NULL,
+       y = "Deviation from even selection rate") 
+graph.pickRate.deviance
+ggsave(paste0(figPath, "pick deviance.png"), plot = graph.pickRate.deviance)
+
+# now look at deviance by block
+graph.pickRate.deviance.byBlock <- ggplot(participants.picks, aes(x = block, y = deviance)) +
+  geom_violin(color = NA, fill='#EEEEEE') +
+  geom_hline(linetype = "dashed", color = "black", yintercept = .5) +
+  geom_point(alpha = 0.5) +
+  geom_line(aes(group = participantId, color = participantId), alpha = 0.3, size=0.3) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  scale_y_continuous(limits = c(0.000,0.5)) +
+  scale_x_discrete(label = unique(participants.picks$block)) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  scale_color_manual(name="Participant", values = c('#A81B21','#EE1C25','#F47252','#007236',
+                                                    '#45BB7E','#4E191F','#6F3D24','#CE9222',
+                                                    '#FEDC01','#FEF783','#7C0A6A','#BD569F',
+                                                    '#DB485B','#EAA39D','#FCD4CC','#054189',
+                                                    '#005BAA','#669AD4','#F37020','#FBA51A',
+                                                    '#252122','#59585D','#7F8386','#D0D4D7')) +
+  labs(title = "Choice deviance over time",
+       subtitle = paste(strwrap(paste("Bias expressed for one advisor over the other (irrespective of which advisor is",
+                                      "preferred) for each block.",
+                                      "Points indicate data from a single participant, with darker points indicating superimposed",
+                                      "observations from separate participants. Each participant has a different coloured line",
+                                      "connecting their observations.",
+                                      "The diamonds indicate the mean proportion across all participants.", 
+                                      "Error bars give 95% bootstrapped confidence intervals.",
+                                      "\nThe messiness of this graph indicates the absence of an clear pattern in advisor selection.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block",
+       y = "Deviation from even selection rate") 
+graph.pickRate.deviance.byBlock
+ggsave(paste0(figPath, "pick deviance by block.png"), plot = graph.pickRate.deviance.byBlock)
+
+# So it looks like participants tend to explore the advisors by modifying their picking bias quite widely, though the average
+# bias for all participants is pretty even over time at around 0.2, or picking one advisor 40% more often than the other
+
+# Perhaps participants have different exploration styles, such that some participants sample widely-but-wildly, picking 
+# one advisor a great deal in some blocks, and picking one advisor much less frequently in others, while other 
+# participants sample more cautiously-and-consistently, picking one advisor slightly more often than the other, but
+# always keeping close to even whichever is preferred. 
+# If that's true, there should be a correlation between mean deviance and standard deviation of deviance, such that
+# the relationship should look like signal-dependant noise
+equation <- lm(deviance.sd ~ deviance, data = participants)
+equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
+graph.pickRate.deviance.style <- ggplot(participants, aes(x = deviance, y = deviance.sd)) +
+  geom_point() + 
+  geom_smooth(method='lm', formula = y~x, level = .95, linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equation.text, x = 0.38, y = 0.14) +
+  scale_y_continuous(limits = c(0,0.25), expand = c(0,0)) +
+  scale_x_continuous(expand = c(0.01,0)) +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  scale_color_manual(name="Participant", values = c('#A81B21','#EE1C25','#F47252','#007236',
+                                                    '#45BB7E','#4E191F','#6F3D24','#CE9222',
+                                                    '#FEDC01','#FEF783','#7C0A6A','#BD569F',
+                                                    '#DB485B','#EAA39D','#FCD4CC','#054189',
+                                                    '#005BAA','#669AD4','#F37020','#FBA51A',
+                                                    '#252122','#59585D','#7F8386','#D0D4D7')) +
+  labs(title = "Choice deviance over time",
+       subtitle = paste(strwrap(paste("Variability in choice deviance from even as a function of mean choice deviance.",
+                                      "Participants with higher mean deviation also have a wider range of deviations,",
+                                      "suggesting these participants explore more widely and more adventurously.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Mean choice deviance",
+       y = "Standard deviation of choice deviance") 
+graph.pickRate.deviance.style
+ggsave(paste0(figPath, "pick deviance mean x SD.png"), plot = graph.pickRate.deviance.style)
+
+# Can look at some marginal means graphs supporting the influence ANOVA
+graph.influence.advisor <- ggplot(
+  participants.influence[which(participants.influence$variable %in% c('aic.influence', 'aiu.influence')),], 
+  aes(x = variable, y = value)
+  ) +
+  geom_violin(color = NA, fill = '#EEEEEE') +
+  geom_point(alpha = 0.5) +
+  geom_line(aes(group = participantId), alpha = .5) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  scale_x_discrete(labels = c('Agree in confidence', 'Agree in uncertainty')) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Advisor influence",
+       subtitle = paste(strwrap(paste("Influence of the advisors by advice type.",
+                                      "Points indicate data from a single participant, while the diamond indicates the",
+                                      "mean proportion across all participants.", 
+                                      "Error bars give 95% bootstrapped confidence intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = NULL,
+       y = "Influence") 
+graph.influence.advisor
+ggsave(paste0(figPath, "advisor influence.png"), plot = graph.influence.advisor)
+
+# We can also compare forced trials to choice trials in the same way
+graph.influence.trialType <- ggplot(
+  participants.influence[which(participants.influence$variable %in% c('forced.influence', 'choice.influence')),], 
+  aes(x = variable, y = value)
+  ) +
+  geom_violin(color = NA, fill = '#EEEEEE') +
+  geom_point(alpha = 0.5) +
+  geom_line(aes(group = participantId), alpha = .5) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, fill = "white", size = 4) +
+  scale_x_discrete(labels = c('Forced trials', 'Choice trials')) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Advisor influence",
+       subtitle = paste(strwrap(paste("Influence of the advisors by trial type.",
+                                      "Points indicate data from a single participant, while the diamond indicates the",
+                                      "mean proportion across all participants.", 
+                                      "Error bars give 95% bootstrapped confidence intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = NULL,
+       y = "Influence") 
+graph.influence.trialType
+ggsave(paste0(figPath, "trial type influence.png"), plot = graph.influence.trialType)
+
+# We can also inspect potential interactions by plotting forced and choice trials separately for the advisors
+graph.influence.advisorXtrialType <- ggplot(participants.influence[complete.cases(participants.influence),],
+                                            aes(x = AiC, y = value)) +
+  geom_split_violin(aes(fill = forced), color = NA, alpha = 0.2) +
+  geom_point(alpha = 0.5, aes(fill = forced, color = forced)) +
+  geom_line(data = participants.influence[which(participants.influence$forced==T),],
+            aes(group = participantId, color = forced), alpha = .5) +
+  geom_line(data = participants.influence[which(participants.influence$forced==F),],
+            aes(group = participantId, color = forced), alpha = .5) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.1) +
+  stat_summary(geom = "point",
+               aes(fill = forced),
+               fun.y = "mean",
+               shape = 23, size = 4) +
+  scale_x_discrete(labels = c('Agree in confidence', 'Agree in uncertainty')) +
+  scale_color_discrete(name = 'Forced') +
+  scale_fill_discrete(name = 'Forced') +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Effect of trial type on advisor influence",
+       subtitle = paste(strwrap(paste("Influence of the advisors by advice type for forced and choice trials.",
+                                      "Points indicate data from a single participant, while the diamonds indicate the",
+                                      "mean proportion across all participants for a given trial type.",
+                                      "Error bars give 95% bootstrapped confidence intervals.",
+                                      sep = " "),
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = NULL,
+       y = "Influence")
+graph.influence.advisorXtrialType
+ggsave(paste0(figPath, "advisor influence by trialType.png"), plot = graph.influence.advisorXtrialType)
+
+write.csv(participants, 'participants.csv')
+# write.csv(trials, 'trials.csv')
+write.csv(participants.influence, 'participants-influence.csv')
