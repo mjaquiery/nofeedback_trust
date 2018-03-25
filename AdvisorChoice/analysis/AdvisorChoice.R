@@ -3,6 +3,7 @@
 #
 # i) Get Data
 # ii) Function definitions - could move to another file
+# iii) Prepare data
 # 0) Exclusions
 # 1) Demographics
 # 2) Is the agree-in-confidence advisor selected more often?
@@ -13,7 +14,7 @@
 # --NON-Preregistered stuff--
 # 6) Descriptives
 
-## Citations 
+## Packages and citations:
 
 # Bayes stuff
 if(!require('BayesFactor')) {
@@ -180,7 +181,14 @@ getPickProportion <- function(pId, trials, adviceType) {
   return(dim(advisorPicks)[1] / dim(choiceTrials)[1])
 }
 
-
+## iii) Prepare data ##############################################################################
+print('## Prepare data ##################################################################')
+# We'll do most of the work with the 'participants' table.
+# This table will need some derived stats such as means for trials under various conditions
+for (p in 1:dim(participants)[1]) {
+  set <- trials[which(trials$participantId == participants$participantId[p]),]
+  participants$proportionCorrect[p] <- length(which(set$cor1==1)) / length(set)
+}
 
 
 ## 0) Exclusions ##################################################################################
@@ -389,6 +397,7 @@ marginal.means('influence', c('adviceType', 'hasChoice', 'agree'), trials[!is.na
 # a random effect. So let's calculate those means.
 for(p in 1:dim(participants)[1]) {
   set <- trials[which(trials$participantId==participants$participantId[p] & !is.nan(trials$advisorId)),]
+  medset <- set[which(set$step==confidenceTypes$medium),]
   participants$aic.influence[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiC)])
   participants$aiu.influence[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiU)])
   participants$forced.influence[p] <- mean(set$influence[which(!set$hasChoice)])
@@ -401,6 +410,18 @@ for(p in 1:dim(participants)[1]) {
                                                                 & set$hasChoice)])
   participants$aiu.influence.choice[p] <- mean(set$influence[which(set$advisorId==adviceTypes$AiU
                                                                 & set$hasChoice)])
+  participants$aic.influence.medConf[p] <- mean(medset$influence[which(medset$advisorId==adviceTypes$AiC)])
+  participants$aiu.influence.medConf[p] <- mean(medset$influence[which(medset$advisorId==adviceTypes$AiU)])
+  participants$forced.influence.medConf[p] <- mean(medset$influence[which(!medset$hasChoice)])
+  participants$choice.influence.medConf[p] <- mean(medset$influence[which(medset$hasChoice)])
+  participants$aic.influence.forced.medConf[p] <- mean(medset$influence[which(medset$advisorId==adviceTypes$AiC
+                                                                   & !medset$hasChoice)])
+  participants$aiu.influence.forced.medConf[p] <- mean(medset$influence[which(medset$advisorId==adviceTypes$AiU
+                                                                   & !medset$hasChoice)])
+  participants$aic.influence.choice.medConf[p] <- mean(medset$influence[which(medset$advisorId==adviceTypes$AiU
+                                                                   & medset$hasChoice)])
+  participants$aiu.influence.choice.medConf[p] <- mean(medset$influence[which(medset$advisorId==adviceTypes$AiU
+                                                                   & medset$hasChoice)])
 }
 participants.influence <- melt(participants, id.vars = 'participantId', measure.vars = c('aic.influence.forced',
                                                                                          'aiu.influence.forced',
@@ -411,15 +432,32 @@ participants.influence$hasChoice <- participants.influence$variable %in% c('aic.
 participants.influence$AiC <- participants.influence$variable %in% c('aic.influence.forced',
                                                                      'aic.influence.choice')
 participants.influence$AiC <- factor(participants.influence$AiC)
-participants.influence$forced <- factor(participants.influence$forced)
+participants.influence$hasChoice <- factor(participants.influence$hasChoice)
+participants.influence.medConf <- melt(participants, id.vars = 'participantId', 
+                                       measure.vars = c('aic.influence.forced.medConf',
+                                                        'aiu.influence.forced.medConf',
+                                                        'aic.influence.choice.medConf',
+                                                        'aiu.influence.choice.medConf'))
+participants.influence.medConf$hasChoice <- participants.influence.medConf$variable %in% c('aic.influence.choice.medConf',
+                                                                                           'aiu.influence.choice.medConf')
+participants.influence.medConf$AiC <- participants.influence.medConf$variable %in% c('aic.influence.forced.medConf',
+                                                                                     'aic.influence.choice.medConf')
+participants.influence.medConf$AiC <- factor(participants.influence.medConf$AiC)
+participants.influence.medConf$hasChoice <- factor(participants.influence.medConf$hasChoice)
 
 print('ANOVA by-participants (not pre-registered)')
 anova.output.byParticipants <- aov(formula = value ~ hasChoice * AiC + Error(participantId / (hasChoice * AiC)), 
                                    data=participants.influence)
 print('>>(anova.output.byParticipants)')
 print(summary(anova.output.byParticipants))
-EtaSq(anova.output, type = 1)
+EtaSq(anova.output.byParticipants, type = 1)
 
+print('ANOVA by-participants (not pre-registered) medium confidence trials only')
+anova.output.byParticipants.70 <- aov(formula = value ~ hasChoice * AiC + Error(participantId / (hasChoice * AiC)), 
+                                   data=participants.influence.medConf)
+print('>>(anova.output.byParticipants.70)')
+print(summary(anova.output.byParticipants.70))
+EtaSq(anova.output.byParticipants.70, type = 1)
 
 ## 4) Trust questionnaire answers #################################################################
 print('## 4) Trust questionnaire answers ################################################')
@@ -990,6 +1028,134 @@ graph.influence.advisorXtrialType <- ggplot(participants.influence[complete.case
        y = "Influence")
 graph.influence.advisorXtrialType
 ggsave(paste0(figPath, "advisor influence by trialType.png"), plot = graph.influence.advisorXtrialType)
+
+# Plot cj1 vs cj2 faceted by dis/agreement
+graph.confidence <- ggplot(trials[which(!is.nan(trials$agree)),], aes(x = cj1, y = cj2)) +
+  geom_point(alpha = 0.2, aes(color = factor(cor2))) +
+  geom_abline(slope = 1, intercept = 0, linetype = 'dashed', size = 1, color = 'black') +
+  scale_color_discrete(name = 'Final judgement', labels = c('Incorrect', 'Correct')) +
+  theme_light() +
+  theme(panel.spacing = unit(2, 'lines')) +
+  coord_fixed() +
+  facet_grid(~agree, labeller = as_labeller(c('0'='Disagree', '1'='Agree'))) +
+  labs(title = "Initial vs final confidence",
+       subtitle = paste(strwrap(paste("Influence of the advisors is evident in the deviation from the dashed y=x",
+                                      "line. Points lying below the line indicate a",
+                                      "more leftward response from initial to final judgement. Points above",
+                                      "the line indicate a more rightward response in the final judgement.",
+                                      "The further away from the y=x line, the greater the change from initial",
+                                      "to final judgement. Separate plots show agreement vs disagreement trials",
+                                      "(between the advisor and judge), and separate colours indicate whether the",
+                                      "judge's final decision was correct or incorrect.",
+                                      sep = " "),
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = 'Initial confidence',
+       y = "Final confidence")
+graph.confidence
+ggsave(paste0(figPath, "confidence autocorrelation.png"), plot = graph.confidence)
+
+# Does early experience of agreement colour judgement for the rest of the experiment?
+for(p in 1:dim(participants)[1]) {
+  participants$aic.agreement.block1[p] <- length(which(trials$agree==1
+                                                       & trials$participantId==participants$participantId[p]
+                                                       & trials$block==3
+                                                       & trials$advisorId==adviceTypes$AiC)) / 
+    length(which(trials$block==3 & trials$participantId==participants$participantId[p] 
+                 & trials$advisorId==adviceTypes$AiC))
+  participants$aiu.agreement.block1[p] <- length(which(trials$agree==1
+                                                       & trials$participantId==participants$participantId[p]
+                                                       & trials$block==3
+                                                       & trials$advisorId==adviceTypes$AiU)) / 
+    length(which(trials$block==3 & trials$participantId==participants$participantId[p] 
+                 & trials$advisorId==adviceTypes$AiU))
+}
+participants$aic.agreement.block1.superiority <- participants$aic.agreement.block1 - participants$aiu.agreement.block1
+
+equation <- lm(aic.pick.proportion ~ aic.agreement.block1.superiority, data = participants)
+equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
+graph.block1Agreement.preference <- ggplot(participants, 
+                                           aes(x=aic.agreement.block1.superiority, y=aic.pick.proportion)) +
+  geom_point(alpha = 0.2) +
+  scale_y_continuous(limits = c(0,1)) + 
+  scale_x_continuous(limits = c(-0.5,0.5), expand = c(0,0)) + 
+  geom_smooth(method='lm', formula = y~x, fullrange = T, level = .99, 
+              linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equation.text, x = .38, y = .54) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
+  labs(title = "High weighting of early experience of advisors",
+       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-confidence",
+                                      "advisor relative to the agree-in-uncertainty advisor and the preference ",
+                                      "for picking the agree-in-confidence advisor.",
+                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
+                                      "intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block 1 agree-in-confidence agreement superiority",
+       y = "Agree-in-confidence pick proportion") 
+graph.block1Agreement.preference
+ggsave(paste0(figPath, "preference by block1 agreement.png"), plot = graph.block1Agreement.preference)
+
+# Interestingly Agree-in-confidence agreement at block 1 is a better predictor of agree-in-confidence
+# preference overall than Agree-in-confidence agreement superiority
+equation <- lm(aic.pick.proportion ~ aic.agreement.block1, data = participants)
+equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
+graph.block1Agreement.preference.aic <- ggplot(participants, 
+                                           aes(x=aic.agreement.block1, y=aic.pick.proportion)) +
+  geom_point(alpha = 0.2) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
+  scale_x_continuous(limits = c(0,1), expand = c(0,0)) + 
+  geom_smooth(method='lm', formula = y~x, fullrange = T,
+              level = .99, linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equation.text, x = .85, y = .6) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
+  labs(title = "High weighting of early experience of advisors",
+       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-confidence",
+                                      "advisor and the pick proportion of that advisor.",
+                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
+                                      "intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block 1 agree-in-confidence agreement",
+       y = "Agree-in-confidence pick proportion") 
+graph.block1Agreement.preference.aic
+ggsave(paste0(figPath, "preference by raw block1 agreement.png"), plot = graph.block1Agreement.preference.aic)
+
+# Third side to the triangle is that AiU agreement in block 1 doesn't predict 1-aic.pick.rate
+# This is very unusual since picking aic vs aiu is a 0-sum game. This suggests that the AiC advisor
+# has a much higher weighting on potential picking, and that the performance of the AiU advisor
+# is essentially ignored.
+equation <- lm((1-aic.pick.proportion) ~ aiu.agreement.block1, data = participants)
+equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
+graph.block1Agreement.preference.aiu <- ggplot(participants, 
+                                               aes(x=aiu.agreement.block1, y=(1-aic.pick.proportion))) +
+  geom_point(alpha = 0.2) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
+  scale_x_continuous(limits = c(0,1), expand = c(0,0)) + 
+  geom_smooth(method='lm', formula = y~x, fullrange = T,
+              level = .99, linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equation.text, x = .85, y = .6) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
+  labs(title = "Negligible weighting of early experience of agree-in-uncertainty advisor",
+       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-uncertainty",
+                                      "advisor and the pick proportion of that advisor.",
+                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
+                                      "intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block 1 agree-in-uncertainty agreement",
+       y = "(1 - Agree-in-confidence pick proportion)") 
+graph.block1Agreement.preference.aiu
+ggsave(paste0(figPath, "preference by raw block1 agreement aiu.png"), plot = graph.block1Agreement.preference.aiu)
 
 write.csv(participants, 'participants.csv')
 # write.csv(trials, 'trials.csv')

@@ -1,5 +1,4 @@
-
 *.tmp
 **/auth/**
 *.asv
-AdvisorChoice/analysis/.Rhistory
+*/.R*
