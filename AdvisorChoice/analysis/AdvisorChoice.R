@@ -58,13 +58,15 @@ citation("R.matlab")
 ## i) Get Data ####################################################################################
 print('Loading data')
 
+
+# Load utility functions
 # Use the mat2R functions to get hold of some data and do some manipulations
-if(!exists("getMatlabData", mode="function")) {
-  source("mat2R.R")
-} 
+source("mat2R.R")  
+source('utilityFunctions.R')
 
 #acPth <- "C:/Users/mj221/Filr/My Files/Results/AdvisorChoice"
 acPth <- "G:/Documents/University/Google Drive/Results/AdvisorChoice"
+figPath = 'G:/Documents/University/Google Drive/Project Documents/AdvisorChoice/figures/'
 
 raw_study <- getMatlabData(acPth)  # get some data from the path defined for convenience in mat2R
 # unpack
@@ -76,8 +78,7 @@ questionnaires <- raw_study$questionnaires
 # the raw study data is quite large, so drop it
 rm('raw_study')
 
-## ii) Some functions #############################################################################
-print('Defining functions')
+## ii) Reference vars #############################################################################
 
 # all advisors agreement probability = .3 where initial judgement is incorrect
 adviceTypes <- list(neutral=0, # neutral: agree|correct=.7
@@ -100,466 +101,18 @@ questionnaireDimensions <- list(accurate=1,
 # NOTE: questions at the first timepoint are presented to the participant prior to their 
 # having interacted with the advisors, and are therefore worded prospectively 
 # (e.g. 'how much will you like this advisor?')
-getQuestionText <- function (qId) {
+getQuestionText <- function (qId, short=FALSE) {
   if(qId==questionnaireDimensions$accurate)
-    return('How accurate do you think this person was when performing the task?')
+    return(ifelse(short,'Accurate','How accurate do you think this person was when performing the task?'))
   if(qId==questionnaireDimensions$like)
-    return('How much do you like this person?')
+    return(ifelse(short,'Likeable','How much do you like this person?'))
   if(qId==questionnaireDimensions$trust)
-    return('How trustworthy are the opinions of this person?')
+    return(ifelse(short,'Trustworthy','How trustworthy are the opinions of this person?'))
   if(qId==questionnaireDimensions$influence)
-    return('How much are you influenced by the opinions of this person?')
+    return(ifelse(short,'Influential','How much are you influenced by the opinions of this person?'))
   return(NA)
 } 
 
-# Print the results of a t-test as we would like to see them reported in a paper
-prettyPrint <- function(results, d) {
-  if(length(results$estimate)==2) 
-    mu <- paste0('Mdiff=', round(results$estimate[[1]]-results$estimate[[2]],2),
-                 ' [',round(attr(results$conf.int, "conf.level")*100),'%CI: ',
-                 round(results$conf.int[[1]],2), ', ', round(results$conf.int[[2]],2),']')
-  else
-    mu <- paste0('Mean=', round(results$estimate[[1]],2), 
-                 ' [',round(attr(results$conf.int, "conf.level")*100),'%CI: ',
-                 round(results$conf.int[[1]],2), ', ', round(results$conf.int[[2]],2),']',
-                 ' vs ', results$null.value)
-  print(paste0('t(',results$parameter,')=',round(results$statistic,2),
-               ', ', mu,
-               ', p=', round(results$p.value,3),
-               ', d=', round(d,2)))
-}
-
-printMean <- function(vector, conf.int = .95, na.rm = F) {
-  mu <- mean(vector, na.rm = na.rm)
-  s <- sd(vector, na.rm = na.rm)
-  n <- length(vector)
-  error <- qnorm(1-(1-conf.int)/2)*s/sqrt(n) # 95% confidence interval width
-  ci.low <- mu - error
-  ci.high <- mu + error
-  print(paste0('Mean=', round(mu,2), ' [', round(conf.int,2)*100, '%CI: ',
-               round(ci.low,2), ', ', round(ci.high,2),']'))
-}
-
-# Generate tables of marginal means 
-marginal.means <- function(dependant, factors, data, ci.level = 0.95, na.rm = T) {
-  #print(paste('marginal means:', paste(factors, collapse = ', ')))
-  #assign("debug.input", data, envir=globalenv())
-  out <- vector('list', length=length(factors))
-  names(out) <- factors
-  for(f in 1:length(out)) {
-    fact <- factors[[f]]
-    lvls <- levels(factor(data[,fact]))
-    if(!length(lvls))
-      next
-    out[[f]] <- list()
-    others <- factors[factors!=fact] # used for tracking interactions
-    out[[f]] <- vector('list', length=length(lvls))
-    df <- data.frame(level=character(), mean=double(), sd=double(), ci.95.low=double(), ci.95.high=double())
-    for(L in 1:length(lvls)) {
-      name <- lvls[[L]]
-      set <- data[which(data[,fact]==name), dependant]
-      if (na.rm)
-        set <- set[!is.na(set)]
-      mu <- mean(set)
-      s <- sd(set)
-      n <- dim(data)[1]
-      error <- qnorm(1-(1-ci.level)/2)*s/sqrt(n) # 95% confidence interval width
-      ci.95.low <- mu - error
-      ci.95.high <- mu + error
-      df <- rbind(df, data.frame(level=name, mean=mu, sd=s, ci.95.low, ci.95.high))
-      # handle interactions using recursion
-      if(length(others) && length(data[which(data[,fact]==name),])) {
-        recur <- marginal.means(dependant, others,  data[which(data[,fact]==name),], ci.level,  na.rm)
-        if(length(recur))
-          out[[f]][paste0(fact,'.',name)] <- recur
-        #assign("debug", recur, envir=globalenv())
-      }
-    }
-    out[[f]]$means <- df
-    names(out[[f]])[names(out[[f]])=='means'] <- paste0(fact,'.total')
-  }
-  return(out)
-}
-
-# Return the proportion of trials on which participant pId picked advisor with specified adviceType
-getPickProportion <- function(pId, trials, adviceType) {
-  trials <- trials[!is.na(trials$participantId),]
-  myTrials <- trials[trials$participantId==pId,]
-  choiceTrials <- myTrials[myTrials$hasChoice==T,]
-  advisorPicks <- choiceTrials[choiceTrials$adviceType==adviceType,]
-  #print(paste0('pId: ', pId, '; choiceTrials: ', dim(choiceTrials)[1]))
-  return(dim(advisorPicks)[1] / dim(choiceTrials)[1])
-}
-
-# Generate a variety of statistics pertaining to the trials in trialSet and
-# return them in a data frame with colnames ending in .suffix
-scanTrials <- function(trialSet, suffix = NULL) {
-  df <- data.frame(trialCount = dim(trialSet)[1])
-  # The medium-confidence trials come in handy, so cache them here
-  medSet <- trialSet[which(trialSet$step==confidenceTypes$medium),]
-  # Proportion of trials in which the initial decision was correct
-  df$proportionCorrect <- length(which(trialSet$cor1==1)) / dim(trialSet)[1]
-  # Proportion of trials in which the intiial decision was incorrect
-  df$proportionCorrectFinal <- length(which(trialSet$cor2==1)) / length(trialSet)
-  # Number of choice trials on which the agree-in-confidence advisor was selected
-  df$aicPickCount <- length(which(trialSet$hasChoice & trialSet$adviceType==adviceTypes$AiC))
-  # Number of choice trials on which the agree-in-uncertainty advisor was selected
-  df$aiuPickCount <- length(which(trialSet$hasChoice & trialSet$adviceType==adviceTypes$AiU))
-  # Proportion of choice trials on which the agree-in-confidence advisor was selelcted
-  df$aicPickRate <- length(which(trialSet$hasChoice & trialSet$adviceType==adviceTypes$AiC)) / 
-    length(which(trialSet$hasChoice))
-  # Number of choice trials on which the initial decision was correct and the
-  # agree-in-confidence advisor was selected
-  df$aicPickCount.correct <- length(which(trialSet$hasChoice
-                                       & trialSet$adviceType==adviceTypes$AiC
-                                       & trialSet$cor1==1))
-  # Number of choice trials on which the initial decision was correct and the
-  # agree-in-uncertainty advisor was selected
-  df$aiuPickCount.correct <- length(which(trialSet$hasChoice
-                                       & trialSet$adviceType==adviceTypes$AiU
-                                       & trialSet$cor1==1))
-  # Proportion of choice trials on which the initial decision was correct and
-  # the agree-in-confidence advisor was selected
-  df$aicPickRate.correct <- length(which(trialSet$hasChoice 
-                                      & trialSet$adviceType==adviceTypes$AiC 
-                                      & trialSet$cor1==1)) / 
-    length(which(trialSet$hasChoice & trialSet$cor1==1))
-  # NB: all confidence-category selections require the initial decision to have
-  # been correct. 
-  
-  # Number of low-confidence choice trials on which the agree-in-confidence
-  # advisor was selected
-  df$aicPickCount.lowConf <- length(which(trialSet$hasChoice 
-                                       & trialSet$adviceType==adviceTypes$AiC 
-                                       & trialSet$step == -1))
-  # Number of low-confidence choice trials on which the agree-in-uncertainty
-  # advisor was selected
-  df$aiuPickCount.lowConf <- length(which(trialSet$hasChoice 
-                                       & trialSet$adviceType==adviceTypes$AiU 
-                                       & trialSet$step == -1))
-  # Proportion of choice trials on which confidence in the initial
-  # decision was low, and the agree-in-confidence advisor was selected
-  df$aicPickRate.lowConf <- length(which(trialSet$hasChoice 
-                                      & trialSet$adviceType==adviceTypes$AiC 
-                                      & trialSet$step == -1)) / 
-    length(which(trialSet$hasChoice & trialSet$step == -1))
-  # Number of medium confidence choice trials on which the agree-in-confidence advisor was selected
-  df$aicPickCount.medConf <- length(which(medSet$hasChoice & medSet$adviceType==adviceTypes$AiC))
-  # Number of medium choice trials on which the agree-in-uncertainty advisor was selected
-  df$aiuPickCount.medConf <- length(which(medSet$hasChoice & medSet$adviceType==adviceTypes$AiU))
-  # Proportion of choice trials on which the initial decision was correct,
-  # confidence in the initial decision was moderate, and the agree-in-confidence
-  # advisor was selected
-  df$aicPickRate.medConf <- length(which(trialSet$hasChoice 
-                                      & trialSet$adviceType==adviceTypes$AiC 
-                                      & trialSet$step == 0)) / 
-    length(which(trialSet$hasChoice & trialSet$step == 0))
-  # Number of high confidence choice trials on which the agree-in-confidence advisor was selected
-  df$aicPickCount.highConf <- length(which(trialSet$hasChoice 
-                                        & trialSet$adviceType==adviceTypes$AiC 
-                                        & trialSet$step == 1))
-  # Number of high choice trials on which the agree-in-uncertainty advisor was selected
-  df$aiuPickCount.highConf <- length(which(trialSet$hasChoice 
-                                        & trialSet$adviceType==adviceTypes$AiU 
-                                        & trialSet$step == 1))
-  # Proportion of choice trials on which the initial decision was correct,
-  # confidence in the initial decision was high, and the agree-in-confidence
-  # advisor was selected
-  df$aicPickRate.highConf <- length(which(trialSet$hasChoice 
-                                       & trialSet$adviceType==adviceTypes$AiC 
-                                       & trialSet$step == 1)) / 
-    length(which(trialSet$hasChoice & trialSet$step == 1))
-  ## Everything below is influence, so drop catch trials
-  trialSet <- trialSet[which(!is.na(trialSet$cor2)),]
-  medSet <- medSet[which(!is.na(medSet$cor2)),]
-  # Number of agreement trials
-  df$agreeCount <- length(which(trialSet$agree==1))
-  # Number of disagreement trials
-  df$disagreeCount <- length(which(trialSet$agree==0))
-  # Number of trials on which the agree-in-confidence advisor agreed
-  df$aicAgreeCount <- length(which(trialSet$agree==1 
-                                   & trialSet$adviceType==adviceTypes$AiC))
-  # Number of trials on which the agree-in-uncertainty advisor agreed
-  df$aiuAgreeCount <- length(which(trialSet$agree==1
-                                   & trialSet$adviceType==adviceTypes$AiU))
-  # Number of choice trials where the advisor agreed
-  df$agreeChoice <- length(which(trialSet$agree==1 & trialSet$hasChoice))
-  # Number of forced trials where advisor agreed
-  df$agreeForced <- length(which(trialSet$agree==1 & !trialSet$hasChoice))
-  # Number of choice trials where the agree-in-confidence advisor agreed
-  df$aicAgreeChoice <- length(which(trialSet$agree==1 
-                                    & trialSet$adviceType==adviceTypes$AiC
-                                    & trialSet$hasChoice))
-  # Number of choice trials where the agree-in-uncertainty advisor agreed
-  df$aiuAgreeChoice <- length(which(trialSet$agree==1
-                                    & trialSet$adviceType==adviceTypes$AiU
-                                    & trialSet$hasChoice))
-  # Number of forced trials where the agree-in-confidence advisor agreed
-  df$aicAgreeForced <- length(which(trialSet$agree==1 
-                                    & trialSet$adviceType==adviceTypes$AiC
-                                    & !trialSet$hasChoice))
-  # Number of forced trials where the agree-in-uncertainty advisor agreed
-  df$aiuAgreeForced <- length(which(trialSet$agree==1 
-                                    & trialSet$adviceType==adviceTypes$AiU
-                                    & !trialSet$hasChoice))
-  # Number of low-confidence trials where the agree-in-confidence advisor agreed
-  df$aicAgree.lowConf <- length(which(trialSet$agree==1
-                                      & trialSet$adviceType==adviceTypes$AiC
-                                      & trialSet$step == -1))
-  # Number of low-confidence trials where the agree-in-uncertainty advisor agreed
-  df$aiuAgree.lowConf <- length(which(trialSet$agree==1
-                                      & trialSet$adviceType==adviceTypes$AiU
-                                      & trialSet$step == -1))
-  # Number of med-confidence trials where the agree-in-confidence advisor agreed
-  df$aicAgree.medConf <- length(which(trialSet$agree==1
-                                      & trialSet$adviceType==adviceTypes$AiC
-                                      & trialSet$step == 0))
-  # Number of med-confidence trials where the agree-in-uncertainty advisor agreed
-  df$aiuAgree.medConf <- length(which(trialSet$agree==1
-                                      & trialSet$adviceType==adviceTypes$AiU
-                                      & trialSet$step == 0))
-  # Number of high-confidence trials where the agree-in-confidence advisor agreed
-  df$aicAgree.highConf <- length(which(trialSet$agree==1
-                                       & trialSet$adviceType==adviceTypes$AiC
-                                       & trialSet$step == 1))
-  # Number of high-confidence trials where the agree-in-uncertainty advisor agreed
-  df$aiuAgree.highConf <- length(which(trialSet$agree==1
-                                       & trialSet$adviceType==adviceTypes$AiU
-                                       & trialSet$step == 1))
-  # Influence of both advisors combined on all trials
-  df$influence <- mean(trialSet$influence)
-  df$influence.sd <- sd(trialSet$influence)
-  # Influence of the agree-in-confidence advisor on all trials
-  df$aicInfluence <- mean(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiC)])
-  df$aicInfluence.sd <- sd(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiC)])
-  # Influence of the agree-in-uncertainty advisor on all trials
-  df$aiuInfluence <- mean(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU)])
-  df$aiuInfluence.sd <- sd(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU)])
-  # Influence of both advisors combined on forced trials
-  df$forcedInfluence <- mean(trialSet$influence[which(!trialSet$hasChoice)])
-  df$forcedInfluence.sd <- sd(trialSet$influence[which(!trialSet$hasChoice)])
-  # Influence of both advisors combined on choice trials
-  df$choiceInfluence <- mean(trialSet$influence[which(trialSet$hasChoice)])
-  df$choiceInfluence.sd <- sd(trialSet$influence[which(trialSet$hasChoice)])
-  # Influence of both advisors combined on agreement trials
-  df$agreeInfluence <- mean(trialSet$influence[which(trialSet$agree==1)])
-  df$agreeInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==1)])
-  # Influence of both advisors combined on disagreement trials
-  df$disagreeInfluence <- mean(trialSet$influence[which(trialSet$agree==0)])
-  df$disagreeInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==0)])
-  # Influence of agree-in-confidence advisor on forced trials
-  df$aicForcedInfluence <- mean(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiC
-                                                      & !trialSet$hasChoice)])
-  df$aicForcedInfluence.sd <- sd(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiC
-                                                       & !trialSet$hasChoice)])
-  # Influence of the agree-in-uncertinaty advisor on forced trials
-  df$aiuForcedInfluence <- mean(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU
-                                                      & !trialSet$hasChoice)])
-  df$aiuForcedInfluence.sd <- sd(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU
-                                                       & !trialSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on choice trials
-  df$aicChoiceInfluence <- mean(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU
-                                                                   & trialSet$hasChoice)])
-  df$aicChoiceInfluence.sd <- sd(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU
-                                                       & trialSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice trials
-  df$aiuChoiceInfluence <- mean(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU
-                                                                   & trialSet$hasChoice)])
-  df$aiuChoiceInfluence.sd <- sd(trialSet$influence[which(trialSet$adviceType==adviceTypes$AiU
-                                                       & trialSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on agreement trials
-  df$aicAgreeInfluence <- mean(trialSet$influence[which(trialSet$agree==1
-                                                        & trialSet$adviceType==adviceTypes$AiC)])
-  df$aicAgreeInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==1
-                                                        & trialSet$adviceType==adviceTypes$AiC)])
-  # Influence of the agree-in-uncertainty advisor on agreement trials
-  df$aiuAgreeInfluence <- mean(trialSet$influence[which(trialSet$agree==1
-                                                        & trialSet$adviceType==adviceTypes$AiU)])
-  df$aiuAgreeInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==1
-                                                        & trialSet$adviceType==adviceTypes$AiU)])
-  # Influence of the agree-in-confidence advisor on choice agreement trials
-  df$aicAgreeChoiceInfluence <- mean(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiC
-                                                              & trialSet$hasChoice)])
-  df$aicAgreeChoiceInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiC
-                                                              & trialSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice agreement trials
-  df$aiuAgreeChoiceInfluence <- mean(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiU
-                                                              & trialSet$hasChoice)])
-  df$aiuAgreeChoiceInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiU
-                                                              & trialSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on forced agreement trials
-  df$aicAgreeForcedInfluence <- mean(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiC
-                                                              & !trialSet$hasChoice)])
-  df$aicAgreeForcedInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiC
-                                                              & !trialSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice agreement trials
-  df$aiuAgreeForcedInfluence <- mean(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiU
-                                                              & !trialSet$hasChoice)])
-  df$aiuAgreeForcedInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==1
-                                                              & trialSet$adviceType==adviceTypes$AiU
-                                                              & !trialSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on disagreement trials
-  df$aicDisagreeInfluence <- mean(trialSet$influence[which(trialSet$agree==0
-                                                           & trialSet$adviceType==adviceTypes$AiC)])
-  df$aicDisagreeInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==0
-                                                           & trialSet$adviceType==adviceTypes$AiC)])
-  # Influence of the agree-in-uncertainty advisor on disagreement trials
-  df$aiuDisagreeInfluence <- mean(trialSet$influence[which(trialSet$agree==0
-                                                           & trialSet$adviceType==adviceTypes$AiU)])
-  df$aiuDisagreeInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==0
-                                                           & trialSet$adviceType==adviceTypes$AiU)])
-  # Influence of the agree-in-confidence advisor on choice disagreement trials
-  df$aicDisagreeChoiceInfluence <- mean(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiC
-                                                                 & trialSet$hasChoice)])
-  df$aicDisagreeChoiceInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiC
-                                                                 & trialSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice disagreement trials
-  df$aiuDisagreeChoiceInfluence <- mean(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiU
-                                                                 & trialSet$hasChoice)])
-  df$aiuDisagreeChoiceInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiU
-                                                                 & trialSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on forced disagreement trials
-  df$aicDisagreeForcedInfluence <- mean(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiC
-                                                                 & !trialSet$hasChoice)])
-  df$aicDisagreeForcedInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiC
-                                                                 & !trialSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice disagreement trials
-  df$aiuDisagreeForcedInfluence <- mean(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiU
-                                                                 & !trialSet$hasChoice)])
-  df$aiuDisagreeForcedInfluence.sd <- sd(trialSet$influence[which(trialSet$agree==0
-                                                                 & trialSet$adviceType==adviceTypes$AiU
-                                                                 & !trialSet$hasChoice)])
-  # Influence of both advisors combined on medium confidence trials
-  df$influence.medConf <- mean(medSet$influence)
-  df$influence.medConf.sd <- sd(medSet$influence)
-  # Influence of the agree-in-confidence advisor on medium confidence trials
-  df$aicInfluence.medConf <- mean(medSet$influence[which(medSet$adviceType==adviceTypes$AiC)])
-  df$aicInfluence.medConf.sd <- sd(medSet$influence[which(medSet$adviceType==adviceTypes$AiC)])
-  # Influence of the agree-in-uncertainty advisor on medium confidence trials
-  df$aiuInfluence.medConf <- mean(medSet$influence[which(medSet$adviceType==adviceTypes$AiU)])
-  df$aiuInfluence.medConf.sd <- sd(medSet$influence[which(medSet$adviceType==adviceTypes$AiU)])
-  # Influence of both advisors combined on medium confidence forced trials
-  df$forcedInfluence.medConf <- mean(medSet$influence[which(!medSet$hasChoice)])
-  df$forcedInfluence.medConf.sd <- sd(medSet$influence[which(!medSet$hasChoice)])
-  # Influence of both advisors combined on medium confidence choice trials
-  df$choiceInfluence.medConf <- mean(medSet$influence[which(medSet$hasChoice)])
-  df$choiceInfluence.medConf.sd <- sd(medSet$influence[which(medSet$hasChoice)])
-  # Influence of agree-in-confidence advisor on medium confidence forced trials
-  df$aicForcedInfluence.medConf <- mean(medSet$influence[which(medSet$adviceType==adviceTypes$AiC
-                                                      & !medSet$hasChoice)])
-  df$aicForcedInfluence.medConf.sd <- sd(medSet$influence[which(medSet$adviceType==adviceTypes$AiC
-                                                       & !medSet$hasChoice)])
-  # Influence of the agree-in-uncertinaty advisor on medium confidence forced trials
-  df$aiuForcedInfluence.medConf <- mean(medSet$influence[which(medSet$adviceType==adviceTypes$AiU
-                                                      & !medSet$hasChoice)])
-  df$aiuForcedInfluence.medConf.sd <- sd(medSet$influence[which(medSet$adviceType==adviceTypes$AiU
-                                                       & !medSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on medium confidence choice trials
-  df$aicChoiceInfluence.medConf <- mean(medSet$influence[which(medSet$adviceType==adviceTypes$AiU
-                                                      & medSet$hasChoice)])
-  df$aicChoiceInfluence.medConf.sd <- sd(medSet$influence[which(medSet$adviceType==adviceTypes$AiU
-                                                       & medSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on medium confidence choice trials
-  df$aiuChoiceInfluence.medConf <- mean(medSet$influence[which(medSet$adviceType==adviceTypes$AiU
-                                                      & medSet$hasChoice)])
-  df$aiuChoiceInfluence.medConf.sd <- sd(medSet$influence[which(medSet$adviceType==adviceTypes$AiU
-                                                       & medSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on medium confidence agreement trials
-  df$aicAgreeInfluence.medConf <- mean(medSet$influence[which(medSet$agree==1
-                                                        & medSet$adviceType==adviceTypes$AiC)])
-  df$aicAgreeInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==1
-                                                         & medSet$adviceType==adviceTypes$AiC)])
-  # Influence of the agree-in-uncertainty advisor on medium confidence agreement trials
-  df$aiuAgreeInfluence.medConf <- mean(medSet$influence[which(medSet$agree==1
-                                                        & medSet$adviceType==adviceTypes$AiU)])
-  df$aiuAgreeInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==1
-                                                         & medSet$adviceType==adviceTypes$AiU)])
-  # Influence of the agree-in-confidence advisor on choice medium confidence agreement trials
-  df$aicAgreeChoiceInfluence.medConf <- mean(medSet$influence[which(medSet$agree==1
-                                                              & medSet$adviceType==adviceTypes$AiC
-                                                              & medSet$hasChoice)])
-  df$aicAgreeChoiceInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==1
-                                                               & medSet$adviceType==adviceTypes$AiC
-                                                               & medSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice medium confidence agreement trials
-  df$aiuAgreeChoiceInfluence.medConf <- mean(medSet$influence[which(medSet$agree==1
-                                                              & medSet$adviceType==adviceTypes$AiU
-                                                              & medSet$hasChoice)])
-  df$aiuAgreeChoiceInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==1
-                                                               & medSet$adviceType==adviceTypes$AiU
-                                                               & medSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on forced medium confidence agreement trials
-  df$aicAgreeForcedInfluence.medConf <- mean(medSet$influence[which(medSet$agree==1
-                                                              & medSet$adviceType==adviceTypes$AiC
-                                                              & !medSet$hasChoice)])
-  df$aicAgreeForcedInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==1
-                                                               & medSet$adviceType==adviceTypes$AiC
-                                                               & !medSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice agreement trials
-  df$aiuAgreeForcedInfluence.medConf <- mean(medSet$influence[which(medSet$agree==1
-                                                              & medSet$adviceType==adviceTypes$AiU
-                                                              & !medSet$hasChoice)])
-  df$aiuAgreeForcedInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==1
-                                                               & medSet$adviceType==adviceTypes$AiU
-                                                               & !medSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on medium confidence disagreement trials
-  df$aicDisagreeInfluence.medConf <- mean(medSet$influence[which(medSet$agree==0
-                                                           & medSet$adviceType==adviceTypes$AiC)])
-  df$aicDisagreeInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==0
-                                                            & medSet$adviceType==adviceTypes$AiC)])
-  # Influence of the agree-in-uncertainty advisor on medium confidence disagreement trials
-  df$aiuDisagreeInfluence.medConf <- mean(medSet$influence[which(medSet$agree==0
-                                                           & medSet$adviceType==adviceTypes$AiU)])
-  df$aiuDisagreeInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==0
-                                                            & medSet$adviceType==adviceTypes$AiU)])
-  # Influence of the agree-in-confidence advisor on choice medium confidence disagreement trials
-  df$aicDisagreeChoiceInfluence.medConf <- mean(medSet$influence[which(medSet$agree==0
-                                                                 & medSet$adviceType==adviceTypes$AiC
-                                                                 & medSet$hasChoice)])
-  df$aicDisagreeChoiceInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==0
-                                                                  & medSet$adviceType==adviceTypes$AiC
-                                                                  & medSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice medium confidence disagreement trials
-  df$aiuDisagreeChoiceInfluence.medConf <- mean(medSet$influence[which(medSet$agree==0
-                                                                 & medSet$adviceType==adviceTypes$AiU
-                                                                 & medSet$hasChoice)])
-  df$aiuDisagreeChoiceInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==0
-                                                                  & medSet$adviceType==adviceTypes$AiU
-                                                                  & medSet$hasChoice)])
-  # Influence of the agree-in-confidence advisor on forced medium confidence disagreement trials
-  df$aicDisagreeForcedInfluence.medConf <- mean(medSet$influence[which(medSet$agree==0
-                                                                 & medSet$adviceType==adviceTypes$AiC
-                                                                 & !medSet$hasChoice)])
-  df$aicDisagreeForcedInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==0
-                                                                  & medSet$adviceType==adviceTypes$AiC
-                                                                  & !medSet$hasChoice)])
-  # Influence of the agree-in-uncertainty advisor on choice medium confidence disagreement trials
-  df$aiuDisagreeForcedInfluence.medConf <- mean(medSet$influence[which(medSet$agree==0
-                                                                 & medSet$adviceType==adviceTypes$AiU
-                                                                 & !medSet$hasChoice)])
-  df$aiuDisagreeForcedInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==0
-                                                                  & medSet$adviceType==adviceTypes$AiU
-                                                                  & !medSet$hasChoice)])
-  if(is.null(suffix))
-    return(df)
-  suffix <- paste0('.', suffix)
-  names(df) <- paste0(names(df), suffix)
-  return(df)
-}
 
 ## iii) Prepare data ##############################################################################
 print('## Prepare data ##################################################################')
@@ -568,7 +121,7 @@ print('## Prepare data #########################################################
 
 # First, remove practice trials from the main trials table
 all.trials <- trials
-trials <- trials[trials$practice==0,]
+trials <- trials[trials$practice==0 & trials$block > 2,]
 trials <- trials[which(trials$participantId %in% participants$participantId),] # discard trials for excluded participants
 
 # we'll also get rid of the advisors, though this is less important
@@ -601,11 +154,15 @@ for(i in 1:dim(trials)[1]) {
 # Calculate the influence of the advisor on each trial
 trials$shift <- vector(length = dim(trials)[1]) #  amount the confidence changes
 trials$influence <- trials$shift # amount the confidence changes in the direction of the advice
+# also record influence capped by the maximum possible shift which could have
+# occurred in agreement direction to counteract the role of the scale asymmetry
+trials$cappedInfluence <- trials$shift 
 for(t in 1:dim(trials)[1]) {
   if(is.na(trials$adviceType[t])) {
     # trials without an advisor are entered as NA
     trials$shift[t] <- NA
     trials$influence[t] <- NA
+    trials$cappedInfluence[t] <- NA
   } else {
     # calculate the confidence change on this trial ('shift')
     # shift = Cpost - Cpre
@@ -614,6 +171,7 @@ for(t in 1:dim(trials)[1]) {
     # Cpost [-55,-1]U[1,55]
     c.pre <- trials$cj1[t]
     c.post <- trials$cj2[t]
+    max.shift <- 55 - abs(trials$cj1[t])
     if(c.pre<0) {
       # initial response is 'left'
       c.pre <- c.pre * -1
@@ -623,9 +181,11 @@ for(t in 1:dim(trials)[1]) {
     if(trials$agree[t]==1) {
       # on agreement trials shift towards initial response inidicates following advice
       trials$influence[t] <- trials$shift[t]
+      trials$cappedInfluence[t] <- ifelse(abs(trials$shift[t])>max.shift,max.shift,trials$shift[t])
     } else {
       # on disagreement trials shift AWAY from initial response inidicates following advice
       trials$influence[t] <- trials$shift[t] * -1
+      trials$cappedInfluence[t] <- ifelse(abs(trials$shift[t])>max.shift,max.shift,trials$shift[t]) * -1
     }
   }
 }
@@ -643,6 +203,13 @@ for (p in 1:dim(participants)[1]) {
     for(n in 1:length(names(byBlock))) 
       participants[p, names(byBlock)[n]] <- byBlock[,n]
   }
+  # It involves a lot of duplication of values we don't need, but coding-wise
+  # it's quicker to run scanTrials again and feed it the cappedInfluence stuff
+  set$influence <- set$cappedInfluence
+  total <- scanTrials(set, 'capped')
+  total <- total[,grep('Influence', names(total), fixed = T)]    # only save the influence scores
+  for(n in 1:length(names(total)))
+    participants[p, names(total)[n]] <- total[,n]
 }
 
 # We don't need to deal with nearly 1000 columns for most stuff, so we can archive the by-block stuff
@@ -700,6 +267,31 @@ participants.influence.medConf$agree <- factor(participants.influence.medConf$ag
 participants.influence.medConf$hasChoice <- factor(participants.influence.medConf$hasChoice)
 participants.influence.medConf$participantId <- factor(participants.influence.medConf$participantId)
 
+# And once more for the capped influence score. Probably a better way to do
+# this, but not going to look into it right now
+participants.influence.capped <- melt(participants, id.vars = 'participantId', 
+                                      measure.vars = c('aicAgreeChoiceInfluence.capped',
+                                                       'aicAgreeForcedInfluence.capped',
+                                                       'aicDisagreeChoiceInfluence.capped',
+                                                       'aicDisagreeForcedInfluence.capped',
+                                                       'aiuAgreeChoiceInfluence.capped',
+                                                       'aiuAgreeForcedInfluence.capped',
+                                                       'aiuDisagreeChoiceInfluence.capped',
+                                                       'aiuDisagreeForcedInfluence.capped'))
+participants.influence.capped$AiC <- participants.influence.capped$variable %in% 
+  c('aicAgreeForcedInfluence.capped', 'aicAgreeChoiceInfluence.capped', 
+    'aicDisagreeForcedInfluence.capped', 'aicDisagreeChoiceInfluence.capped')
+participants.influence.capped$agree <- participants.influence.capped$variable %in% 
+  c('aicAgreeForcedInfluence.capped', 'aiuAgreeForcedInfluence.capped',
+    'aicAgreeChoiceInfluence.capped', 'aiuAgreeChoiceInfluence.capped')
+participants.influence.capped$hasChoice <- participants.influence.capped$variable %in% 
+  c('aicAgreeChoiceInfluence.capped', 'aiuAgreeChoiceInfluence.capped',
+    'aicDisagreeChoiceInfluence.capped', 'aiuDisagreeChoiceInfluence.capped')
+participants.influence.capped$AiC <- factor(participants.influence.capped$AiC)
+participants.influence.capped$agree <- factor(participants.influence.capped$agree)
+participants.influence.capped$hasChoice <- factor(participants.influence.capped$hasChoice)
+participants.influence.capped$participantId <- factor(participants.influence.capped$participantId)
+
 ## 0) Exclusions ##################################################################################
 print('## 0) Running exclusions #########################################################')
 # Exclusion rules:
@@ -715,17 +307,22 @@ exclusions
 participants$excluded[25:dim(participants)[1]] = T
 participants.byBlock$excluded <- participants$excluded
 
-
-# backup the full participant list and reframe the original to honour exclusions
-all.participants <- participants
-participants <- participants[participants$excluded==F,]
 # Drop excluded participant data from the long table
 all.participants.influence <- participants.influence
 participants.influence <- participants.influence[which(!participants.influence$participantId 
                                                         %in% which(participants$excluded)),] 
 all.participants.influence.medConf <- participants.influence.medConf
 participants.influence.medConf <- participants.influence.medConf[which(!participants.influence.medConf$participantId
-                                                                        %in% which(participants$excluded)),]
+                                                                        %in% participants$participantId[
+                                                                          which(participants$excluded)]),]
+# Also drop excluded participants from trials and questionnaires
+all.questionnaires <- questionnaires
+questionnaires <- questionnaires[which(!questionnaires$participantId 
+                                       %in% participants$participantId[which(participants$excluded)]),]
+trials <- trials[which(!trials$participantId %in% participants$participantId[which(participants$excluded)]),]
+# backup the full participant list and reframe the original to honour exclusions
+all.participants <- participants
+participants <- participants[participants$excluded==F,]
 print(paste('>>Excluded participant count:', length(which(all.participants$excluded==T))))
 
 ## 1) Demographics ################################################################################
@@ -767,7 +364,42 @@ print('>>(aic.test.b) bayesian examination of above (prior = mean of 0.5, sd as 
 aic.test.b <- ttestBF(participants$aicPickRate, mu = 0.5)
 print(aic.test.b)
 print(paste0('Evidence strength for preferential AiC picking: BF=', round(exp(aic.test.b@bayesFactor$bf),3)))
-
+# Present the result with a graph
+tmp <- melt(participants[,c("participantId","aicPickRate.lowConf","aicPickRate.medConf","aicPickRate.highConf")],
+            id.vars = 'participantId')
+levels(tmp$variable) <- c('Low', 'Medium', 'High')
+tmp$participantId <- as.factor(tmp$participantId)
+graph.pickRate <- ggplot(tmp, aes(x = variable, y = value)) +
+  geom_hline(linetype = "dashed", color = "black", yintercept = .5, size = 1) +
+  geom_point(aes(color = participantId)) +
+  geom_line(aes(group = factor(participantId), color = participantId)) +
+  stat_summary(geom = "errorbar", fun.data = "mean_cl_boot", width = 0.1) +
+  stat_summary(geom = "point", fun.y = "mean", shape = 23, fill = "black", size = 4) +
+  geom_point(position = position_jitter(w=0.03, h=0),
+             aes(x="Overall", y=aicPickRate, color = factor(participantId)), data = participants) +
+  stat_summary(geom = "errorbar", fun.data = "mean_cl_boot", width = 0.1,
+               aes(x="Overall", y=aicPickRate), data = participants) +
+  stat_summary(geom = "point", fun.y = "mean", shape = 23, fill = "black", size = 4,
+               aes(x="Overall", y=aicPickRate), data = participants) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  scale_x_discrete(expand = c(0,1), limits = c('Low', 'Medium',
+                                               'High', 'Overall')) +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Advisor preference",
+       subtitle = paste(strwrap(paste("Proportion of the time each participant picked the",
+                                      "agree-in-confidence advisor. Connected points of a colour indicate",
+                                      "data from a single participant, while the diamond indicates the",
+                                      "mean proportion across all participants. The dashed reference line indicates",
+                                      "picking both advisors equally, as would be expected by chance.",
+                                      "Error bars give 95% bootstrapped confidence intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Confidence",
+       y = "Proportion of the time the agree-in-confidence advisor is chosen") 
+graph.pickRate
+ggsave(paste0(figPath, "aicPickRate.png"), plot = graph.pickRate)
 
 ## 3) ANOVA investigating influence ###############################################################
 print('## 3) ANOVA investigating influence ##############################################')
@@ -788,12 +420,40 @@ anova.influence <- ezANOVA(data = participants.influence,
                            return_aov = T)
 print('>>(anova.influence)')
 anova.influence$ANOVA
+tmp <- participants.influence
+levels(tmp$AiC) <- c('Agree-in-uncertainty', 'Agree-in-confidence') 
+levels(tmp$agree) <- c('Disagree', 'Agree')
+levels(tmp$hasChoice) <- c('Forced trials', 'Choice trials')
+graph.anova.influence <- ggplot(tmp, aes(agree, value, color = AiC, fill = AiC)) +
+  geom_point(position = position_jitter(w=0.05, h=0)) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.2) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, size = 5) +
+  stat_summary(aes(group = AiC), fun.y=mean, geom="line") + 
+  facet_grid(.~hasChoice) +
+  scale_color_discrete(name = 'Advisor type') +
+  scale_fill_discrete(name = 'Advisor type') +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Advice Influence",
+       subtitle = paste(strwrap(paste("Influence of advice under varied conditions. Points indicate",
+                                      "mean values for a participant, while diamonds indicate the mean",
+                                      "of participant means, with error bars specifying 95% confidence intervals.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = 'Agreement between advisor and judge',
+       y = "Influence of the advice") 
+graph.anova.influence
+ggsave(paste0(figPath, "influence.png"), plot = graph.anova.influence)
 
-print('ANOVA by-participants (not pre-registered) medium confidence trials only')
+print('ANOVA medium confidence trials only')
 tmp <- participants.influence.medConf
 tmp$value[which(is.nan(tmp$value))] <- 0.00
-anova.influence.medConf <- ezANOVA(data = participants.influence.medConf[
-  which(!is.nan(participants.influence.medConf$value)),],
+anova.influence.medConf <- ezANOVA(data = tmp,
                                    dv = value, 
                                    wid = participantId,
                                    within = c('AiC', 'agree', 'hasChoice'),
@@ -822,57 +482,90 @@ questionnaires$adviceType <- vector(length=dim(questionnaires)[1])
 for(q in 1:dim(questionnaires)[1]) {
   questionnaires$adviceType[q] <- advisors$advice.type[advisors$id==questionnaires$advisorId[q] 
                                                        & advisors$participantId==questionnaires$participantId[p]]
+  questionnaires$questionText[q] <- getQuestionText(questionnaires$questionNumber[q])
+  questionnaires$questionTextShort[q] <- getQuestionText(questionnaires$questionNumber[q], T)
 }
 
-# We can get a quick overview from an anova looking for main effect of advisor
-# and interactions of timepoint and advisor
-print('>>(trust.test) ANOVA exploring trust questionnaire responses')
-trust.test <- aov(formula = answer ~ adviceType * timePoint * questionNumber + Error(participantId),
-                  data = questionnaires)
-summary(trust.test)
-EtaSq(trust.test, type = 1)
-# Bayesian version
-# print('Bayesian ANOVA')
-# trust.test.b <- anovaBF(formula = answer ~ adviceType * timePoint * questionId + Error(participantId),
-#                         data = questionnaires)
-# print(trust.test.b)
-print('Marginal means')
-marginal.means('answer', c('adviceType', 'timePoint', 'questionNumber'), questionnaires)
-
 # Were the advisors perceived differently to begin with?
-trust.test.t1 <- t.test(questionnaires[questionnaires$timePoint==1 & questionnaires$adviceType==adviceTypes$AiC,"answer"],
-                        questionnaires[questionnaires$timePoint==1 & questionnaires$adviceType==adviceTypes$AiU,"answer"], 
-                        paired=T)
-trust.test.t1.d <- cohensD(questionnaires[questionnaires$timePoint==1 & questionnaires$adviceType==adviceTypes$AiC,"answer"],
-                           questionnaires[questionnaires$timePoint==1 & questionnaires$adviceType==adviceTypes$AiU,"answer"])
-print('>>(trust.test.t1) Paired t-test for whether advisors are trusted differentially at the beginning of the experiment')
-prettyPrint(trust.test.t1, trust.test.t1.d)
-print('>>(trust.test.t1.b) bayesian examination of above')
-trust.test.t1.b <- ttestBF(questionnaires[questionnaires$timePoint==1 & questionnaires$adviceType==adviceTypes$AiC,"answer"],
-                           questionnaires[questionnaires$timePoint==1 & questionnaires$adviceType==adviceTypes$AiU,"answer"],
-                           paired=T)
-print(trust.test.t1.b)
-print(paste0('Evidence strength for higher AiC trust: BF=', round(exp(trust.test.t1.b@bayesFactor$bf),3)))
+questionnaireTests <- list()
+for(qNum in 1:length(unique(questionnaires$questionNumber))) {
+  q <- unique(questionnaires$questionNumber)[qNum]
+  q.text <- getQuestionText(q)
+  Qs <- questionnaires[which(questionnaires$questionNumber==q),]
+  trust.test.t1 <- t.test(Qs[Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiC,"answer"],
+                          Qs[Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiU,"answer"], 
+                          paired=T)
+  trust.test.t1.d <- cohensD(Qs[Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiC,"answer"],
+                             Qs[Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiU,"answer"])
+  print(paste0('>>Question: ', q.text))
+  print('  Paired t-test for the BEGINNING of the experiment')
+  prettyPrint(trust.test.t1, trust.test.t1.d)
+  print('  bayesian examination of above')
+  trust.test.t1.b <- ttestBF(Qs[Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiC,"answer"],
+                             Qs[Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiU,"answer"], 
+                             paired=T)
+  #print(trust.test.t1.b)
+  print(paste0('  Evidence strength for higher AiC answer: BF=', round(exp(trust.test.t1.b@bayesFactor$bf),3)))
+  print('  Mean(AiC start)')
+  printMean(Qs[which(Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiC),"answer"])
+  print('  Mean(AiU start)')
+  printMean(Qs[which(Qs$timePoint==1 & Qs$adviceType==adviceTypes$AiU),"answer"])
+  
+  # Were they perceived differently from one another at the end?
+  t <- lastTimePoint # find last time point
+  trust.test.tLast <- t.test(Qs[Qs$timePoint==t & Qs$adviceType==adviceTypes$AiC,"answer"],
+                             Qs[Qs$timePoint==t & Qs$adviceType==adviceTypes$AiU,"answer"], 
+                             paired=T)
+  trust.test.tLast.d <- cohensD(Qs[Qs$timePoint==t & Qs$adviceType==adviceTypes$AiC,"answer"],
+                                Qs[Qs$timePoint==t & Qs$adviceType==adviceTypes$AiU,"answer"])
+  print('  Paired t-test for the END of the experiment')
+  prettyPrint(trust.test.tLast, trust.test.tLast.d)
+  print('  bayesian examination of above')
+  trust.test.tLast.b <- ttestBF(Qs[Qs$timePoint==t & Qs$adviceType==adviceTypes$AiC,"answer"],
+                                Qs[Qs$timePoint==t & Qs$adviceType==adviceTypes$AiU,"answer"], 
+                                paired=T)
+  #print(trust.test.tLast.b)
+  print(paste0('  Evidence strength for higher AiC answer: BF=', round(exp(trust.test.tLast.b@bayesFactor$bf),3)))
+  print('  Mean(AiC end)')
+  printMean(Qs[which(Qs$timePoint==t & Qs$adviceType==adviceTypes$AiC),"answer"])
+  print('  Mean(AiU end)')
+  printMean(Qs[which(Qs$timePoint==t & Qs$adviceType==adviceTypes$AiU),"answer"])
+  questionnaireTests[[qNum]] <- list()
+  questionnaireTests[[qNum]]$t1 <- trust.test.t1
+  questionnaireTests[[qNum]]$tLast <- trust.test.tLast
+  questionnaireTests[[qNum]]$text <- q.text
+}
+graph.questionnaire <- ggplot(questionnaires, aes(x=timePoint, y=answer, color = factor(adviceType))) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.2) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, size = 5) +
+  stat_summary(aes(group = adviceType), fun.y=mean, geom="line") +
+  scale_color_discrete(name = 'Advisor', labels=c('Agree-in-confidence', 'Agree-in-uncertainty')) +
+  scale_y_continuous(limits = c(0,100), expand = c(0,0)) +
+  theme_light() + 
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank()) +
+  facet_wrap(~factor(questionTextShort)) +
+  labs(title = "Questionnaire responses",
+       subtitle = paste(strwrap(paste("Subjective assessment of the advisors over the course of the experiment.",
+                                      "Mean values across participants are indicated by open diamonds,",
+                                      "with error bars showing 95% confidence intervals. Each panel shows the",
+                                      "answers concerning a different attribute of the advisor.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = 'Timepoint',
+       y = "Advisor rating") 
+graph.questionnaire  
+ggsave(paste0(figPath, "questionnaires.png"), plot = graph.questionnaire)
 
-# Were they perceived differently from one another at the end?
-t <- max(questionnaires$timePoint) # find last time point
-trust.test.tLast <- t.test(questionnaires[questionnaires$timePoint==t & questionnaires$adviceType==adviceTypes$AiC,"answer"],
-                           questionnaires[questionnaires$timePoint==t & questionnaires$adviceType==adviceTypes$AiU,"answer"],
-                           paired=T)
-trust.test.tLast.d <- cohensD(questionnaires[questionnaires$timePoint==t & questionnaires$adviceType==adviceTypes$AiC,"answer"],
-                              questionnaires[questionnaires$timePoint==t & questionnaires$adviceType==adviceTypes$AiU,"answer"])
-print('>>(trust.test.tLast) Paired t-test for whether advisors are trusted differentially at the end of the experiment')
-prettyPrint(trust.test.tLast, trust.test.tLast.d)
-print('>>(trust.test.tLast.b) bayesian examination of above')
-trust.test.tLast.b <- ttestBF(questionnaires[questionnaires$timePoint==t & questionnaires$adviceType==adviceTypes$AiC,"answer"],
-                           questionnaires[questionnaires$timePoint==t & questionnaires$adviceType==adviceTypes$AiU,"answer"],
-                           paired=T)
-print(trust.test.tLast.b)
-print(paste0('Evidence strength for higher AiC trust: BF=', round(exp(trust.test.tLast.b@bayesFactor$bf),3)))
+# We should look at whether there's a subjective preference for the most picked
+# advisor. Should also look at whether that advisor is more influential. But
+# those are not preregistered, so look at them later
 
-# We should look at some specifics in the above, such as trust
-
-# Exploratory: influence shows as significantly different between advisors, so check questionnaire answers on influence
 
 ## 5) Do participants simply prefer agreement? ####################################################
 print('## 5) Do participants simply prefer agreement? ###################################')
@@ -882,29 +575,381 @@ print('## 5) Do participants simply prefer agreement? ##########################
 # their initial confidence is low. We can t-test aic pick proportion in
 # high-confidence vs aic pick proportion in low-confidence.
 
-aic.byConf.test <- t.test(participants$aic.pick.proportion.low.confidence, 
-                          participants$aic.pick.proportion.high.confidence,
-                          paired=T) # do selection proportions differ by initial confidence?
-aic.byConf.test.d <- cohensD(participants$aic.pick.proportion.low.confidence,
-                             participants$aic.pick.proportion.high.confidence)
+ttest.aic.byConf <- t.test(participants$aicPickRate.lowConf,
+                           participants$aicPickRate.highConf,
+                           paired=T) # do selection proportions differ by initial confidence?
+ttest.aic.byConf.d <- cohensD(participants$aicPickRate.lowConf,
+                              participants$aicPickRate.highConf)
 print('>>(aic.byConf.test) choice proportion Agree-in-confidence in low vs. high inital confidence')
-prettyPrint(aic.byConf.test, aic.byConf.test.d)
+prettyPrint(ttest.aic.byConf, ttest.aic.byConf.d)
 print('>>(aic.byConf.test.b) bayesian examination of above (prior = mean of 0.5, sd as empirically observed)')
-aic.byConf.test.b <- ttestBF(participants$aic.pick.proportion.low.confidence, 
-                             participants$aic.pick.proportion.high.confidence,
-                             paired = T)
-print(aic.byConf.test.b)
-print(paste0('Evidence strength for differential AiC picking: BF=', round(exp(aic.byConf.test.b@bayesFactor$bf),3)))
+ttest.aic.byConf.b <- ttestBF(participants$aicPickRate.lowConf,
+                              participants$aicPickRate.highConf,
+                              paired = T)
+print(ttest.aic.byConf.b)
+print(paste0('Evidence strength for differential AiC picking: BF=', round(exp(ttest.aic.byConf.b@bayesFactor$bf),3)))
+print('Low-confidence:')
+printMean(participants$aicPickRate.lowConf)
+print('High-confidence:')
+printMean(participants$aicPickRate.highConf)
+
 
 
 # --NON-Preregistered stuff----------------------------------------------------------------------------------
 print('--NON Preregistered stuff-----------------------------------------------------------------------------')
 
+## 6) Initial agreement effect
 
-## 6) Descriptives
-print('## 6) Descriptives ###############################################################')
+# Perhaps the decision as to the better advisor is fairly intractable once made,
+# and it's made early? The quickest way to test this is to look at whether block
+# 1 agree-in-confidence agreement rate predicts agree-in-confidence pick preference.
+equation <- lm(aicPickRate ~ aicAgreeCount.block3, data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+graph.block1Agreement.count <- ggplot(participants.byBlock, 
+                                      aes(x=aicAgreeCount.block3, y=aicPickRate)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
+  scale_x_continuous(limits = c(1,12), expand = c(0,0)) + 
+  geom_smooth(method='lm', formula = y~x, fullrange = T, level = .99, 
+              linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equationText, x = 11, y = .54) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
+  labs(title = "High weighting of early experience of advisors",
+       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-confidence",
+                                      "advisor and the preference for picking that advisor.",
+                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
+                                      "intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block 3 agree-in-confidence agreement count",
+       y = "Agree-in-confidence pick proportion") 
+graph.block1Agreement.count
+ggsave(paste0(figPath, "block1Agreement.png"), plot = graph.block1Agreement.count)
 
-figPath = 'G:/Documents/University/Google Drive/Project Documents/AdvisorChoice/figures/'
+# Is this simply accounted for by a correlation between agree-in-confidence picking in block 3 and throughout?
+equation <- lm(aicPickRate ~ aicPickRate.block3 * aicAgreeCount.block3, data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+# Looking at the low/mid/high conf trials separately
+equation <- lm(aicPickRate ~ aicAgree.highConf.block3 + aicAgree.medConf.block3 + aicAgree.lowConf.block3, 
+               data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+
+# What about using the difference between agreement count
+# First a quick check of adding agree-in-uncertainty agreement to the model
+equation <- lm(aicPickRate ~ aicPickRate.block3 * (aicAgreeCount.block3 + aiuAgreeCount.block3), 
+               data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+
+participants.byBlock$agreeCountDiff.block3 <- participants.byBlock$aicAgreeCount.block3 - 
+  participants.byBlock$aiuAgreeCount.block3
+equation <- lm(aicPickRate ~ agreeCountDiff.block3, data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+graph.block1Agreement.difference <- ggplot(participants.byBlock, 
+                                           aes(x=agreeCountDiff.block3, y=aicPickRate)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
+  scale_x_continuous(expand = c(0.01,0)) + 
+  geom_smooth(method='lm', formula = y~x, fullrange = T, level = .99, 
+              linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equationText, x = 2.5, y = .45) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
+  labs(title = "High weighting of early experience of advisors",
+       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-confidence",
+                                      "advisor relative to the agree-in-uncertainty advisor and the preference ",
+                                      "for picking the agree-in-confidence advisor.",
+                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
+                                      "intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block 1 agree-in-confidence agreement superiority",
+       y = "Agree-in-confidence pick proportion") 
+graph.block1Agreement.difference
+ggsave(paste0(figPath, "block1AgreementDifference.png"), plot = graph.block1Agreement.difference)
+
+# Finally, let's look at how (whether?) predictive power of agreement count
+# drops off over time
+agreementCoefs <- data.frame(block=integer(), coef=double(), coef.se = double())
+for(b in 1:length(unique(trials$block))) {
+  block <- unique(trials$block)[b]
+  eq <- as.formula(paste0('aicPickRate ~ aicAgreeCount.block',block))
+  mdl <- summary(lm(eq, data = participants.byBlock))    # we can rip the necessary stats from the summary
+  agreementCoefs <- rbind(agreementCoefs,
+                          data.frame(block,
+                                     coef=mdl$coef[2,1],
+                                     se=mdl$coef[2,2]))
+}
+summary(lm(coef ~ block, data = agreementCoefs))
+agreementCoefs$block <- factor(agreementCoefs$block)
+graph.agreementPickRate <- ggplot(agreementCoefs, aes(x = block, y = coef)) +
+  geom_errorbar(aes(x = block, ymin = coef-se, ymax = coef+se), size = 0.01) +
+  geom_point(shape = 23, fill = 'white', color = 'black', size = 5) +
+  geom_smooth(method = 'lm') +
+  theme_light() +
+  theme(panel.grid.minor = element_blank(), 
+        panel.grid.major.x = element_blank()) +
+  labs(title = "Agreement-Pick rate correlation coefficients by block",
+       subtitle = paste(strwrap(paste("Diamonds give the correlation coefficient for the number of times",
+                                      "the agree-in-confidence advisor agrees with a judge and the extent to",
+                                      "which the judge chooses that advisor over the agree-in-uncertainty advisor,",
+                                      "broken down by block. Error bars indicate +/- 1 standard error.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block",
+       y = "Agreement trials - Pick proportion correlation beta") 
+graph.agreementPickRate
+ggsave(paste0(figPath, "agreementPickRate-byBlock.png"), plot = graph.agreementPickRate)
+
+# Disagreement may also be important. Run the first of these agreement analyses
+# with disagreement instead
+equation <- lm(aicPickRate ~ aicDisagreeCount.block3, data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+graph.block1Disagreement.count <- ggplot(participants.byBlock, 
+                                         aes(x=aicDisagreeCount.block3, y=aicPickRate)) +
+  geom_point() +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
+  scale_x_continuous(limits = c(1,12), expand = c(0,0)) + 
+  geom_smooth(method='lm', formula = y~x, fullrange = T, level = .99, 
+              linetype="dashed", color="black", fill="#CCCCCC") +
+  geom_text(label = equationText, x = 11, y = .54) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
+  labs(title = "High weighting of early experience of advisors",
+       subtitle = paste(strwrap(paste("Relationship between the initial disagreement rate of the agree-in-confidence",
+                                      "advisor and the preference for picking that advisor.",
+                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
+                                      "intervals.", 
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = "Block 3 agree-in-confidence disagreement count",
+       y = "Agree-in-confidence pick proportion") 
+graph.block1Disagreement.count
+ggsave(paste0(figPath, "block1Disagreement.png"), plot = graph.block1Disagreement.count)
+
+# Is this simply accounted for by a correlation between agree-in-confidence picking in block 3 and throughout?
+equation <- lm(aicPickRate ~ aicPickRate.block3 * aicDisagreeCount.block3, data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+# Looking at the low/mid/high conf trials separately
+equation <- lm(aicPickRate ~ aicDisagree.highConf.block3 + aicDisagree.medConf.block3 + aicDisagree.lowConf.block3, 
+               data = participants.byBlock)
+equationText <- lmToStr(equation, c('x'), roundTo = 2)
+summary(equation)
+
+## 7) Subjective assessment of preferred advisor
+# Correlate pickrate for favourite advisor against questionnaire scores
+lastTimePoint <- max(questionnaires$timePoint)
+tmp <- participants[,c('participantId', 'aicPickRate')]
+tmp$pickRateBias <- abs(0.5-tmp$aicPickRate)
+tmp$favouriteAdvisor <- ifelse(tmp$aicPickRate>0.5, adviceTypes$AiC, adviceTypes$AiU)
+questionnaires$pickRateBias <- sapply(questionnaires$participantId, function(y) {
+  tmp$pickRateBias[which(tmp$participantId==y)]
+})
+questionnaires$aicPickRate <- sapply(questionnaires$participantId, function(y) {
+  as.numeric(tmp$aicPickRate[which(tmp$participantId==y)])
+})
+questionnaires$favouriteAdvisor <- sapply(questionnaires$participantId, function(y) {
+  as.numeric(tmp$favouriteAdvisor[which(tmp$participantId==y)])
+})
+
+graph.Q.aicPickRate <- ggplot(questionnaires[which(questionnaires$adviceType==adviceTypes$AiC),], 
+                             aes(x = aicPickRate, y = answer)) +
+  geom_point() + 
+  geom_smooth(method = 'lm') +
+  facet_grid(timePoint~questionTextShort)
+graph.Q.aicPickRate
+ggsave(paste0(figPath, "pickRate-Questionnaire.png"), plot = graph.Q.aicPickRate)
+# These look similar enough that we can average them across timepoints 2-4
+coefs <- vector('list', length = length(unique(questionnaires$questionTextShort)))
+for(q in 1:length(coefs)) {
+  qTxt <- unique(questionnaires$questionTextShort)[q]
+  # average timepoints 2:4
+  coefs[[q]] <- lm(answer ~ aicPickRate, 
+                   data = questionnaires[which(questionnaires$questionTextShort==qTxt 
+                                               & questionnaires$timePoint!=1
+                                               & questionnaires$adviceType==adviceTypes$AiC),])
+  print(qTxt)
+  print(summary(coefs[[q]]))
+}
+names(coefs) <- unique(questionnaires$questionTextShort)
+questionnaires$equation <- sapply(questionnaires$questionTextShort, function(x){lmToStr(coefs[[x]],2)})
+
+graph.Q.aicPickRate.combine <- ggplot(questionnaires[which(questionnaires$timePoint!=1),], 
+                                      aes(x = aicPickRate, y = answer)) +
+  geom_point() + 
+  geom_smooth(method = 'lm') + 
+  geom_text(aes(label = equation, x = 0.3, y = 95)) +
+  facet_wrap(~questionTextShort) +
+  scale_y_continuous(limits = c(0,100), expand = c(0,0)) +
+  theme_light() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank()) +
+  labs(title = "Behavioural and self-report consistency",
+       subtitle = paste(strwrap(paste("Scatter plot of questionnaire response for the agree-in-confidence",
+                                      "advisor versus the overall pick rate for that advisor. Different panels",
+                                      "pertain to the different questions asked in the questionnaire. Lines give",
+                                      "the best-fit linear model given by the formula, with shaded areas indicating",
+                                      "95% confidence intervals.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = 'Overall pick proportions for agree-in-confidence advisor',
+       y = "Questionnaire response") 
+graph.Q.aicPickRate.combine
+ggsave(paste0(figPath, "pickRate-Answer.png"), plot = graph.Q.aicPickRate.combine)
+
+equation <- lm(answer ~ aicPickRate, data = questionnaires)
+summary(equation)
+ggplot(questionnaires[which(questionnaires$adviceType==adviceTypes$AiC & questionnaires$timePoint==4),],
+       aes(x=aicPickRate, y=answer)) + geom_point()
+
+# So the more often they pick the agree-in-confidence advisor, the higher they
+# rate that advisor. But picking is zero-sum, so what about the difference in
+# ratings between the advisors?
+tmp <- questionnaires[which(questionnaires$adviceType==adviceTypes$AiC),]
+for(i in 1:dim(tmp)[1]) {
+  tmp$difference[i] <- tmp$answer[i] - questionnaires[which(questionnaires$timePoint==tmp$timePoint[i]
+                                                            & questionnaires$questionNumber==tmp$questionNumber[i]
+                                                            & questionnaires$adviceType==adviceTypes$AiU
+                                                            & questionnaires$participantId==tmp$participantId[i]),
+                                                      "answer"]
+}
+# recalculate coefficients
+coefs <- vector('list', length = length(unique(tmp$questionTextShort)))
+for(q in 1:length(coefs)) {
+  qTxt <- unique(tmp$questionTextShort)[q]
+  # average timepoints 2:4
+  coefs[[q]] <- lm(difference ~ aicPickRate, 
+                   data = tmp[which(tmp$questionTextShort==qTxt 
+                                    & tmp$timePoint!=1
+                                    & tmp$adviceType==adviceTypes$AiC),])
+  print(qTxt)
+  print(summary(coefs[[q]]))
+}
+names(coefs) <- unique(tmp$questionTextShort)
+tmp$equation <- sapply(tmp$questionTextShort, function(x){lmToStr(coefs[[x]],2)})
+
+graph.Q.aicPickRate.difference <- ggplot(tmp[which(tmp$timePoint!=1),],
+                                         aes(x = aicPickRate, y = difference)) +
+  geom_point() + 
+  geom_smooth(method = 'lm') + 
+  geom_text(aes(label = equation, x = 0.3, y = 90)) +
+  facet_wrap(~questionTextShort) +
+  scale_y_continuous(limits = c(-100,100), expand = c(0,0)) +
+  theme_light() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank()) +
+  labs(title = "Behavioural and self-report consistency",
+       subtitle = paste(strwrap(paste("Scatter plot of questionnaire response difference between the advisors.",
+                                      "Positive values indicate higher scores for the agree-in-confidence",
+                                      "advisor than the agree-in-uncertainty advisor. The horizontal axis gives",
+                                      "the overall pick rate for the agree-in-confidence advisor. Different panels",
+                                      "pertain to the different questions asked in the questionnaire. Lines give",
+                                      "the best-fit linear model given by the formula, with shaded areas indicating",
+                                      "95% confidence intervals.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = 'Overall pick proportions for agree-in-confidence advisor',
+       y = "Questionnaire response difference") 
+graph.Q.aicPickRate.difference
+ggsave(paste0(figPath, "pickRate-AnswerDifference.png"), plot = graph.Q.aicPickRate.difference)
+
+## 8) Agreement effect under capped influence ###############################################################
+
+print('## 8) ANOVA investigating capped influence ##############################################')
+
+# The asymmetry in the scale (arising from the fact the initial decision is
+# never on the midpoint so that there is always more potential for shifting away
+# from the inital answer than shifting more in that direction) means that the
+# effect of agreement found earlier (disagree>agree) is trivial. We calculated a
+# capped measure of influence earlier, so we can use that measure to rerun the
+# ANOVA and test whether the agreement effect is an artefact of the scale.
+
+# First some descriptives about how much the capping process changes the data
+influenceCapEffects <- data.frame(participantId = integer(), cappedTrials = integer())
+for(p in 1:dim(participants)[1]) {
+  participantId <- participants$participantId[p]
+  cappedTrials <- length(which(trials$influence!=trials$cappedInfluence
+                               & trials$participantId==participantId))
+  influenceCapEffects <- rbind(influenceCapEffects, data.frame(participantId,
+                                                               cappedTrials))
+}
+summary(influenceCapEffects)
+hist(influenceCapEffects$cappedTrials, breaks = 20)
+print(paste(sum(influenceCapEffects$cappedTrials), 'of', length(which(!is.na(trials$influence))),
+      '[', round(sum(influenceCapEffects$cappedTrials)/length(which(!is.na(trials$influence)))*100,2),'%]', 
+      'trials capped.'))
+
+# 2x2x2 ANOVA investigating effects of advisor type
+# (agree-in-confidence/uncertainty), choice (un/forced), and agreement
+# (dis/agree) on influence. These are all within-subjects manipulations (meaning
+# we include an error term of participantID and its child effects).
+anova.influence.capped <- ezANOVA(data = participants.influence.capped,
+                                  dv = value, 
+                                  wid = participantId,
+                                  within = c('AiC', 'agree', 'hasChoice'),
+                                  return_aov = T)
+print('>>(anova.influence.capped)')
+anova.influence.capped$ANOVA
+print('Advisor type = AiC')
+printMean(participants.influence.capped$value[which(participants.influence.capped$AiC==T)])
+print('Advisor type = AiU')
+printMean(participants.influence.capped$value[which(participants.influence.capped$AiC==F)])
+print('Agree')
+printMean(participants.influence.capped$value[which(participants.influence.capped$agree==T)])
+print('Disagree')
+printMean(participants.influence.capped$value[which(participants.influence.capped$agree==F)])
+print('Choice')
+printMean(participants.influence.capped$value[which(participants.influence.capped$hasChoice==T)])
+print('Forced')
+printMean(participants.influence.capped$value[which(participants.influence.capped$hasChoice==F)])
+tmp <- participants.influence.capped
+levels(tmp$AiC) <- c('Agree-in-uncertainty', 'Agree-in-confidence') 
+levels(tmp$agree) <- c('Disagree', 'Agree')
+levels(tmp$hasChoice) <- c('Forced trials', 'Choice trials')
+graph.anova.influence.capped <- ggplot(tmp, aes(agree, value, color = AiC, fill = AiC)) +
+  geom_point(position = position_jitter(w=0.05, h=0)) +
+  stat_summary(geom = "errorbar",
+               fun.data = "mean_cl_boot",
+               width = 0.2) +
+  stat_summary(geom = "point",
+               fun.y = "mean",
+               shape = 23, size = 5) +
+  stat_summary(aes(group = AiC), fun.y=mean, geom="line") + 
+  facet_grid(.~hasChoice) +
+  scale_color_discrete(name = 'Advisor type') +
+  scale_fill_discrete(name = 'Advisor type') +
+  theme_light() +
+  theme(panel.grid.major.x = element_blank()) +
+  labs(title = "Advice Influence",
+       subtitle = paste(strwrap(paste("Influence of advice under varied conditions. Points indicate",
+                                      "mean values for a participant, while diamonds indicate the mean",
+                                      "of participant means, with error bars specifying 95% confidence intervals.",
+                                      sep = " "), 
+                                width=115), collapse = "\n"),
+       legend = NULL,
+       x = 'Agreement between advisor and judge',
+       y = "Influence of the advice") 
+graph.anova.influence.capped
+ggsave(paste0(figPath, "cappedInfluence.png"), plot = graph.anova.influence.capped)
+
+## 9) Descriptives
+print('## 9) Descriptives ###############################################################')
 
 # Participant accuracy
 # reformat the data so we have a nice comparison before vs after
@@ -1045,34 +1090,6 @@ graph.influence.byConfidence <- ggplot(trials[which(is.finite(trials$influence))
        y = "Influence of advice") 
 graph.influence.byConfidence
 ggsave(paste0(figPath, "influence by confidence.png"), plot = graph.influence.byConfidence)
-
-# which advisor did they pick?
-# This matches pre-registered analysis 1: differential pick rates
-graph.pickRate <- ggplot(participants, aes(x = "", y = aic.pick.proportion)) +
-  geom_hline(linetype = "dashed", color = "black", yintercept = .5) +
-  geom_point(alpha = 0.5) +
-  stat_summary(geom = "errorbar",
-               fun.data = "mean_cl_boot",
-               width = 0.1) +
-  stat_summary(geom = "point",
-               fun.y = "mean",
-               shape = 23, fill = "white", size = 4) +
-  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
-  scale_x_discrete(expand = c(0,0)) +
-  theme_light() +
-  theme(panel.grid.major.x = element_blank()) +
-  labs(title = "Advisor preference",
-       subtitle = paste(strwrap(paste("Proportion of the time each participant picked the agree-in-confidence advisor.",
-                                      "Points indicate data from a single participant, while the diamond indicates the",
-                                      "mean proportion across all participants.", 
-                                      "Error bars give 95% bootstrapped confidence intervals.", 
-                                      sep = " "), 
-                                width=115), collapse = "\n"),
-       legend = NULL,
-       x = NULL,
-       y = "Proportion of the time the agree-in-confidence advisor is chosen") 
-graph.pickRate
-ggsave(paste0(figPath, "basic pick rate.png"), plot = graph.pickRate)
 
 # There were many experimental blocks. We can look at pick proportion as a function of block across participants
 trials$block <- as.numeric(trials$block)
@@ -1366,107 +1383,6 @@ graph.confidence <- ggplot(trials[which(!is.nan(trials$agree)),], aes(x = cj1, y
 graph.confidence
 ggsave(paste0(figPath, "confidence autocorrelation.png"), plot = graph.confidence)
 
-# Does early experience of agreement colour judgement for the rest of the experiment?
-for(p in 1:dim(participants)[1]) {
-  participants$aic.agreement.block1[p] <- length(which(trials$agree==1
-                                                       & trials$participantId==participants$participantId[p]
-                                                       & trials$block==3
-                                                       & trials$advisorId==adviceTypes$AiC)) / 
-    length(which(trials$block==3 & trials$participantId==participants$participantId[p] 
-                 & trials$advisorId==adviceTypes$AiC))
-  participants$aiu.agreement.block1[p] <- length(which(trials$agree==1
-                                                       & trials$participantId==participants$participantId[p]
-                                                       & trials$block==3
-                                                       & trials$advisorId==adviceTypes$AiU)) / 
-    length(which(trials$block==3 & trials$participantId==participants$participantId[p] 
-                 & trials$advisorId==adviceTypes$AiU))
-}
-participants$aic.agreement.block1.superiority <- participants$aic.agreement.block1 - participants$aiu.agreement.block1
-
-equation <- lm(aic.pick.proportion ~ aic.agreement.block1.superiority, data = participants)
-equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
-graph.block1Agreement.preference <- ggplot(participants, 
-                                           aes(x=aic.agreement.block1.superiority, y=aic.pick.proportion)) +
-  geom_point(alpha = 0.2) +
-  scale_y_continuous(limits = c(0,1)) + 
-  scale_x_continuous(limits = c(-0.5,0.5), expand = c(0,0)) + 
-  geom_smooth(method='lm', formula = y~x, fullrange = T, level = .99, 
-              linetype="dashed", color="black", fill="#CCCCCC") +
-  geom_text(label = equation.text, x = .38, y = .54) +
-  theme_light() +
-  theme(panel.grid = element_blank(),
-        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
-  labs(title = "High weighting of early experience of advisors",
-       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-confidence",
-                                      "advisor relative to the agree-in-uncertainty advisor and the preference ",
-                                      "for picking the agree-in-confidence advisor.",
-                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
-                                      "intervals.", 
-                                      sep = " "), 
-                                width=115), collapse = "\n"),
-       legend = NULL,
-       x = "Block 1 agree-in-confidence agreement superiority",
-       y = "Agree-in-confidence pick proportion") 
-graph.block1Agreement.preference
-ggsave(paste0(figPath, "preference by block1 agreement.png"), plot = graph.block1Agreement.preference)
-
-# Interestingly Agree-in-confidence agreement at block 1 is a better predictor of agree-in-confidence
-# preference overall than Agree-in-confidence agreement superiority
-equation <- lm(aic.pick.proportion ~ aic.agreement.block1, data = participants)
-equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
-graph.block1Agreement.preference.aic <- ggplot(participants, 
-                                           aes(x=aic.agreement.block1, y=aic.pick.proportion)) +
-  geom_point(alpha = 0.2) +
-  scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
-  scale_x_continuous(limits = c(0,1), expand = c(0,0)) + 
-  geom_smooth(method='lm', formula = y~x, fullrange = T,
-              level = .99, linetype="dashed", color="black", fill="#CCCCCC") +
-  geom_text(label = equation.text, x = .85, y = .6) +
-  theme_light() +
-  theme(panel.grid = element_blank(),
-        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
-  labs(title = "High weighting of early experience of advisors",
-       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-confidence",
-                                      "advisor and the pick proportion of that advisor.",
-                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
-                                      "intervals.", 
-                                      sep = " "), 
-                                width=115), collapse = "\n"),
-       legend = NULL,
-       x = "Block 1 agree-in-confidence agreement",
-       y = "Agree-in-confidence pick proportion") 
-graph.block1Agreement.preference.aic
-ggsave(paste0(figPath, "preference by raw block1 agreement.png"), plot = graph.block1Agreement.preference.aic)
-
-# Third side to the triangle is that AiU agreement in block 1 doesn't predict 1-aic.pick.rate
-# This is very unusual since picking aic vs aiu is a 0-sum game. This suggests that the AiC advisor
-# has a much higher weighting on potential picking, and that the performance of the AiU advisor
-# is essentially ignored.
-equation <- lm((1-aic.pick.proportion) ~ aiu.agreement.block1, data = participants)
-equation.text <- paste0('y = ', round(coef(equation)[[1]],2), ' + ', round(coef(equation)[[2]],2), 'x')
-graph.block1Agreement.preference.aiu <- ggplot(participants, 
-                                               aes(x=aiu.agreement.block1, y=(1-aic.pick.proportion))) +
-  geom_point(alpha = 0.2) +
-  scale_y_continuous(limits = c(0,1), expand = c(0,0)) + 
-  scale_x_continuous(limits = c(0,1), expand = c(0,0)) + 
-  geom_smooth(method='lm', formula = y~x, fullrange = T,
-              level = .99, linetype="dashed", color="black", fill="#CCCCCC") +
-  geom_text(label = equation.text, x = .85, y = .6) +
-  theme_light() +
-  theme(panel.grid = element_blank(),
-        panel.grid.major.y = element_line(color = '#CCCCCC', size = 0.5)) +
-  labs(title = "Negligible weighting of early experience of agree-in-uncertainty advisor",
-       subtitle = paste(strwrap(paste("Relationship between the initial agreement rate of the agree-in-uncertainty",
-                                      "advisor and the pick proportion of that advisor.",
-                                      "Dashed line shows the best-fit regression line with shaded 99% confidence ",
-                                      "intervals.", 
-                                      sep = " "), 
-                                width=115), collapse = "\n"),
-       legend = NULL,
-       x = "Block 1 agree-in-uncertainty agreement",
-       y = "(1 - Agree-in-confidence pick proportion)") 
-graph.block1Agreement.preference.aiu
-ggsave(paste0(figPath, "preference by raw block1 agreement aiu.png"), plot = graph.block1Agreement.preference.aiu)
 
 write.csv(participants, 'participants.csv')
 # write.csv(trials, 'trials.csv')
