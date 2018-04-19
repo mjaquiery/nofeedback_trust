@@ -17,15 +17,17 @@ prettyPrint <- function(results, d) {
                ', d=', round(d,2)))
 }
 
-printMean <- function(vector, conf.int = .95, na.rm = F) {
+printMean <- function(vector, conf.int = .95, na.rm = F, decimals = 2) {
   mu <- mean(vector, na.rm = na.rm)
   s <- sd(vector, na.rm = na.rm)
   n <- length(vector)
   error <- qnorm(1-(1-conf.int)/2)*s/sqrt(n) # 95% confidence interval width
   ci.low <- mu - error
   ci.high <- mu + error
-  print(paste0('Mean=', round(mu,2), ' [', round(conf.int,2)*100, '%CI: ',
-               round(ci.low,2), ', ', round(ci.high,2),']'))
+  r <- round(range(vector), decimals)
+  print(paste0('Mean=', round(mu,decimals), ' [', round(conf.int,decimals)*100, '%CI: ',
+               round(ci.low,decimals), ', ', round(ci.high,decimals),'] [Range: ',
+               r[[1]], ', ', r[[2]], ']'))
 }
 
 # Generate tables of marginal means 
@@ -80,15 +82,30 @@ getPickProportion <- function(pId, trials, adviceType) {
 }
 
 # Generate a variety of statistics pertaining to the trials in trialSet and
-# return them in a data frame with colnames ending in .suffix
+# return them in a data frame with colnames ending in .suffix.
+# These stats are not necessarily complete (e.g. the number of agreement trials
+# might be calculated for one contingency but not the number of disagreement trials).
 scanTrials <- function(trialSet, suffix = NULL) {
   df <- data.frame(trialCount = dim(trialSet)[1])
   # The medium-confidence trials come in handy, so cache them here
   medSet <- trialSet[which(trialSet$step==confidenceTypes$medium),]
+  df$trialCount <- dim(trialSet)[1]
   # Proportion of trials in which the initial decision was correct
   df$proportionCorrect <- length(which(trialSet$cor1==1)) / dim(trialSet)[1]
-  # Proportion of trials in which the intiial decision was incorrect
-  df$proportionCorrectFinal <- length(which(trialSet$cor2==1)) / length(trialSet)
+  # Proportion of trials in which the initial decision was correct and the agree-in-confidence advisor was selected
+  df$aicProportionCorrect <- length(which(trialSet$cor1==1 & trialSet$adviceType==adviceTypes$AiC)) /
+    length(which(trialSet$adviceType==adviceTypes$AiC))
+  # Proportion of trials in which the initial decision was correct and the agree-in-uncertainty advisor was selected
+  df$aiuProportionCorrect <- length(which(trialSet$cor1==1 & trialSet$adviceType==adviceTypes$AiU)) /
+    length(which(trialSet$adviceType==adviceTypes$AiU))
+  # Proportion of trials in which the final decision was correct
+  df$proportionCorrectFinal <- length(which(trialSet$cor2==1)) / dim(trialSet)[1]
+  # Proportion of trials in which the final decision was correct and the agree-in-confidence advisor was selected
+  df$aicProportionCorrectFinal <- length(which(trialSet$cor2==1 & trialSet$adviceType==adviceTypes$AiC)) /
+    length(which(trialSet$adviceType==adviceTypes$AiC))
+  # Proportion of trials in which the final decision was correct and the agree-in-uncertainty advisor was selected
+  df$aiuProportionCorrectFinal <- length(which(trialSet$cor2==1 & trialSet$adviceType==adviceTypes$AiU)) /
+    length(which(trialSet$adviceType==adviceTypes$AiU))
   # Number of choice trials on which the agree-in-confidence advisor was selected
   df$aicPickCount <- length(which(trialSet$hasChoice & trialSet$adviceType==adviceTypes$AiC))
   # Number of choice trials on which the agree-in-uncertainty advisor was selected
@@ -176,16 +193,65 @@ scanTrials <- function(trialSet, suffix = NULL) {
   # Number of trials on which the agree-in-uncertainty advisor disagreed
   df$aiuDisagreeCount <- length(which(trialSet$agree==0
                                    & trialSet$adviceType==adviceTypes$AiU))
+  # Number of (initially) correct trials on which the agree-in-confidence advisor agreed
+  df$aicCorrectAgree <- length(which(trialSet$agree==1 
+                                     & trialSet$adviceType==adviceTypes$AiC
+                                     & trialSet$cor1==1))
+  # Number of (initially) correct trials on which the agree-in-uncertianty advisor agreed
+  df$aiuCorrectAgree <- length(which(trialSet$agree==1 
+                                     & trialSet$adviceType==adviceTypes$AiU
+                                     & trialSet$cor1==1))
+  # Number of (initially) correct trials on which the agree-in-confidence advisor disagreed
+  df$aicCorrectDisagree <- length(which(trialSet$agree==0 
+                                        & trialSet$adviceType==adviceTypes$AiC
+                                        & trialSet$cor1==1))
+  # Number of (initially) correct trials on which the agree-in-uncertainty advisor disagreed
+  df$aiuCorrectDisagree <- length(which(trialSet$agree==0 
+                                        & trialSet$adviceType==adviceTypes$AiU
+                                        & trialSet$cor1==1))
+  # Number of (initially) incorrect trials on which the agree-in-confidence advisor agreed
+  df$aicIncorrectAgree <- length(which(trialSet$agree==1 
+                                     & trialSet$adviceType==adviceTypes$AiC
+                                     & trialSet$cor1==0))
+  # Number of (initially) incorrect trials on which the agree-in-uncertianty advisor agreed
+  df$aiuIncorrectAgree <- length(which(trialSet$agree==1 
+                                     & trialSet$adviceType==adviceTypes$AiU
+                                     & trialSet$cor1==0))
+  # Number of (initially) incorrect trials on which the agree-in-confidence advisor disagreed
+  df$aicIncorrectDisagree <- length(which(trialSet$agree==0 
+                                        & trialSet$adviceType==adviceTypes$AiC
+                                        & trialSet$cor1==0))
+  # Number of (initially) incorrect trials on which the agree-in-uncertainty advisor disagreed
+  df$aiuIncorrectDisagree <- length(which(trialSet$agree==0 
+                                        & trialSet$adviceType==adviceTypes$AiU
+                                        & trialSet$cor1==0))
+  # Number of choice trials
+  df$choiceCount <- length(which(trialSet$hasChoice))
+  # Number of forced trials
+  df$forcedCount <- length(which(!trialSet$hasChoice))
+  
   # Number of choice trials where the advisor agreed
   df$agreeChoice <- length(which(trialSet$agree==1 & trialSet$hasChoice))
   # Number of forced trials where advisor agreed
   df$agreeForced <- length(which(trialSet$agree==1 & !trialSet$hasChoice))
+  # Number of choice trials where the advisor disagreed
+  df$disagreeChoice <- length(which(trialSet$agree==0 & trialSet$hasChoice))
+  # Number of forced trials where advisor disagreed
+  df$disagreeForced <- length(which(trialSet$agree==0 & !trialSet$hasChoice))
   # Number of choice trials where the agree-in-confidence advisor agreed
   df$aicAgreeChoice <- length(which(trialSet$agree==1 
                                     & trialSet$adviceType==adviceTypes$AiC
                                     & trialSet$hasChoice))
   # Number of choice trials where the agree-in-uncertainty advisor agreed
   df$aiuAgreeChoice <- length(which(trialSet$agree==1
+                                    & trialSet$adviceType==adviceTypes$AiU
+                                    & trialSet$hasChoice))
+  # Number of choice trials where the agree-in-confidence advisor disagreed
+  df$aicDisagreeChoice <- length(which(trialSet$agree==0 
+                                    & trialSet$adviceType==adviceTypes$AiC
+                                    & trialSet$hasChoice))
+  # Number of choice trials where the agree-in-uncertainty advisor disagreed
+  df$aiuDisagreeChoice <- length(which(trialSet$agree==0
                                     & trialSet$adviceType==adviceTypes$AiU
                                     & trialSet$hasChoice))
   # Number of forced trials where the agree-in-confidence advisor agreed
@@ -220,14 +286,34 @@ scanTrials <- function(trialSet, suffix = NULL) {
   df$aiuAgree.medConf <- length(which(trialSet$agree==1
                                       & trialSet$adviceType==adviceTypes$AiU
                                       & trialSet$step == 0))
+  # Number of med-confidence choice trials where the agree-in-confidence advisor agreed
+  df$aicAgreeChoice.medConf <- length(which(trialSet$agree==1
+                                            & trialSet$adviceType==adviceTypes$AiC
+                                            & trialSet$step == 0
+                                            & trialSet$hasChoice == T))
+  # Number of med-confidence choice trials where the agree-in-uncertainty advisor agreed
+  df$aiuAgreeChoice.medConf <- length(which(trialSet$agree==1
+                                            & trialSet$adviceType==adviceTypes$AiU
+                                            & trialSet$step == 0
+                                            & trialSet$hasChoice == T))
   # Number of med-confidence trials where the agree-in-confidence advisor disagreed
   df$aicDisagree.medConf <- length(which(trialSet$agree==0
-                                      & trialSet$adviceType==adviceTypes$AiC
-                                      & trialSet$step == 0))
+                                         & trialSet$adviceType==adviceTypes$AiC
+                                         & trialSet$step == 0))
   # Number of med-confidence trials where the agree-in-uncertainty advisor disagreed
   df$aiuDisagree.medConf <- length(which(trialSet$agree==0
-                                      & trialSet$adviceType==adviceTypes$AiU
-                                      & trialSet$step == 0))
+                                         & trialSet$adviceType==adviceTypes$AiU
+                                         & trialSet$step == 0))
+  # Number of med-confidence choice trials where the agree-in-confidence advisor disagreed
+  df$aicDisagreeChoice.medConf <- length(which(trialSet$agree==0
+                                               & trialSet$adviceType==adviceTypes$AiC
+                                               & trialSet$step == 0
+                                               & trialSet$hasChoice == T))
+  # Number of med-confidence choice trials where the agree-in-uncertainty advisor disagreed
+  df$aiuDisagreeChoice.medConf <- length(which(trialSet$agree==0
+                                               & trialSet$adviceType==adviceTypes$AiU
+                                               & trialSet$step == 0
+                                               & trialSet$hasChoice == T))
   # Number of high-confidence trials where the agree-in-confidence advisor agreed
   df$aicAgree.highConf <- length(which(trialSet$agree==1
                                        & trialSet$adviceType==adviceTypes$AiC
@@ -472,6 +558,21 @@ scanTrials <- function(trialSet, suffix = NULL) {
   df$aiuDisagreeForcedInfluence.medConf.sd <- sd(medSet$influence[which(medSet$agree==0
                                                                         & medSet$adviceType==adviceTypes$AiU
                                                                         & !medSet$hasChoice)])
+  
+  # Agreement rates calculated from values
+  df$aicAgreeRate <- df$aicAgreeCount / (df$aicAgreeCount + df$aicDisagreeCount)
+  df$aiuAgreeRate <- df$aiuAgreeCount / (df$aiuAgreeCount + df$aiuDisagreeCount)
+  df$aicCorrectAgreeRate <- df$aicCorrectAgree / (df$aicCorrectAgree + df$aicCorrectDisagree)
+  df$aiuCorrectAgreeRate <- df$aiuCorrectAgree / (df$aiuCorrectAgree + df$aiuCorrectDisagree)
+  df$aicIncorrectAgreeRate <- df$aicIncorrectAgree / (df$aicIncorrectAgree + df$aicIncorrectDisagree)
+  df$aiuIncorrectAgreeRate <- df$aiuIncorrectAgree / (df$aiuIncorrectAgree + df$aiuIncorrectDisagree)
+  df$aicAgreeRate.highConf <- df$aicAgree.highConf / (df$aicAgree.highConf + df$aicDisagree.highConf)
+  df$aiuAgreeRate.highConf <- df$aiuAgree.highConf / (df$aiuAgree.highConf + df$aiuDisagree.highConf)
+  df$aicAgreeRate.medConf <- df$aicAgree.medConf / (df$aicAgree.medConf + df$aicDisagree.medConf)
+  df$aiuAgreeRate.medConf <- df$aiuAgree.medConf / (df$aiuAgree.medConf + df$aiuDisagree.medConf)
+  df$aicAgreeRate.lowConf <- df$aicAgree.lowConf / (df$aicAgree.lowConf + df$aicDisagree.lowConf)
+  df$aiuAgreeRate.lowConf <- df$aiuAgree.lowConf / (df$aiuAgree.lowConf + df$aiuDisagree.lowConf)
+  
   if(is.null(suffix))
     return(df)
   suffix <- paste0('.', suffix)
