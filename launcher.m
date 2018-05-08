@@ -10,25 +10,26 @@
 clear all;
 close all;
 clc;
-experimentName = 'HaloEffect';
-%experimentName = 'AdvisorChoice';
+%experimentName = 'HaloEffect';
+experimentName = 'AdvisorChoice';
 %experimentName = 'PoliticalDifferences';
 %forceResolution = []; 
-forceResolution = [1600 1200]; 
+forceResolution = [1440 900]; 
 feedbackEnabled = 0;  
-debugMode = 1; 
-shortMode = 1; 
+debugMode = 0; 
+shortMode = 0; 
 pathRoot = 'MattHome';    
 
 %% set path   
 switch pathRoot
     case 'MattHome'  
         my_path = 'G:\Documents\University\Programming\nofeedback_trust_matt\'; % working directory
-        if ~feedbackEnabled
-            results_path = ['D:\Users\MJ\Filr\My Files\Results\' experimentName];
-        else
-            results_path = ['D:\Users\MJ\Filr\My Files\Results\' experimentName '\Feedback\'];
-        end
+%         if ~feedbackEnabled
+%             results_path = ['D:\Users\MJ\Filr\My Files\Results\' experimentName];
+%         else
+%             results_path = ['D:\Users\MJ\Filr\My Files\Results\' experimentName '\Feedback\'];
+%         end
+        results_path = 'G:\Documents\University\Programming\tmp';
         stims_path    = [my_path 'stims'];
         osSlash = '\'; 
         screenNumber = 2; % this tells psychtoolbox which screen to draw on
@@ -76,5 +77,5 @@ addpath(genpath([my_path 'core'])); % add core files
 stim_folder = [osSlash 'sounds' osSlash 'Voice'];          
 cd(my_path)
 
-%screenTests
-main
+screenTests
+%main

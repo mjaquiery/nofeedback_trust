@@ -24,7 +24,7 @@ printMean <- function(vector, conf.int = .95, na.rm = F, decimals = 2) {
   error <- qnorm(1-(1-conf.int)/2)*s/sqrt(n) # 95% confidence interval width
   ci.low <- mu - error
   ci.high <- mu + error
-  r <- round(range(vector), decimals)
+  r <- round(range(vector, na.rm = na.rm), decimals)
   print(paste0('Mean=', round(mu,decimals), ' [', round(conf.int,decimals)*100, '%CI: ',
                round(ci.low,decimals), ', ', round(ci.high,decimals),'] [Range: ',
                r[[1]], ', ', r[[2]], ']'))

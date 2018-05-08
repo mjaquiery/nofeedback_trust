@@ -84,7 +84,7 @@ instructions(4);
 
 %introduce_observers
 
-%questionnaire(1);
+qAnswers = questionnaire(1);
 
 %getAdvisorChoice(NaN, 2);
 

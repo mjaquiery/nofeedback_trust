@@ -649,7 +649,7 @@ printMean(participants$aicPickRate.highConf)
 # --NON-Preregistered stuff----------------------------------------------------------------------------------
 print('--NON Preregistered stuff-----------------------------------------------------------------------------')
 
-## 6) Initial agreement effect
+## 6) Initial agreement effect ##################################################################
 
 # Perhaps the decision as to the better advisor is fairly intractable once made,
 # and it's made early? 
@@ -797,7 +797,7 @@ graph.agreementPickRate <- ggplot(agreementCoefs, aes(x = block, y = coef)) +
 graph.agreementPickRate
 ggsave(paste0(figPath, "agreementPickRate-byBlock.png"), plot = graph.agreementPickRate)
 
-## 7) Subjective assessment of preferred advisor
+## 7) Subjective assessment of preferred advisor ##################################################################
 # Correlate pickrate for favourite advisor against questionnaire scores
 lastTimePoint <- max(questionnaires$timePoint)
 tmp <- participants[,c('participantId', 'aicPickRate')]
@@ -995,7 +995,7 @@ graph.anova.influence.capped <- ggplot(tmp, aes(agree, value, color = AiC, fill 
 graph.anova.influence.capped
 ggsave(paste0(figPath, "cappedInfluence.png"), plot = graph.anova.influence.capped)
 
-## 9) Descriptives
+## 9) Descriptives ##################################################################
 print('## 9) Descriptives ###############################################################')
 
 # Means etc.
@@ -1090,7 +1090,7 @@ printMean(participants$aicDisagreeConf)
 print('Mean confidence on AiU disagreement trials')
 printMean(participants$aiuDisagreeConf)
 
-## 10) Improvement with practice?
+## 10) Improvement with practice? ##################################################################
 print('## 10) Improvement with practice? ################################################')
 
 # Do participants become more confident in their initial answers on average over
@@ -1106,7 +1106,7 @@ t.test(participants.byBlock$confidence.block3, participants.byBlock$confidence.n
 ttestBF(participants.byBlock$confidence.block3, participants.byBlock$confidence.notBlock3, paired = T)
 
 
-## 11) Initial and final accuracy
+## 11) Initial and final accuracy ##################################################################
 print('## 11) Initial and final accuracy ################################################')
 
 # reformat the data so we have a nice comparison before vs after
@@ -1186,7 +1186,7 @@ graph.accuracy <- ggplot(participants.accuracy, aes(variable, value)) +
 graph.accuracy
 ggsave(paste0(figPath, "decision accuracy.png"), plot = graph.accuracy)
 
-## 12) Histogram of influence
+## 12) Histogram of influence ##################################################################
 print('## 12) Histogram of influence ####################################################')
 
 # histograms of advisor influence by participant
@@ -1202,8 +1202,8 @@ graph.influence.byParticipant <- ggplot(trials[which(is.finite(trials$influence)
         panel.grid.minor.x = element_blank(),
         panel.spacing = unit(0.75, "lines"), # pad the panels slightly
         legend.position = c(0.91, 0.07)) +
-  scale_y_continuous(expand = c(0,0)) +
-  scale_x_continuous(expand = c(0,0)) +                        
+  scale_y_continuous(expand = c(0,0), limits = c(0,300)) +
+  scale_x_continuous(expand = c(0,0), limits = c(-50, 100)) +                        
   scale_fill_manual(name = 'Advisor', values = c('red', 'blue')) +
   scale_color_manual(name = 'Advisor', values = c('red', 'blue')) +
   geom_vline(xintercept = 0, linetype="dashed", color = "black") +
@@ -1226,7 +1226,49 @@ ggsave(paste0(figPath, "influence by participant.png"),
        plot = graph.influence.byParticipant, 
        width = 9.05, height = 5.98)
 
-## 13) Initial confidence and influence
+# Produce the plot individually by participants
+for(p in participants$participantId) {
+  ggsave(paste0(figPath, "p", p, "influence.png"),
+         plot = ggplot(trials[which(is.finite(trials$influence) 
+                                              & trials$participantId==p),], aes(x=influence)) +
+           geom_histogram(bins = 30, alpha = .75, aes(color = "Both", fill = "Both")) +
+           geom_histogram(bins = 30,
+                          data = trials[which(trials$advisorId==adviceTypes$AiC
+                                              & trials$participantId==p),],
+                          alpha = 0.3,
+                          aes(color = "Agree in Confidence",
+                              fill = "Agree in Confidence")) +
+           theme_light() +
+           theme(panel.grid.major.x = element_blank(),
+                 panel.grid.minor.x = element_blank(),
+                 panel.spacing = unit(0.75, "lines"), # pad the panels slightly
+                 legend.position = c(0.8, 0.95), 
+                 legend.justification = c(0, 1),
+                 legend.background = element_rect(color = 'black')) +
+           scale_y_continuous(expand = c(0,0), limits = c(0,300)) +
+           scale_x_continuous(expand = c(0,0), limits = c(-50, 100)) +            
+           scale_fill_manual(name = 'Advisor', values = c('red', 'blue')) +
+           scale_color_manual(name = 'Advisor', values = c('red', 'blue')) +
+           geom_vline(xintercept = 0, linetype="dashed", color = "black") +
+           labs(title = paste0("Advisor influence (participant", p, ")"),
+                subtitle = paste(strwrap(paste("Influence of the advisors on the participants' responses.
+                                                The blue histogram shows the distribution of 
+                                                influence for both advisors combined,
+                                                while the red histogram shows the distribution 
+                                                of the influence for the agree-in-confidence
+                                                advisor alone.
+                                                The blue areas uncovered by red shading indicate 
+                                                the frequency of responses for the
+                                                agree-in-uncertainty advisor.
+                                                The dashed line marks 0 influence: the participant's 
+                                                intial answer was unchanged by advice.",
+                                               sep = " "), 
+                                         width=140), collapse = "\n"),
+                x = "Influence (binned)",
+                y = "Trial count"))
+}
+
+## 13) Initial confidence and influence ##################################################################
 print('## 13) Initial confidence and influence ##########################################')
 
 # Relationship between initial confidence and influence
@@ -1254,7 +1296,7 @@ graph.influence.byConfidence <- ggplot(trials[which(is.finite(trials$influence))
 graph.influence.byConfidence
 ggsave(paste0(figPath, "influence by confidence.png"), plot = graph.influence.byConfidence)
 
-## 14) Picking by block
+## 14) Picking by block ##################################################################
 print('## 14) Picking by block ##########################################################')
 
 # There were many experimental blocks. We can look at pick proportion as a function of block across participants
@@ -1429,7 +1471,7 @@ graph.pickRate.deviance.style <- ggplot(participants, aes(x = deviance, y = devi
 graph.pickRate.deviance.style
 ggsave(paste0(figPath, "pick deviance mean x SD.png"), plot = graph.pickRate.deviance.style)
 
-## 15) Marginal means for influence
+## 15) Marginal means for influence ##################################################################
 print('## 15) Marginal means for influence ##############################################')
 
 # Can look at some marginal means graphs supporting the influence ANOVA
@@ -1526,7 +1568,7 @@ graph.influence.advisorXtrialType <- ggplot(participants.influence[complete.case
 graph.influence.advisorXtrialType
 ggsave(paste0(figPath, "advisor influence by trialType.png"), plot = graph.influence.advisorXtrialType)
 
-## 16) CJ1/CJ2 plots
+## 16) CJ1/CJ2 plots ##################################################################
 print('## 16) CJ1/CJ2 plots #############################################################')
 
 # Plot cj1 vs cj2 faceted by dis/agreement
@@ -1595,7 +1637,7 @@ for(p in 1:dim(participants)[1]) {
          width = 8, height = 5, units = 'in', plot = graph.confidence.byP)
 }
 
-## 17) Subjective/Objective influence
+## 17) Subjective/Objective influence ##################################################################
 print('## 17) Subject/Objective influence ###############################################')
 
 # We can correlate subjective and objective influence 
@@ -1697,7 +1739,7 @@ graph.influence.correlation.capped <- ggplot(tmp, aes(x = influence.capped, y = 
 graph.influence.correlation.capped
 ggsave(paste0(figPath, "behaviour-SelfReportCorrelationCapped.png"), plot = graph.influence.correlation.capped)
 
-## 18) Missing ANOVA values
+## 18) Missing ANOVA values ##################################################################
 print('## 18) Missing ANOVA values ######################################################')
 
 # Investigating:
@@ -1721,7 +1763,7 @@ tmp <- participants[,c('participantId', 'medConf', 'disagreeChoice.medConf', 'ai
                        'aicDisagree.medConf', 'aiuDisagree.medConf',
                        'aicDisagreeChoice.medConf', 'aiuDisagreeChoice.medConf')]
 
-## 19) Questionnaire correlations
+## 19) Questionnaire correlations ##################################################################
 print('## 19) Questionnaire correlations ################################################')
 
 # How much of the variance in advisor choice explained by the various
@@ -1773,7 +1815,7 @@ summary(equation.4)
 
 anova(equation.1, equation.2, equation.3, equation.4)
 
-## 20) ANCOVA for initial experience
+## 20) ANCOVA for initial experience ##################################################################
 print('## 20) ANCOVA for inital experience ##############################################')
 
 ## We can run the main ANOVA as an ANCOVA and control for initial agreement rate difference
@@ -1789,27 +1831,79 @@ ancova.influence <- ezANOVA(data = participants.influence.capped,
                            return_aov = T)
 ancova.influence$ANOVA
 
-## 21) Changes of mind
+## 21) Changes of mind ##################################################################
 print('## 21) Changes of mind ###########################################################')
 
 ## Looking at changes of mind
 
 # First we build a data frame with processed values for trials on which the
 # participant did/n't change their mind
+trials$changeMind <- sign(trials$cj1) != sign(trials$cj2)
 participants.changeMind <- participants
 for(p in 1:dim(participants)[1]) {
   set <- trials[which(trials$participantId==participants$participantId[p]),]
-  tmp <- scanTrials(set[which(sign(set$cj1)==sign(set$cj2)),],'noChange')
-  tmp <- c(tmp, scanTrials(set[which(sign(set$cj1)!=sign(set$cj2) & !is.nan(set$cj2)),],'change'))
+  tmp <- scanTrials(set[which(!set$changeMind),],'noChange')
+  tmp <- c(tmp, scanTrials(set[which(set$changeMind),],'change'))
   for(n in names(tmp))
     participants.changeMind[p, n] <- tmp[n]
 }
+
+# Take a quick look at some descriptives and basic comparisons
+for(p in 1:dim(participants.changeMind)[1]) {
+  set <- trials[which(trials$participantId==participants.changeMind$participantId[p]),]
+  participants.changeMind$cj1.change[p] <- mean(abs(set$cj1[which(set$changeMind)]))
+  participants.changeMind$cj1.noChange[p] <- mean(abs(set$cj1[which(!set$changeMind)]))
+  participants.changeMind$cj2.change[p] <- mean(abs(set$cj2[which(set$changeMind)]))
+  participants.changeMind$cj2.noChange[p] <- mean(abs(set$cj2[which(!set$changeMind)]))
+}
+# remove NaNs caused by no change trials
+print(paste0('Temporarily dropping ',
+             length(which(is.nan(participants.changeMind$cj1.change))),
+             ' participants with 0 change trials'))
+tmp <- participants.changeMind[,c('participantId', 'cj1.change', 'cj1.noChange',
+                                  'cj2.change', 'cj2.noChange')]
+tmp <- tmp[complete.cases(tmp),]
+# CJ1
+print('Mean initial confidence on change trials')
+printMean(tmp$cj1.change)
+print('Mean initial confidence on no-change trials')
+printMean(tmp$cj1.noChange)
+print('T-test of initial confidence on no/change trials')
+t.test(tmp$cj1.change, tmp$cj1.noChange, paired = T)
+cohensD(tmp$cj1.change, tmp$cj1.noChange)
+print('Bayesian version')
+ttestBF(tmp$cj1.change, tmp$cj1.noChange, paired = T)
+# CJ2
+print('Mean final confidence on change trials')
+printMean(tmp$cj2.change)
+print('Mean final confidence on no-change trials')
+printMean(tmp$cj2.noChange)
+print('T-test of final confidence on no/change trials')
+t.test(tmp$cj2.change, tmp$cj2.noChange, paired = T)
+cohensD(tmp$cj2.change, tmp$cj2.noChange)
+print('Bayesian version')
+ttestBF(tmp$cj2.change, tmp$cj2.noChange, paired = T)
+# Do change trials ever occur on agreement?
+print(paste0('Of ', sum(participants.changeMind$trialCount.change, na.rm = T),
+             ' change trials, ',
+             sum(participants.changeMind$agreeCount.change, na.rm = T),
+             ' (', round(sum(participants.changeMind$agreeCount.change, na.rm = T)/
+               sum(participants.changeMind$trialCount.change, na.rm = T) * 100, 3),
+             '%) occur on agreement trials.'))
+
+
+# Calculate some rates for plotting
 tmp <- participants.changeMind
 tmp$changeMindRate <- tmp$trialCount.change / tmp$trialCount
 tmp$forcedChangeMindRate <- tmp$forcedCount.change / tmp$forcedCount
 tmp$choiceChangeMindRate <- tmp$choiceCount.change / tmp$choiceCount
+tmp$aicChangeMindRate <- (tmp$aicAgreeCount.change + tmp$aicDisagreeCount.change) / 
+  (tmp$aicAgreeCount + tmp$aiuDisagreeCount)
+tmp$aiuChangeMindRate <- (tmp$aiuAgreeCount.change + tmp$aiuDisagreeCount.change) /
+  (tmp$aiuAgreeCount + tmp$aiuDisagreeCount)
 tmp <- melt(tmp, id.vars = c('participantId'), 
-            measure.vars = c('changeMindRate', 'forcedChangeMindRate', 'choiceChangeMindRate'))
+            measure.vars = c('changeMindRate', 'forcedChangeMindRate', 'choiceChangeMindRate',
+                             'aicChangeMindRate', 'aiuChangeMindRate'))
 tmp$participantId <- as.factor(tmp$participantId)
 # let's plot the mean number of trials where people change their mind
 graph.changeMind.count <- ggplot(tmp, aes(variable, value)) +
@@ -1818,12 +1912,88 @@ graph.changeMind.count <- ggplot(tmp, aes(variable, value)) +
   stat_summary(fun.y = mean, geom = 'point', size = 5, shape = 23) +
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar', size = 0.1, width = 0.25) +
   geom_violin(alpha = 0.1, fill = 'blue') +
+  scale_color_discrete(name = 'Participant') + 
+  scale_x_discrete(labels = c('Overall', 'Forced', 'Choice', 'Agree-in-confidence', 'Agree-in-uncertainty')) +
   theme_light() +
   theme(panel.grid.major.x = element_blank()) +
-  labs(title = 'Changes of mind')
+  labs(title = 'Changes of mind',
+       x = 'Trial type',
+       y = 'Proportion of trials on which the judge changes their mind')
 
 graph.changeMind.count
+ggsave(paste0(figPath, "changeOfMind.png"), plot = graph.changeMind.count)
 
+# Plot indicates the largest difference is advisor type; let's check the extent
+# First we reconstruct the derived variables
+tmp <- participants.changeMind
+tmp$changeMindRate <- tmp$trialCount.change / tmp$trialCount
+tmp$forcedChangeMindRate <- tmp$forcedCount.change / tmp$forcedCount
+tmp$choiceChangeMindRate <- tmp$choiceCount.change / tmp$choiceCount
+tmp$aicChangeMindRate <- (tmp$aicAgreeCount.change + tmp$aicDisagreeCount.change) / 
+  (tmp$aicAgreeCount + tmp$aiuDisagreeCount)
+tmp$aiuChangeMindRate <- (tmp$aiuAgreeCount.change + tmp$aiuDisagreeCount.change) /
+  (tmp$aiuAgreeCount + tmp$aiuDisagreeCount)
+print('Testing change proportion for different advisor types')
+t.test(tmp$aicChangeMindRate, tmp$aiuChangeMindRate, paired = T)
+cohensD(tmp$aicChangeMindRate, tmp$aiuChangeMindRate)
+ttestBF(tmp$aicChangeMindRate, tmp$aiuChangeMindRate, paired = T)
+printMean(tmp$aicChangeMindRate)
+printMean(tmp$aiuChangeMindRate)
+
+## Correlation with subjective assessment of influence. 
+tmp <- participants.changeMind
+tmp$changeMindDiff <- (tmp$aicAgreeCount.change + tmp$aicDisagreeCount.change) - 
+  (tmp$aiuAgreeCount.change + tmp$aiuDisagreeCount.change)
+for(p in 1:dim(tmp)[1]) {
+  tmp$influenceQuestionnaireDifference[p] <- 
+    questionnaires$answer[which(questionnaires$participantId==tmp$participantId[p]
+                                & questionnaires$questionNumber==questionnaireDimensions$influence
+                                & questionnaires$timePoint==lastTimePoint
+                                & questionnaires$adviceType==adviceTypes$AiC)] -
+    questionnaires$answer[which(questionnaires$participantId==tmp$participantId[p]
+                                & questionnaires$questionNumber==questionnaireDimensions$influence
+                                & questionnaires$timePoint==lastTimePoint
+                                & questionnaires$adviceType==adviceTypes$AiU)]
+  tmp$influenceDifference.capped[p] <-
+    mean(trials$influence[which(trials$participantId==tmp$participantId[p]
+                                & trials$adviceType==adviceTypes$AiC
+                                & !is.nan(trials$influence))]) -
+    mean(trials$influence[which(trials$participantId==tmp$participantId[p]
+                                & trials$adviceType==adviceTypes$AiU
+                                & !is.nan(trials$influence))])
+}
+influence.questionnaire.change <- lm(influenceQuestionnaireDifference ~ changeMindDiff, data = tmp)
+summary(influence.questionnaire.change)
+
+## Correlation with pick rate
+pick.rate.change <- lm(aicPickRate ~ changeMindDiff, data = tmp)
+summary(pick.rate.change)
+# controlling for influence differences
+tmp$influenceDifference <- tmp$aicInfluence - tmp$aiuInfluence
+pick.rate.change.base <- lm(aicPickRate ~ influenceDifference, data = tmp)
+pick.rate.change.covar <- lm(aicPickRate ~ influenceDifference + changeMindDiff, data = tmp)
+anova(pick.rate.change.base, pick.rate.change.covar)
+
+## 22) Initial confidence and influence ##################################################################
+print('## 22) Initial confidence and influence ##########################################')
+tmp <- participants[,c('participantId', 'disagreeInfluence')]
+for(p in 1:dim(tmp)[1]) {
+  tmp$cj1[p] <- mean(abs(trials$cj1[which(trials$participantId==tmp$participantId[p]
+                                          & !is.nan(trials$cj2)
+                                          & trials$agree==0)]))
+  tmp$influenceDifference.capped[p] <-
+    mean(trials$cappedInfluence[which(trials$participantId==tmp$participantId[p]
+                                      & trials$adviceType==adviceTypes$AiC
+                                      & !is.nan(trials$influence))]) -
+    mean(trials$cappedInfluence[which(trials$participantId==tmp$participantId[p]
+                                      & trials$adviceType==adviceTypes$AiU
+                                      & !is.nan(trials$influence))])
+} 
+summary(lm(tmp$disagreeInfluence ~ tmp$cj1))
+summary(lm(tmp$influenceDifference.capped ~ tmp$cj1))
+
+ggplot(tmp, aes(cj1, disagreeInfluence)) + geom_point() + geom_smooth(method = lm)
+ggplot(tmp, aes(cj1, influenceDifference.capped)) + geom_point() + geom_smooth(method = lm)
 
 write.csv(participants, 'participants.csv')
 # write.csv(trials, 'trials.csv')
