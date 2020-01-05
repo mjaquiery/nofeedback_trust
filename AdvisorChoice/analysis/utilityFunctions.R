@@ -1,35 +1,5 @@
 # Utility functions for analysing AdvisorChoice data
 
-# Print the results of a t-test as we would like to see them reported in a paper
-prettyPrint <- function(results, d) {
-  if(length(results$estimate)==2) 
-    mu <- paste0('Mdiff=', round(results$estimate[[1]]-results$estimate[[2]],2),
-                 ' [',round(attr(results$conf.int, "conf.level")*100),'%CI: ',
-                 round(results$conf.int[[1]],2), ', ', round(results$conf.int[[2]],2),']')
-  else
-    mu <- paste0('Mean=', round(results$estimate[[1]],2), 
-                 ' [',round(attr(results$conf.int, "conf.level")*100),'%CI: ',
-                 round(results$conf.int[[1]],2), ', ', round(results$conf.int[[2]],2),']',
-                 ' vs ', results$null.value)
-  print(paste0('t(',results$parameter,')=',round(results$statistic,2),
-               ', ', mu,
-               ', p=', round(results$p.value,3),
-               ', d=', round(d,2)))
-}
-
-printMean <- function(vector, conf.int = .95, na.rm = F, decimals = 2) {
-  mu <- mean(vector, na.rm = na.rm)
-  s <- sd(vector, na.rm = na.rm)
-  n <- length(vector)
-  error <- qnorm(1-(1-conf.int)/2)*s/sqrt(n) # 95% confidence interval width
-  ci.low <- mu - error
-  ci.high <- mu + error
-  r <- round(range(vector, na.rm = na.rm), decimals)
-  print(paste0('Mean=', round(mu,decimals), ' [', round(conf.int,decimals)*100, '%CI: ',
-               round(ci.low,decimals), ', ', round(ci.high,decimals),'] [Range: ',
-               r[[1]], ', ', r[[2]], ']'))
-}
-
 # Generate tables of marginal means 
 marginal.means <- function(dependant, factors, data, ci.level = 0.95, na.rm = T) {
   #print(paste('marginal means:', paste(factors, collapse = ', ')))

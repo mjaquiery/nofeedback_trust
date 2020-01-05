@@ -2,4 +2,5 @@
 **/auth/**
 *.asv
 *.Rhistory
-.Rproj.user
+*.Rproj.user
+*.RData

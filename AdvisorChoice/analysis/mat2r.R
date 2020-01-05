@@ -117,6 +117,10 @@ numerify <- function(df, nanBecomes = NaN) {
 # IDs tie things together, and participantId is of particular relevance for 
 # fetching values across tables.
 frameMess <- function(raw_study) {
+  participants.all <- NULL
+  trials.all <- NULL
+  advisors.all <- NULL
+  questionnaires.all <- NULL
   for(p in 1:length(raw_study)) {
     # participant data
     pId <- ifelse(length(raw_study[[p]]$subject$id)!=1, p, raw_study[[p]]$subject$id)
@@ -134,24 +138,42 @@ frameMess <- function(raw_study) {
     screen <- ifelse(length(raw_study[[p]]$subject$screen)!=1, NA, raw_study[[p]]$subject$screen)
     computer <- ifelse(length(raw_study[[p]]$cfg$computer)!=1, NA, raw_study[[p]]$cfg$computer)
     os <- ifelse(length(raw_study[[p]]$cfg$os)!=1, NA, raw_study[[p]]$cfg$os)
+    debug <- ifelse(is.null(raw_study[[p]]$cfg$debug), NA, raw_study[[p]]$cfg$debug)
+    short.mode <- ifelse(is.null(raw_study[[p]]$cfg$shortMode), NA, raw_study[[p]]$cfg$shortMode)
+    stimulus.response.interval <- ifelse(is.null(raw_study[[p]]$cfg$stim$SRI1), NA, raw_study[[p]]$cfg$stim$SRI1)
+    response.stimulus.interval.1 <- ifelse(is.null(raw_study[[p]]$cfg$stim$RSI1), NA, raw_study[[p]]$cfg$stim$RSI1)
+    response.stimulus.interval.2 <- ifelse(is.null(raw_study[[p]]$cfg$stim$RSI2), NA, raw_study[[p]]$cfg$stim$RSI2)
+    initial.dot.difference <- ifelse(is.null(raw_study[[p]]$cfg$stim$initialDotDifference), 
+                                     NA, 
+                                     raw_study[[p]]$cfg$stim$initialDotDifference)
+    fixation.pre.flicker.time <- ifelse(is.null(raw_study[[p]]$cfg$stim$fixationFlicker$time$pre),
+                                        NA,
+                                        raw_study[[p]]$cfg$stim$fixationFlicker$time$pre)
+    fixation.flicker.time <- ifelse(is.null(raw_study[[p]]$cfg$stim$fixationFlicker$time$duration),
+                                    NA,
+                                    raw_study[[p]]$cfg$stim$fixationFlicker$time$duration)
+    fixation.post.flicker.time <- ifelse(is.null(raw_study[[p]]$cfg$stim$fixationFlicker$time$post),
+                                         NA,
+                                         raw_study[[p]]$cfg$stim$fixationFlicker$time$post)
+    rng.code <- ifelse(is.null(raw_study[[p]]$cfg$resetrn),
+                       NA,
+                       raw_study[[p]]$cfg$resetrn)
     participant <- data.frame(participantId = p, nominalParticipantId = pId, name, gender, age, restarted, date, 
                               start.time.year, start.time.month, start.time.day, 
                               start.time.hour, start.time.minute, start.time.second, 
                               screen, computer, os, 
-                              debug = raw_study[[p]]$cfg$debug,  # should never be true
-                              short.mode = raw_study[[p]]$cfg$shortMode,  # should never be true
-                              stimulus.response.interval = raw_study[[p]]$cfg$stim$SRI1, # time between stimulus and response enabling
-                              response.stimulus.interval.1 = raw_study[[p]]$cfg$stim$RSI1, # time between response and advice choice
-                              response.stimulus.interval.2 = raw_study[[p]]$cfg$stim$RSI2, # time between advice and second response
-                              initial.dot.difference = raw_study[[p]]$cfg$stim$initialDotDifference,
-                              fixation.pre.flicker.time = raw_study[[p]]$cfg$stim$fixationFlicker$time$pre, # fixation initial offset
-                              fixation.flicker.time = raw_study[[p]]$cfg$stim$fixationFlicker$time$duration, # fixation flicker onset
-                              fixation.post.flicker.time = raw_study[[p]]$cfg$stim$fixationFlicker$time$post, # fixation temporary offset
-                              rng.code = raw_study[[p]]$cfg$resetrn)
-    if(exists('participants.all'))
-      participants.all <- rbind(participants.all, participant)
-    else
-      participants.all <- participant
+                              debug,  # should never be true
+                              short.mode,  # should never be true
+                              stimulus.response.interval, # time between stimulus and response enabling
+                              response.stimulus.interval.1, # time between response and advice choice
+                              response.stimulus.interval.2, # time between advice and second response
+                              initial.dot.difference,
+                              fixation.pre.flicker.time, # fixation initial offset
+                              fixation.flicker.time, # fixation flicker onset
+                              fixation.post.flicker.time, # fixation temporary offset
+                              rng.code)
+    participants.all <- rbind(participants.all, participant)
+    
     # advisor data
     advisor <- raw_study[[p]]$cfg$advisor
     for(a in seq(1,length(advisor),6)) {
@@ -161,23 +183,16 @@ frameMess <- function(raw_study) {
                                portrait = advisor[[a+2]],
                                voice = advisor[[a+3]],
                                name = advisor[[a+4]])
-      if(exists('advisors.all'))
-        advisors.all <- rbind(advisors.all, advisor.df)
-      else
-        advisors.all <- advisor.df
+      advisors.all <- rbind(advisors.all, advisor.df)
     }
+    
     # trials
     trials <- as.data.frame(raw_study[[p]]$trials)
     # subset for testing!
     #trials <- trials[,1:10]
     trials <- cbind(data.frame(participantId=p), trials)
-    if(exists('trials.all')) {
-      #print(names(trials.all))
-      #print(names(trials))
-      trials.all <- rbind(trials.all, trials)
-    }
-    else 
-      trials.all <- trials
+    trials.all <- rbind(trials.all, trials)
+    
     # questionnaires
     qtrials <- trials[trials$questionnaire==1,]
     for(q in 1:dim(qtrials)[1]) {
@@ -190,10 +205,7 @@ frameMess <- function(raw_study) {
       qs$participantId <- p
       qs$timePoint <- q
       qs <- qs[,order(c(10,11,2,1,3:9))]
-      if(exists('questionnaires.all'))
-        questionnaires.all <- rbind(questionnaires.all, qs)
-      else
-        questionnaires.all <- qs
+      questionnaires.all <- rbind(questionnaires.all, qs)
     }
   }
   out <- list(participants=participants.all, advisors=advisors.all, trials=trials.all, questionnaires=questionnaires.all)
