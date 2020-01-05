@@ -375,7 +375,7 @@ demographics
 # Data sanity checks ------------------------------------------------------
 
 # load utility functions from another project
-source("https://github.com/oxacclab/ExploringSocialMetacognition/blob/master/analysis/miscFunctions.R")
+source("https://raw.githubusercontent.com/oxacclab/ExploringSocialMetacognition/master/analysis/src/miscFunctions.R")
 
 # Plot function, expects melted dataframe
 getPlot <- function(df) {
